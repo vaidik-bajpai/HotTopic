@@ -22,6 +22,9 @@ require (
 	github.com/jackc/pgtype v1.14.0 // indirect
 	github.com/jackc/puddle v1.3.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
+	github.com/shopspring/decimal v1.4.0 // indirect
+	github.com/steebchen/prisma-client-go v0.46.0 // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
