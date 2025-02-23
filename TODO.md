@@ -27,3 +27,19 @@
 - [ ] Write unit tests for authentication
 - [ ] Test API responses
 - [ ] Ensure UI validation works as expected
+
+## Post Management
+
+### Backend
+
+- [ ] setup database schema for posts
+- [ ] make provisions for images and video files
+- [ ] secure API with middlewares
+- [ ] implement API endpoints
+- [ ] implement posts CRUD
+
+### UI improvements
+
+- [ ] design create post form with preview
+- [ ] design post cards for rendering
+- [ ] add form validation
