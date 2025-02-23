@@ -14,3 +14,6 @@ prisma-migrate:
  
 prisma-mig-deploy:
 	go run github.com/steebchen/prisma-client-go migrate deploy
+
+postgres-shell:
+	docker exec -it HotTopic psql -U bajpai -d hottopic

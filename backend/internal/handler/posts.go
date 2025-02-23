@@ -15,35 +15,34 @@ func (h *HTTPHandler) handleGetUserPosts(w http.ResponseWriter, r *http.Request)
 	sizeStr := r.URL.Query().Get("size")
 	pageSize, err := strconv.ParseInt(sizeStr, 10, 64)
 	if err != nil {
-		h.logger.Error("invalid page size", zap.Error(err))
-		badRequestResponse(w, "invalid page size")
+		h.json.BadRequestResponse(w, r, err)
 		return
 	}
 
 	offsetStr := r.URL.Query().Get("offset")
 	offset, err := strconv.ParseInt(offsetStr, 10, 64)
 	if err != nil {
-		h.logger.Error("invalid page size", zap.Error(err))
-		badRequestResponse(w, "invalid page size")
+		h.json.BadRequestResponse(w, r, err)
 		return
 	}
 
 	userID := r.URL.Query().Get("user_id")
 	if err = h.validate.Var(userID, "required,uuid"); err != nil {
-		h.logger.Error("invalid userID", zap.Error(err))
-		badRequestResponse(w, "invalid userID")
+		h.json.FailedValidationResponse(w, r, err)
 		return
 	}
 
-	posts, err := h.store.GetPosts(pageSize, offset)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	posts, err := h.store.GetPosts(ctx, pageSize, offset, "1")
 	if err != nil {
-		h.logger.Error("something went wrong while fetching the posts")
-		internalServerErrorResponse(w, "something went wrong while fetching the posts")
+		h.json.ServerErrorResponse(w, r, err)
 		return
 	}
 
 	h.logger.Info("successfully fetched the posts")
-	writeJSON(w, http.StatusOK, map[string][]store.GetUserPosts{"posts": posts})
+	h.json.WriteJSONResponse(w, http.StatusOK, map[string][]store.GetUserPosts{"posts": posts})
 }
 
 func (h *HTTPHandler) handleGetUserFeed(w http.ResponseWriter, r *http.Request) {
@@ -52,15 +51,13 @@ func (h *HTTPHandler) handleGetUserFeed(w http.ResponseWriter, r *http.Request) 
 
 func (h *HTTPHandler) handleCreatePost(w http.ResponseWriter, r *http.Request) {
 	var payload store.CreateUserPosts
-	if err := readJSONBody(r, &payload); err != nil {
-		h.logger.Error("error decoding the create user payload", zap.Any("payload", payload))
-		writeJSON(w, http.StatusBadRequest, payload)
+	if err := h.json.ReadJSON(w, r, &payload); err != nil {
+		h.json.BadRequestResponse(w, r, err)
 		return
 	}
 
 	if err := h.validate.Struct(payload); err != nil {
-		h.logger.Error("error invalid create user payload", zap.Any("payload", payload))
-		writeJSON(w, http.StatusBadRequest, payload)
+		h.json.FailedValidationResponse(w, r, err)
 		return
 	}
 
@@ -69,26 +66,23 @@ func (h *HTTPHandler) handleCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	err := h.store.CreatePost(ctx, &payload)
 	if err != nil {
-		h.logger.Error("error while creating post", zap.Any("payload", payload))
-		writeJSON(w, http.StatusInternalServerError, payload)
+		h.json.ServerErrorResponse(w, r, err)
 		return
 	}
 
 	h.logger.Info("post successfully created", zap.Any("payload", payload))
-	writeJSON(w, http.StatusCreated, payload)
+	h.json.WriteJSONResponse(w, http.StatusOK, payload)
 }
 
 func (h *HTTPHandler) handleUpdatePost(w http.ResponseWriter, r *http.Request) {
 	var payload store.UpdateUserPost
-	if err := readJSONBody(r, payload); err != nil {
-		h.logger.Error("error while decoding the update post payload", zap.Any("payload", payload))
-		badRequestResponse(w, "could not decode the payload")
+	if err := h.json.ReadJSON(w, r, payload); err != nil {
+		h.json.BadRequestResponse(w, r, err)
 		return
 	}
 
 	if err := h.validate.Struct(payload); err != nil {
-		h.logger.Error("invalid update post payload", zap.Any("payload", payload))
-		badRequestResponse(w, "ill formed request payload")
+		h.json.FailedValidationResponse(w, r, err)
 		return
 	}
 
@@ -97,21 +91,19 @@ func (h *HTTPHandler) handleUpdatePost(w http.ResponseWriter, r *http.Request) {
 
 	err := h.store.UpdatePost(ctx, &payload)
 	if err != nil {
-		h.logger.Error("something went wrong during the update post", zap.Any("payload", payload))
-		internalServerErrorResponse(w, "something went wrong during the update post")
+		h.json.ServerErrorResponse(w, r, err)
 		return
 	}
 
 	h.logger.Info("successfully updated the post", zap.Any("payload", payload))
-	writeJSON(w, http.StatusOK, payload)
+	h.json.WriteJSONResponse(w, http.StatusOK, payload)
 }
 
 func (h *HTTPHandler) handleDeletePost(w http.ResponseWriter, r *http.Request) {
 	postID := chi.URLParam(r, "post_id")
 	err := h.validate.Var(postID, "required,uuid")
 	if err != nil {
-		h.logger.Error("invalid post id sent to delete post", zap.Any("post id", postID))
-		badRequestResponse(w, "invalid post id sent to delete post")
+		h.json.FailedValidationResponse(w, r, err)
 		return
 	}
 
@@ -120,11 +112,10 @@ func (h *HTTPHandler) handleDeletePost(w http.ResponseWriter, r *http.Request) {
 
 	err = h.store.DeletePost(ctx, postID)
 	if err != nil {
-		h.logger.Error("something went wrong while deleting the post", zap.Error(err))
-		internalServerErrorResponse(w, "something went wrong while deleting the post")
+		h.json.ServerErrorResponse(w, r, err)
 		return
 	}
 
 	h.logger.Info("successfully deleted the post", zap.String("post id", postID))
-	writeJSON(w, http.StatusOK, "successfully deleted the post")
+	h.json.WriteJSONResponse(w, http.StatusOK, "successfully deleted the post")
 }

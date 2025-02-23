@@ -4,7 +4,11 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/go-chi/cors"
 	"github.com/go-playground/validator/v10"
+	"github.com/redis/go-redis/v9"
+	"github.com/vaidik-bajpai/gopher-social/internal/helper/json"
+	"github.com/vaidik-bajpai/gopher-social/internal/mailer"
 	"github.com/vaidik-bajpai/gopher-social/internal/store"
 	"go.uber.org/zap"
 )
@@ -26,26 +30,50 @@ type Handler interface {
 }
 
 type HTTPHandler struct {
-	logger   *zap.Logger
-	store    store.Storer
-	validate *validator.Validate
+	logger      *zap.Logger
+	store       store.Storer
+	validate    *validator.Validate
+	redisClient *redis.Client
+	json        *json.JSON
+	mailer      mailer.Mailer
 }
 
-func NewHandler(logger *zap.Logger, store store.Storer, validate *validator.Validate) *HTTPHandler {
+func NewHandler(logger *zap.Logger, store store.Storer, validate *validator.Validate, redisClient *redis.Client, json *json.JSON, mailer mailer.Mailer) *HTTPHandler {
 	return &HTTPHandler{
-		logger:   logger,
-		store:    store,
-		validate: validate,
+		logger:      logger,
+		store:       store,
+		validate:    validate,
+		redisClient: redisClient,
+		json:        json,
+		mailer:      mailer,
 	}
 }
 
 func (h *HTTPHandler) SetupRoutes() *chi.Mux {
 	r := chi.NewRouter()
 
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
+
 	r.Route("/post", func(r chi.Router) {
 		r.Get("/{userID}", h.handleGetUserPosts)
 		r.Post("/create", h.handleCreatePost)
 		r.Delete("/delete/{postID}", h.handleDeletePost)
+	})
+
+	r.Route("/auth", func(r chi.Router) {
+		r.Post("/signup", h.handleUserSignup)
+		r.Post("/signin", h.handleUserSignin)
+		r.Post("/logout", h.handleUserLogout)
+		r.Post("/forgot-password", h.handleForgotPassword)
+
+		r.With(h.authenticate, h.tokenChecker).Post("/activate/{token}", h.handleUserActivation)
+		r.With(h.tokenChecker).Post("/reset-password/{token}", h.handleResetPassword)
 	})
 
 	return r

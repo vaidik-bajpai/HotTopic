@@ -2,25 +2,25 @@
 
 ## Authentication
 
-- [ ] Implement user signup
-- [ ] Implement user signin
+- [x] Implement user signup
+- [x] Implement user signin
 - [ ] Add Oauth2.0
-- [ ] Implement password hashing
-- [ ] Add user session management
-- [ ] Implement forgot password functionality
+- [x] Implement password hashing
+- [x] Add user session management
+- [x] Implement forgot password functionality
 
 ## UI Improvements
 
-- [ ] Design signup page
-- [ ] Design signin page
-- [ ] Add form validation
+- [x] Design signup page
+- [x] Design signin page
+- [x] Add form validation
 - [ ] Improve error handling and user feedback
 
 ## Backend
 
-- [ ] Setup database schema for users
-- [ ] Implement API endpoints for authentication
-- [ ] Secure API with middleware
+- [x] Setup database schema for users
+- [x] Implement API endpoints for authentication
+- [x] Secure API with middleware
 
 ## Testing
 

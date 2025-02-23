@@ -8,14 +8,17 @@ generator db {
 }
 
 model Post {
-    id        String   @id @default(uuid())
+    id        String    @id @default(uuid())
     caption   String
     images    Media[]
-    createdAt DateTime @default(now())
-    updatedAt DateTime
-    deleted   Boolean  @default(false)
-    User      User     @relation(fields: [userId], references: [id])
+    createdAt DateTime  @default(now())
+    updatedAt DateTime?
+    deleted   Boolean   @default(false)
+    User      User      @relation(fields: [userId], references: [id])
     userId    String
+    likes     BigInt    @default(0)
+    comments  BigInt    @default(0)
+    shares    BigInt    @default(0)
 }
 
 model Media {
@@ -26,21 +29,36 @@ model Media {
 }
 
 model User {
-    id        String       @id @default(uuid())
+    id        String       @id
     username  String       @unique
     email     String       @unique
     password  String
-    name      String
+    name      String?
     pic       String?
     profile   UserProfile? @relation
     posts     Post[]
+    activated Boolean      @default(false)
     createdAt DateTime     @default(now())
     updatedAt DateTime     @updatedAt
+
+    Token Token[]
 }
 
 model UserProfile {
-    uID    String  @unique
-    user   User    @relation(fields: [uID], references: [id])
-    bio    String?
-    gender String?
+    uID        String  @unique
+    user       User    @relation(fields: [uID], references: [id])
+    bio        String?
+    gender     String?
+    postNumber Int     @default(0)
+    followers  Int     @default(0)
+    following  Int     @default(0)
+}
+
+model Token {
+    id    String   @id @default(uuid()) // Unique ID for the token
+    uID   String
+    token String   @unique
+    ttl   DateTime
+    scope String
+    user  User     @relation(fields: [uID], references: [id], onDelete: Cascade)
 }

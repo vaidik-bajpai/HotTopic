@@ -3,6 +3,9 @@ package store
 import (
 	"context"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/vaidik-bajpai/gopher-social/internal/db/db"
 )
 
 type CreateUserPosts struct {
@@ -14,37 +17,31 @@ type CreateUserPosts struct {
 }
 
 func (s *Store) CreatePost(ctx context.Context, cp *CreateUserPosts) error {
-	queryPosts := `INSERT INTO posts (caption) VALUES ($1) RETURNING id, created_at, updated_at`
+	cp.ID = uuid.New().String()
 
-	tx, err := s.db.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
+	postTxn := s.db.Post.CreateOne(
+		db.Post.Caption.Equals(cp.ID),
+		db.Post.User.Link(
+			db.User.ID.Equals("1"),
+		),
+	).Tx()
 
-	err = tx.QueryRow(ctx, queryPosts, cp.Caption).Scan(&cp)
-	if err != nil {
-		return err
-	}
-
-	queryMedia := `INSERT INTO media (p_id, url) VALUES ($1, $2)`
+	var transactions []db.PrismaTransaction
+	transactions = append(transactions, postTxn)
 
 	for _, media := range cp.Medias {
-		_, err := tx.Exec(
-			ctx,
-			queryMedia,
-			cp.ID,
-			media,
-		)
-		if err != nil {
-			return err
-		}
+		txn := s.db.Media.CreateOne(
+			db.Media.Media.Set(media),
+			db.Media.Post.Link(
+				db.Post.ID.Equals(cp.ID),
+			),
+		).Tx()
+		transactions = append(transactions, txn)
 	}
 
-	if err := tx.Commit(ctx); err != nil {
+	if err := s.db.Prisma.Transaction(transactions...).Exec(ctx); err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -58,42 +55,40 @@ type UpdateUserPost struct {
 }
 
 func (s *Store) UpdatePost(ctx context.Context, up *UpdateUserPost) error {
-	tx, err := s.db.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
+	var txns []db.PrismaTransaction
 	if up.Caption != nil {
-		query := `UPDATE posts SET caption = $1, updated_at = NOW() WHERE id = $2 RETURNING created_at, updated_at`
-		err := tx.QueryRow(ctx, query, up.Caption, up.ID).Scan(
-			&up.CreatedAt,
-			&up.Updated_At,
-		)
-		if err != nil {
-			return err
-		}
+		txn := s.db.Post.FindUnique(
+			db.Post.ID.Equals(up.ID),
+		).Update(
+			db.Post.Caption.Set(*up.Caption),
+			db.Post.UpdatedAt.Set(time.Now()),
+		).Tx()
+
+		txns = append(txns, txn)
 	}
 
 	if len(up.MediaToRemove) > 0 {
-		queryDeleteMedia := `DELETE FROM media WHERE p_id = $1 AND url = ANY($2)`
-		_, err := tx.Exec(ctx, queryDeleteMedia, up.ID, up.MediaToRemove)
-		if err != nil {
-			return err
-		}
+		txn := s.db.Media.FindMany(
+			db.Media.PID.Equals(up.ID),
+		).Delete().Tx()
+
+		txns = append(txns, txn)
 	}
 
 	if len(up.MediaToAdd) > 0 {
-		queryInsertMedia := `INSERT INTO media (p_id, url) VALUES ($1, $2)`
 		for _, media := range up.MediaToAdd {
-			_, err := tx.Exec(ctx, queryInsertMedia, up.ID, media)
-			if err != nil {
-				return err
-			}
+			txn := s.db.Media.CreateOne(
+				db.Media.Media.Set(media),
+				db.Media.Post.Link(
+					db.Post.ID.Equals(up.ID),
+				),
+			).Tx()
+			txns = append(txns, txn)
 		}
 	}
 
-	if err := tx.Commit(ctx); err != nil {
+	err := s.db.Prisma.Transaction(txns...).Exec(ctx)
+	if err != nil {
 		return err
 	}
 
@@ -101,13 +96,12 @@ func (s *Store) UpdatePost(ctx context.Context, up *UpdateUserPost) error {
 }
 
 func (s *Store) DeletePost(ctx context.Context, postID string) error {
-	query := `DELETE from posts WHERE id = $1`
-	_, err := s.db.Exec(ctx, query, postID)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	_, err := s.db.Post.FindUnique(
+		db.Post.ID.Equals(postID),
+	).Update(
+		db.Post.Deleted.Set(true),
+	).Exec(ctx)
+	return err
 }
 
 type GetUserPosts struct {
@@ -123,6 +117,46 @@ type GetUserPosts struct {
 	ShareCount   int64 `json:"share_count"`
 }
 
-func (s *Store) GetPosts(pageSize, pageOffset int64) ([]GetUserPosts, error) {
-	return []GetUserPosts{}, nil
+func (s *Store) GetPosts(ctx context.Context, pageSize, pageNo int64, userID string) ([]GetUserPosts, error) {
+	posts, err := s.db.Post.FindMany(
+		db.Post.UserID.Equals(userID),
+	).Skip(
+		int(pageSize)*(int(pageNo)-9),
+	).Take(
+		int(pageSize),
+	).With(
+		db.Post.Images.Fetch(),
+		db.Post.User.Fetch().Select(
+			db.User.Username.Field(),
+			db.User.Pic.Field(),
+		),
+	).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var res []GetUserPosts
+
+	for _, post := range posts {
+		var medias []string
+		for _, media := range post.Images() {
+			medias = append(medias, media.Media)
+		}
+
+		uAt, _ := post.UpdatedAt()
+
+		res = append(res, GetUserPosts{
+			ID:           post.ID,
+			Caption:      post.Caption,
+			Medias:       medias,
+			CreatedAt:    post.CreatedAt,
+			UpdatedAt:    uAt,
+			IsSaved:      false,
+			LikeCount:    int64(post.Likes),
+			CommentCount: int64(post.Comments),
+			ShareCount:   int64(post.Shares),
+		})
+	}
+
+	return res, nil
 }
