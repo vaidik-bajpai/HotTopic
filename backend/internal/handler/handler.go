@@ -61,7 +61,7 @@ func (h *HTTPHandler) SetupRoutes() *chi.Mux {
 	}))
 
 	r.Route("/post", func(r chi.Router) {
-		r.Get("/{userID}", h.handleGetUserPosts)
+		r.With(h.paginate).Get("/{userID}", h.handleGetUserPosts)
 		r.Post("/create", h.handleCreatePost)
 		r.Delete("/delete/{postID}", h.handleDeletePost)
 	})

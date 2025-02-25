@@ -84,3 +84,7 @@ func (j *JSON) WriteJSONResponse(w http.ResponseWriter, status int, data interfa
 	w.Write(js)
 	return nil
 }
+
+func (j *JSON) WriteNoContentResponse(w http.ResponseWriter) error {
+	return j.WriteJSONResponse(w, http.StatusNoContent, nil)
+}

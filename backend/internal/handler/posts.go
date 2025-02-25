@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -12,22 +11,10 @@ import (
 )
 
 func (h *HTTPHandler) handleGetUserPosts(w http.ResponseWriter, r *http.Request) {
-	sizeStr := r.URL.Query().Get("size")
-	pageSize, err := strconv.ParseInt(sizeStr, 10, 64)
-	if err != nil {
-		h.json.BadRequestResponse(w, r, err)
-		return
-	}
+	paginate := getPaginateFromCtx(r)
 
-	offsetStr := r.URL.Query().Get("offset")
-	offset, err := strconv.ParseInt(offsetStr, 10, 64)
-	if err != nil {
-		h.json.BadRequestResponse(w, r, err)
-		return
-	}
-
-	userID := r.URL.Query().Get("user_id")
-	if err = h.validate.Var(userID, "required,uuid"); err != nil {
+	userID := chi.URLParam(r, "userID")
+	if err := h.validate.Var(userID, "required,uuid"); err != nil {
 		h.json.FailedValidationResponse(w, r, err)
 		return
 	}
@@ -35,7 +22,7 @@ func (h *HTTPHandler) handleGetUserPosts(w http.ResponseWriter, r *http.Request)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	posts, err := h.store.GetPosts(ctx, pageSize, offset, "1")
+	posts, err := h.store.GetPosts(ctx, paginate.PageSize, paginate.PageNo, userID)
 	if err != nil {
 		h.json.ServerErrorResponse(w, r, err)
 		return

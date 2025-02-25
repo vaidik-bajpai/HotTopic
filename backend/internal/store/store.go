@@ -21,6 +21,18 @@ type Storer interface {
 	ResetPassword(context.Context, *models.ResetPassword) error
 	GetTokenModel(ctx context.Context, tokenHash []byte) (*models.Token, error)
 	ActivateUser(ctx context.Context, userID string) error
+
+	IsFollower(ctx context.Context, followerID string, followingID string) (bool, error)
+	FollowUser(ctx context.Context, followerID string, followingID string) error
+	UnFollowUser(ctx context.Context, followerID, unFollowedID string) error
+	GetFollowerList(ctx context.Context, fr *models.GetFollowReq) ([]*models.GetFollowRes, error)
+	GetFollowingList(ctx context.Context, fr *models.GetFollowReq) ([]*models.GetFollowRes, error)
+
+	LikeAPost(ctx context.Context, userID string, postID string) error
+	UnlikeAPost(ctx context.Context, userID string, postID string) error
+
+	WriteComment(ctx context.Context, wc *models.WriteCommentReq) error
+	WriteReplyToComment(ctx context.Context, wcr *models.WriteReplyToCommentReq) error
 }
 
 type Store struct {

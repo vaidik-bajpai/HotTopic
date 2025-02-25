@@ -19,6 +19,8 @@ model Post {
     likes     BigInt    @default(0)
     comments  BigInt    @default(0)
     shares    BigInt    @default(0)
+    Like      Like[]
+    Comment   Comment[]
 }
 
 model Media {
@@ -42,6 +44,13 @@ model User {
     updatedAt DateTime     @updatedAt
 
     Token Token[]
+
+    // Followers and Following Relations with unique relation names
+    following Follow[]  @relation("UserFollowing")
+    followers Follow[]  @relation("UserFollowers")
+    Like      Like[]
+    Comment   Comment[]
+    Reply     Reply[]
 }
 
 model UserProfile {
@@ -55,10 +64,75 @@ model UserProfile {
 }
 
 model Token {
-    id    String   @id @default(uuid()) // Unique ID for the token
+    id    String   @id @default(uuid())
     uID   String
     token String   @unique
     ttl   DateTime
     scope String
     user  User     @relation(fields: [uID], references: [id], onDelete: Cascade)
+}
+
+model Follow {
+    followerId  String
+    followingId String
+    createdAt   DateTime @default(now())
+
+    follower  User @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+    following User @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+
+    @@id([followerId, followingId]) // Composite primary key
+}
+
+model Like {
+    id        String   @id @default(uuid())
+    userId    String
+    targetId  String // UUID of Post, Comment, or Reply
+    type      LikeType
+    createdAt DateTime @default(now())
+
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    Post      Post?    @relation(fields: [postId], references: [id])
+    postId    String?
+    Comment   Comment? @relation(fields: [commentId], references: [id])
+    commentId String?
+    Reply     Reply?   @relation(fields: [replyId], references: [id])
+    replyId   String?
+
+    @@unique([userId, targetId, type]) // Ensure a user can like only once per entity
+}
+
+enum LikeType {
+    POST
+    COMMENT
+    REPLY
+}
+
+model Comment {
+    id        String   @id @default(uuid())
+    userId    String
+    postId    String
+    comment   String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+    likes     BigInt   @default(0)
+    createdAt DateTime @default(now())
+    Reply     Reply[]
+    Like      Like[]
+}
+
+model Reply {
+    id            String  @id @default(uuid())
+    userId        String
+    commentId     String
+    parentReplyId String?
+    reply         String
+    user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    comment     Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+    parentReply Reply?   @relation("ReplyToReply", fields: [parentReplyId], references: [id], onDelete: Cascade)
+    replies     Reply[]  @relation("ReplyToReply")
+
+    createdAt DateTime @default(now())
+    likes     BigInt   @default(0)
+    Like      Like[]
 }

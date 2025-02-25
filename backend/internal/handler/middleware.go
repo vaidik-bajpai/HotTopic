@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/vaidik-bajpai/gopher-social/internal/helper"
+	"github.com/vaidik-bajpai/gopher-social/internal/models"
 	"github.com/vaidik-bajpai/gopher-social/internal/store"
 )
 
@@ -72,5 +74,62 @@ func (h *HTTPHandler) tokenChecker(next http.Handler) http.Handler {
 		tCtx := context.WithValue(r.Context(), tokenCtx, tokenModel)
 
 		next.ServeHTTP(w, r.WithContext(tCtx))
+	})
+}
+
+func (h *HTTPHandler) paginate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		queryParams := r.URL.Query()
+
+		pageSizeStr := queryParams.Get("page_size")
+		pageNoStr := queryParams.Get("page_no")
+
+		pageNo, err := strconv.ParseInt(pageNoStr, 10, 64)
+		if err != nil {
+			h.json.FailedValidationResponse(w, r, err)
+			return
+		}
+
+		pageSize, err := strconv.ParseInt(pageSizeStr, 10, 64)
+		if err != nil {
+			h.json.FailedValidationResponse(w, r, err)
+			return
+		}
+
+		paginate := &models.Paginate{
+			PageSize: pageSize,
+			PageNo:   pageNo,
+		}
+
+		if err := h.validate.Struct(paginate); err != nil {
+			h.json.FailedValidationResponse(w, r, err)
+			return
+		}
+
+		pCtx := context.WithValue(r.Context(), paginateCtxKey, paginate)
+
+		next.ServeHTTP(w, r.WithContext(pCtx))
+	})
+}
+
+func (h *HTTPHandler) canAccess(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userID := chi.URLParam(r, "userID")
+		self := getUserFromCtx(r)
+		if self.ID == userID {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		IsFollower, err := h.store.IsFollower(ctx, self.ID, userID)
+		if err != nil || !IsFollower {
+			h.json.UnauthorizedResponse(w, r, err)
+			return
+		}
+
+		next.ServeHTTP(w, r)
 	})
 }
