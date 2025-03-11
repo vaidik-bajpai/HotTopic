@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-chi/chi"
 	"github.com/vaidik-bajpai/gopher-social/internal/models"
 )
 
@@ -78,6 +77,7 @@ func (h *HTTPHandler) WriteReplyToAComment(w http.ResponseWriter, r *http.Reques
 	h.json.WriteNoContentResponse(w)
 }
 
+/*
 func (h *HTTPHandler) handleGetComments(w http.ResponseWriter, r *http.Request) {
 	paginate := getPaginateFromCtx(r)
 	userID := getUserFromCtx(r)
@@ -92,4 +92,4 @@ func (h *HTTPHandler) handleGetComments(w http.ResponseWriter, r *http.Request) 
 	defer cancel()
 
 	h.store.GetComments(ctx, )
-}
+} */

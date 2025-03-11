@@ -66,6 +66,15 @@ func (h *HTTPHandler) SetupRoutes() *chi.Mux {
 		r.Delete("/delete/{postID}", h.handleDeletePost)
 	})
 
+	r.Route("/user", func(r chi.Router) {
+		r.Get("/feed", h.handleGetUserFeed)
+		r.Route("/profile", func(r chi.Router) {
+			r.Get("/{userID}", h.handleGetProfile)
+			r.Post("/", h.handleCreateProfile)
+			r.Put("/", h.handleUpdateProfile)
+		})
+	})
+
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/signup", h.handleUserSignup)
 		r.Post("/signin", h.handleUserSignin)

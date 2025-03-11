@@ -83,6 +83,7 @@ func (h *HTTPHandler) paginate(next http.Handler) http.Handler {
 
 		pageSizeStr := queryParams.Get("page_size")
 		pageNoStr := queryParams.Get("page_no")
+		lastID := queryParams.Get("last_id")
 
 		pageNo, err := strconv.ParseInt(pageNoStr, 10, 64)
 		if err != nil {
@@ -99,6 +100,7 @@ func (h *HTTPHandler) paginate(next http.Handler) http.Handler {
 		paginate := &models.Paginate{
 			PageSize: pageSize,
 			PageNo:   pageNo,
+			LastID:   lastID,
 		}
 
 		if err := h.validate.Struct(paginate); err != nil {

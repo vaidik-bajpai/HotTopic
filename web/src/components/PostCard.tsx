@@ -11,12 +11,12 @@ export function PostCard({userImage, username, postImages, caption}: PostCardInt
     const [isCaption, setIsCaption] = useState<boolean>(false)
     return (
         <div className="font-mono">
-            <div className="flex py-2 px-2 gap-3 items-center max-w-3xs">
+            <div className="flex py-2 px-2 gap-3 items-center">
                 <h2 className="rounded-full w-8 h-8 bg-blue-300 flex-shrink-0">{userImage}</h2>
                 <p className="font-bold text-sm truncate">{username}</p>
             </div>
 
-            <div className="w-full h-80 bg-blue-100 flex items-center justify-center">
+            <div className="w-full aspect-square bg-blue-100 flex items-center justify-center">
                 
             </div>
 

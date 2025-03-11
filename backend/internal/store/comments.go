@@ -34,8 +34,8 @@ func (s *Store) WriteReplyToComment(ctx context.Context, wcr *models.WriteReplyT
 	return err
 }
 
-func (s *Store) GetComments(ctx context.Context, gc *models.GetCommentsReq) ([]*models.GetCommentsRes, error) {
+/* func (s *Store) GetComments(ctx context.Context, gc *models.GetCommentsReq) ([]*models.GetCommentsRes, error) {
 	err := s.db.Prisma.QueryRaw("
-		
+
 	")
-}
+} */

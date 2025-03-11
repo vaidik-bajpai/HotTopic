@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
+	"github.com/vaidik-bajpai/gopher-social/internal/models"
 	"github.com/vaidik-bajpai/gopher-social/internal/store"
 	"go.uber.org/zap"
 )
@@ -33,7 +34,23 @@ func (h *HTTPHandler) handleGetUserPosts(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *HTTPHandler) handleGetUserFeed(w http.ResponseWriter, r *http.Request) {
-	panic("unimplemented")
+	user := getUserFromCtx(r)
+	paginate := getPaginateFromCtx(r)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	posts, err := h.store.GetFeed(ctx, &models.FeedReq{
+		Paginate: *paginate,
+		UserID:   user.ID,
+	})
+	if err != nil {
+		h.json.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	h.logger.Info("feed fetched successfully", zap.String("user id", user.ID))
+	h.json.WriteJSONResponse(w, http.StatusOK, map[string]interface{}{"posts": posts})
 }
 
 func (h *HTTPHandler) handleCreatePost(w http.ResponseWriter, r *http.Request) {

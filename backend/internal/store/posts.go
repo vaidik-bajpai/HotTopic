@@ -2,10 +2,12 @@ package store
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/vaidik-bajpai/gopher-social/internal/db/db"
+	"github.com/vaidik-bajpai/gopher-social/internal/models"
 )
 
 type CreateUserPosts struct {
@@ -159,4 +161,36 @@ func (s *Store) GetPosts(ctx context.Context, pageSize, pageNo int64, userID str
 	}
 
 	return res, nil
+}
+
+func (s *Store) GetFeed(ctx context.Context, feedReq *models.FeedReq) ([]*models.Post, error) {
+	query := `
+		SELECT p.*, 
+			CASE WHEN l.id IS NOT NULL THEN true ELSE false END AS is_liked
+		FROM posts p
+		LEFT JOIN likes l ON l.post_id = p.id AND l.user_id = $1
+		WHERE p.deleted = false
+			AND p.user_id IN (
+				SELECT following_id FROM follows WHERE follower_id = $1
+			)
+			%s
+		ORDER BY p.created_at DESC, p.id DESC
+		LIMIT $2;
+	`
+
+	var pagination string
+	args := []interface{}{feedReq.UserID, feedReq.PageSize}
+	if feedReq.LastID != "" {
+		pagination = "AND p.id < $3"
+		args = append(args, feedReq.LastID)
+	}
+	query = fmt.Sprintf(query, pagination)
+
+	var posts []*models.Post
+	err := s.db.Prisma.QueryRaw(query, args...).Exec(ctx, &posts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch posts: %w", err)
+	}
+
+	return posts, nil
 }
