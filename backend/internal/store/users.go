@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -86,6 +87,7 @@ func (s *Store) UserRegistration(ctx context.Context, cu *User) (*models.Token, 
 	).Tx()
 
 	if err := s.db.Prisma.Transaction(userTxn, tokenTxn).Exec(ctx); err != nil {
+		log.Printf("[error:%v]\n", err)
 		return nil, err
 	}
 

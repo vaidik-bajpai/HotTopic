@@ -3,8 +3,10 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -42,6 +44,11 @@ func (h *HTTPHandler) handleUserSignup(w http.ResponseWriter, r *http.Request) {
 
 	token, err := h.store.UserRegistration(ctx, payload)
 	if err != nil {
+		if strings.Contains(err.Error(), "P2002") {
+			h.json.ConflictResponse(w, r, errors.New("email or username already registered"))
+			return
+		}
+
 		h.json.ServerErrorResponse(w, r, err)
 		return
 	}

@@ -13,7 +13,7 @@ import (
 
 func (h *HTTPHandler) handleGetUserPosts(w http.ResponseWriter, r *http.Request) {
 	paginate := getPaginateFromCtx(r)
-
+	h.logger.Info("get posts called")
 	userID := chi.URLParam(r, "userID")
 	if err := h.validate.Var(userID, "required,uuid"); err != nil {
 		h.json.FailedValidationResponse(w, r, err)
@@ -23,14 +23,14 @@ func (h *HTTPHandler) handleGetUserPosts(w http.ResponseWriter, r *http.Request)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	posts, err := h.store.GetPosts(ctx, paginate.PageSize, paginate.PageNo, userID)
+	posts, err := h.store.GetPosts(ctx, &models.GetPostReq{Paginate: *paginate, UserID: userID})
 	if err != nil {
 		h.json.ServerErrorResponse(w, r, err)
 		return
 	}
 
 	h.logger.Info("successfully fetched the posts")
-	h.json.WriteJSONResponse(w, http.StatusOK, map[string][]store.GetUserPosts{"posts": posts})
+	h.json.WriteJSONResponse(w, http.StatusOK, map[string][]*models.Post{"posts": posts})
 }
 
 func (h *HTTPHandler) handleGetUserFeed(w http.ResponseWriter, r *http.Request) {
@@ -54,6 +54,7 @@ func (h *HTTPHandler) handleGetUserFeed(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *HTTPHandler) handleCreatePost(w http.ResponseWriter, r *http.Request) {
+	user := getUserFromCtx(r)
 	var payload store.CreateUserPosts
 	if err := h.json.ReadJSON(w, r, &payload); err != nil {
 		h.json.BadRequestResponse(w, r, err)
@@ -64,6 +65,8 @@ func (h *HTTPHandler) handleCreatePost(w http.ResponseWriter, r *http.Request) {
 		h.json.FailedValidationResponse(w, r, err)
 		return
 	}
+
+	payload.UserID = user.ID
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

@@ -16,22 +16,27 @@ import (
 	"github.com/vaidik-bajpai/gopher-social/internal/mailer"
 	"github.com/vaidik-bajpai/gopher-social/internal/store"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func main() {
-	prismaConnURL := getEnvOrPanic("POSTGRES_URL")
 	redisConnURL := getEnvOrPanic("REDIS_URL")
 	sgAPIKey := getEnvOrPanic("SENDGRID_API_KEY")
 	sgfromEmail := getEnvOrPanic("SENDGRID_FROM_EMAIL")
 
-	logger, _ := zap.NewProduction()
+	cfg := zap.NewProductionConfig()
+	cfg.EncoderConfig.TimeKey = "ts"
+	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	cfg.DisableStacktrace = true // Disable stack traces
+
+	logger, _ := cfg.Build()
 	defer logger.Sync()
 
 	validate := validator.New()
 	validate.RegisterValidation("checkEmail", CheckEmail)
 	validate.RegisterValidation("base32", Base32)
 
-	prismaClient, err := database.NewPrismaClient(prismaConnURL)
+	prismaClient, err := database.NewPrismaClient()
 	if err != nil {
 		panic(err)
 	}

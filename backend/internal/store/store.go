@@ -11,8 +11,10 @@ type Storer interface {
 	CreatePost(context.Context, *CreateUserPosts) error
 	UpdatePost(context.Context, *UpdateUserPost) error
 	DeletePost(context.Context, string) error
-	GetPosts(context.Context, int64, int64, string) ([]GetUserPosts, error)
+	GetPosts(context.Context, *models.GetPostReq) ([]*models.Post, error)
 	GetFeed(context.Context, *models.FeedReq) ([]*models.Post, error)
+	SavePost(ctx context.Context, userID string, postID string) error
+	UnSavePost(ctx context.Context, userID string, postID string) error
 
 	UserRegistration(context.Context, *User) (*models.Token, error)
 	UserViaEmail(context.Context, string) (*User, error)

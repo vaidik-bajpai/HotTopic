@@ -61,9 +61,18 @@ func (h *HTTPHandler) SetupRoutes() *chi.Mux {
 	}))
 
 	r.Route("/post", func(r chi.Router) {
-		r.With(h.paginate).Get("/{userID}", h.handleGetUserPosts)
+		r.Use(h.authenticate)
 		r.Post("/create", h.handleCreatePost)
-		r.Delete("/delete/{postID}", h.handleDeletePost)
+		r.Route("/{postID}", func(r chi.Router) {
+			r.Post("/like", h.handleLikeAPost)
+			r.Post("/unlike", h.handleUnlikeAPost)
+			r.Post("/save", h.handleSavePost)
+			r.Post("/unsave", h.handleUnsavePost)
+			r.With(h.onlyMe).Delete("/delete", h.handleDeletePost)
+		})
+		r.With(h.canAccess).
+			With(h.paginate).
+			Get("/{userID}", h.handleGetUserPosts)
 	})
 
 	r.Route("/user", func(r chi.Router) {

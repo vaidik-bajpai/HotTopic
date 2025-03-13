@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/vaidik-bajpai/gopher-social/internal/db/db"
 )
@@ -13,11 +14,12 @@ var (
 )
 
 func (s *Store) LikeAPost(ctx context.Context, userID string, postID string) error {
-	likeModel := s.db.Like.CreateOne(
-		db.Like.TargetID.Equals(postID),
-		db.Like.Type.Equals(db.LikeTypePost),
-		db.Like.User.Link(
+	likeModel := s.db.PostLike.CreateOne(
+		db.PostLike.User.Link(
 			db.User.ID.Equals(userID),
+		),
+		db.PostLike.Post.Link(
+			db.Post.ID.Equals(postID),
 		),
 	).Tx()
 
@@ -29,6 +31,7 @@ func (s *Store) LikeAPost(ctx context.Context, userID string, postID string) err
 
 	err := s.db.Prisma.Transaction(likeModel, postModel).Exec(ctx)
 	if err != nil {
+		log.Println(err)
 		return ErrLikeNotProcessed
 	}
 
@@ -36,11 +39,10 @@ func (s *Store) LikeAPost(ctx context.Context, userID string, postID string) err
 }
 
 func (s *Store) UnlikeAPost(ctx context.Context, userID string, postID string) error {
-	likeModel := s.db.Like.FindUnique(
-		db.Like.UserIDTargetIDType(
-			db.Like.UserID.Equals(userID),
-			db.Like.TargetID.Equals(postID),
-			db.Like.Type.Equals(db.LikeTypePost),
+	likeModel := s.db.PostLike.FindUnique(
+		db.PostLike.UserIDPostID(
+			db.PostLike.UserID.Equals(userID),
+			db.PostLike.PostID.Equals(postID),
 		),
 	).Delete().Tx()
 

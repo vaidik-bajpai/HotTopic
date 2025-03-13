@@ -40,7 +40,6 @@ func (h *HTTPHandler) authenticate(next http.Handler) http.Handler {
 
 		uCtx := context.WithValue(r.Context(), userCtx, &user)
 
-		// Proceed with the authenticated request
 		next.ServeHTTP(w, r.WithContext(uCtx))
 	})
 }
@@ -82,14 +81,7 @@ func (h *HTTPHandler) paginate(next http.Handler) http.Handler {
 		queryParams := r.URL.Query()
 
 		pageSizeStr := queryParams.Get("page_size")
-		pageNoStr := queryParams.Get("page_no")
 		lastID := queryParams.Get("last_id")
-
-		pageNo, err := strconv.ParseInt(pageNoStr, 10, 64)
-		if err != nil {
-			h.json.FailedValidationResponse(w, r, err)
-			return
-		}
 
 		pageSize, err := strconv.ParseInt(pageSizeStr, 10, 64)
 		if err != nil {
@@ -99,7 +91,6 @@ func (h *HTTPHandler) paginate(next http.Handler) http.Handler {
 
 		paginate := &models.Paginate{
 			PageSize: pageSize,
-			PageNo:   pageNo,
 			LastID:   lastID,
 		}
 
@@ -133,5 +124,18 @@ func (h *HTTPHandler) canAccess(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(w, r)
+	})
+}
+
+func (h *HTTPHandler) onlyMe(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userID := chi.URLParam(r, "userID")
+		self := getUserFromCtx(r)
+		if self.ID == userID {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		h.json.UnauthorizedResponse(w, r, errors.New("you cannot access this endpoint"))
 	})
 }

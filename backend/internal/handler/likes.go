@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
+	"go.uber.org/zap"
 )
 
 func (h *HTTPHandler) handleLikeAPost(w http.ResponseWriter, r *http.Request) {
@@ -26,6 +27,7 @@ func (h *HTTPHandler) handleLikeAPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.logger.Info("post has been un liked successfully", zap.String("user id", user.ID), zap.String("post id", postID))
 	h.json.WriteNoContentResponse(w)
 }
 
@@ -47,5 +49,6 @@ func (h *HTTPHandler) handleUnlikeAPost(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	h.logger.Info("post has been un liked successfully", zap.String("user id", user.ID), zap.String("post id", postID))
 	h.json.WriteNoContentResponse(w)
 }

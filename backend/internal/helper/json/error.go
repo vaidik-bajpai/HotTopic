@@ -49,7 +49,7 @@ func (j *JSON) FailedValidationResponse(w http.ResponseWriter, r *http.Request, 
 }
 
 func (j *JSON) UnauthorizedResponse(w http.ResponseWriter, r *http.Request, err error) {
-	message := "you are not logged in"
+	message := "you are authorized to access this resource"
 	j.logError(r, message, err.Error())
 	j.errorResponse(w, r, http.StatusUnauthorized, message)
 }
@@ -64,4 +64,10 @@ func (j *JSON) TokenExpiredResponse(w http.ResponseWriter, r *http.Request, err 
 	message := "your token has expired"
 	j.logError(r, message, err.Error())
 	j.errorResponse(w, r, http.StatusUnauthorized, message)
+}
+
+func (j *JSON) ConflictResponse(w http.ResponseWriter, r *http.Request, err error) {
+	message := err.Error()
+	j.logError(r, message, message)
+	j.errorResponse(w, r, http.StatusConflict, message)
 }

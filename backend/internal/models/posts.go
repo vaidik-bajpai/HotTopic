@@ -1,6 +1,7 @@
 package models
 
 type Post struct {
+	ID           string   `json:"id"`
 	UserID       string   `json:"user_id"`
 	Username     string   `json:"username"`
 	UserPic      string   `json:"userpic"`
@@ -10,4 +11,9 @@ type Post struct {
 	CommentCount int64    `json:"comment_count"`
 	IsLiked      bool     `json:"is_liked"`
 	IsSaved      bool     `json:"is_saved"`
+}
+
+type GetPostReq struct {
+	Paginate
+	UserID string
 }

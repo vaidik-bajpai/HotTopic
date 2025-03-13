@@ -85,7 +85,6 @@ func (s *Store) GetFollowerList(ctx context.Context, fr *models.GetFollowReq) ([
 		fr.RequesterID,
 		fr.UserID,
 		fr.PageSize,
-		fr.PageSize*(fr.PageNo-1),
 	).Exec(ctx, followerList)
 	if err != nil {
 		return nil, err
@@ -114,7 +113,6 @@ func (s *Store) GetFollowingList(ctx context.Context, fr *models.GetFollowReq) (
 		fr.RequesterID,
 		fr.UserID,
 		fr.PageSize,
-		fr.PageSize*(fr.PageNo-1),
 	).Exec(ctx, followingList)
 	if err != nil {
 		return nil, err

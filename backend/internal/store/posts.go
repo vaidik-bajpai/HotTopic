@@ -11,7 +11,8 @@ import (
 )
 
 type CreateUserPosts struct {
-	ID        string    `json:"id"`
+	ID        string `json:"id"`
+	UserID    string
 	Caption   string    `json:"caption" validate:"required,max=200"`
 	Medias    []string  `json:"medias" validate:"required,dive,required,url"`
 	CreatedAt time.Time `json:"created_at"`
@@ -22,9 +23,10 @@ func (s *Store) CreatePost(ctx context.Context, cp *CreateUserPosts) error {
 	cp.ID = uuid.New().String()
 
 	postTxn := s.db.Post.CreateOne(
-		db.Post.Caption.Equals(cp.ID),
+		db.Post.ID.Set(cp.ID),
+		db.Post.Caption.Set(cp.Caption),
 		db.Post.User.Link(
-			db.User.ID.Equals("1"),
+			db.User.ID.Equals(cp.UserID),
 		),
 	).Tx()
 
@@ -106,61 +108,60 @@ func (s *Store) DeletePost(ctx context.Context, postID string) error {
 	return err
 }
 
-type GetUserPosts struct {
-	ID        string    `json:"id"`
-	Caption   string    `json:"caption"`
-	Medias    []string  `json:"medias"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-
-	IsSaved      bool  `json:"is_saved"`
-	LikeCount    int64 `json:"like_count"`
-	CommentCount int64 `json:"comment_count"`
-	ShareCount   int64 `json:"share_count"`
-}
-
-func (s *Store) GetPosts(ctx context.Context, pageSize, pageNo int64, userID string) ([]GetUserPosts, error) {
-	posts, err := s.db.Post.FindMany(
-		db.Post.UserID.Equals(userID),
-	).Skip(
-		int(pageSize)*(int(pageNo)-9),
-	).Take(
-		int(pageSize),
+func (s *Store) GetPosts(ctx context.Context, gp *models.GetPostReq) ([]*models.Post, error) {
+	posts := []*models.Post{}
+	query := s.db.Post.FindMany(
+		db.Post.UserID.Equals(gp.UserID),
 	).With(
+		db.Post.User.Fetch(),
 		db.Post.Images.Fetch(),
-		db.Post.User.Fetch().Select(
-			db.User.Username.Field(),
-			db.User.Pic.Field(),
-		),
-	).Exec(ctx)
+		db.Post.Like.Fetch(db.PostLike.UserID.Equals(gp.UserID)),
+		db.Post.Save.Fetch(db.Save.UserID.Equals(gp.UserID)),
+	).Take(
+		int(gp.PageSize),
+	).OrderBy(
+		db.Post.CreatedAt.Order(db.SortOrderDesc),
+		db.Post.ID.Order(db.SortOrderDesc),
+	)
+
+	if gp.LastID != "" {
+		query = query.Cursor(db.Post.ID.Cursor(gp.LastID))
+	}
+
+	postsRes, err := query.Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	var res []GetUserPosts
-
-	for _, post := range posts {
-		var medias []string
-		for _, media := range post.Images() {
-			medias = append(medias, media.Media)
+	for _, post := range postsRes {
+		pic, ok := post.User().Pic()
+		if !ok {
+			pic = ""
 		}
 
-		uAt, _ := post.UpdatedAt()
+		var images []string
+		imagesRes := post.Images()
+		for _, image := range imagesRes {
+			images = append(images, image.Media)
+		}
 
-		res = append(res, GetUserPosts{
+		isLiked := len(post.Like()) > 0
+		isSaved := len(post.Save()) > 0
+
+		posts = append(posts, &models.Post{
 			ID:           post.ID,
+			UserID:       post.UserID,
+			Username:     post.User().Username,
+			UserPic:      pic,
+			Media:        images,
 			Caption:      post.Caption,
-			Medias:       medias,
-			CreatedAt:    post.CreatedAt,
-			UpdatedAt:    uAt,
-			IsSaved:      false,
 			LikeCount:    int64(post.Likes),
 			CommentCount: int64(post.Comments),
-			ShareCount:   int64(post.Shares),
+			IsLiked:      isLiked,
+			IsSaved:      isSaved,
 		})
 	}
-
-	return res, nil
+	return posts, nil
 }
 
 func (s *Store) GetFeed(ctx context.Context, feedReq *models.FeedReq) ([]*models.Post, error) {

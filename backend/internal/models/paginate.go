@@ -1,7 +1,6 @@
 package models
 
 type Paginate struct {
-	LastID   string `validate:"uuid"`
-	PageNo   int64  `validate:"gte=1"`
+	LastID   string `validate:"omitempty,uuid"`
 	PageSize int64  `validate:"gte=1"`
 }
