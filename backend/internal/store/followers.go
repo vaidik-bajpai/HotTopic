@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/vaidik-bajpai/gopher-social/internal/db/db"
 	"github.com/vaidik-bajpai/gopher-social/internal/models"
@@ -13,21 +14,18 @@ var (
 	ErrAlreadyAFollower = errors.New("already a follower")
 )
 
-func (s *Store) IsFollower(ctx context.Context, followerID string, followingID string) (bool, error) {
-	_, err := s.db.Follow.FindUnique(
-		db.Follow.FollowerIDFollowingID(
-			db.Follow.FollowerID.Equals(followerID),
-			db.Follow.FollowingID.Equals(followerID),
-		),
-	).Exec(ctx)
+func (s *Store) IsFollower(ctx context.Context, followerID string, followingID string) error {
+	log.Printf("[followerID:%s] [followingID:%s]\n", followerID, followingID)
+	res, err := s.db.Follow.FindMany().Exec(ctx)
+	log.Println(res)
 	if err != nil {
 		if db.IsErrNotFound(err) {
-			return false, ErrNotAFollower
+			return ErrNotAFollower
 		}
-		return false, err
+		return err
 	}
 
-	return true, nil
+	return nil
 }
 
 func (s *Store) FollowUser(ctx context.Context, followerID string, followingID string) error {
@@ -40,7 +38,7 @@ func (s *Store) FollowUser(ctx context.Context, followerID string, followingID s
 		),
 	).Exec(ctx)
 	if err != nil {
-		if _, ok := db.IsErrUniqueConstraint(err); !ok {
+		if _, ok := db.IsErrUniqueConstraint(err); ok {
 			return ErrAlreadyAFollower
 		}
 		return err

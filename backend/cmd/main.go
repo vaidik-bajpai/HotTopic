@@ -16,7 +16,6 @@ import (
 	"github.com/vaidik-bajpai/gopher-social/internal/mailer"
 	"github.com/vaidik-bajpai/gopher-social/internal/store"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 func main() {
@@ -24,12 +23,12 @@ func main() {
 	sgAPIKey := getEnvOrPanic("SENDGRID_API_KEY")
 	sgfromEmail := getEnvOrPanic("SENDGRID_FROM_EMAIL")
 
-	cfg := zap.NewProductionConfig()
+	/* cfg := zap.NewProductionConfig()
 	cfg.EncoderConfig.TimeKey = "ts"
 	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	cfg.DisableStacktrace = true // Disable stack traces
+	cfg.DisableStacktrace = true // Disable stack traces */
 
-	logger, _ := cfg.Build()
+	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 
 	validate := validator.New()

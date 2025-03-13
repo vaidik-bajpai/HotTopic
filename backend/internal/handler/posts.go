@@ -12,6 +12,7 @@ import (
 )
 
 func (h *HTTPHandler) handleGetUserPosts(w http.ResponseWriter, r *http.Request) {
+	user := getUserFromCtx(r)
 	paginate := getPaginateFromCtx(r)
 	h.logger.Info("get posts called")
 	userID := chi.URLParam(r, "userID")
@@ -23,7 +24,7 @@ func (h *HTTPHandler) handleGetUserPosts(w http.ResponseWriter, r *http.Request)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	posts, err := h.store.GetPosts(ctx, &models.GetPostReq{Paginate: *paginate, UserID: userID})
+	posts, err := h.store.GetPosts(ctx, &models.GetPostReq{Paginate: *paginate, UserID: userID, RequesterID: user.ID})
 	if err != nil {
 		h.json.ServerErrorResponse(w, r, err)
 		return

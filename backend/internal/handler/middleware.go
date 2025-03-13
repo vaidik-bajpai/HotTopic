@@ -117,8 +117,8 @@ func (h *HTTPHandler) canAccess(next http.Handler) http.Handler {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		IsFollower, err := h.store.IsFollower(ctx, self.ID, userID)
-		if err != nil || !IsFollower {
+		err := h.store.IsFollower(ctx, self.ID, userID)
+		if err != nil {
 			h.json.UnauthorizedResponse(w, r, err)
 			return
 		}

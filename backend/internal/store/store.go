@@ -25,7 +25,7 @@ type Storer interface {
 	GetTokenModel(ctx context.Context, tokenHash []byte) (*models.Token, error)
 	ActivateUser(ctx context.Context, userID string) error
 
-	IsFollower(ctx context.Context, followerID string, followingID string) (bool, error)
+	IsFollower(ctx context.Context, followerID string, followingID string) error
 	FollowUser(ctx context.Context, followerID string, followingID string) error
 	UnFollowUser(ctx context.Context, followerID, unFollowedID string) error
 	GetFollowerList(ctx context.Context, fr *models.GetFollowReq) ([]*models.GetFollowRes, error)

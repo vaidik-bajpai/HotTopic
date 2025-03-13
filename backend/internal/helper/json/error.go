@@ -49,7 +49,7 @@ func (j *JSON) FailedValidationResponse(w http.ResponseWriter, r *http.Request, 
 }
 
 func (j *JSON) UnauthorizedResponse(w http.ResponseWriter, r *http.Request, err error) {
-	message := "you are authorized to access this resource"
+	message := "you are unauthorized to access this resource"
 	j.logError(r, message, err.Error())
 	j.errorResponse(w, r, http.StatusUnauthorized, message)
 }

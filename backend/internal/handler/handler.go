@@ -76,7 +76,12 @@ func (h *HTTPHandler) SetupRoutes() *chi.Mux {
 	})
 
 	r.Route("/user", func(r chi.Router) {
+		r.Use(h.authenticate)
 		r.Get("/feed", h.handleGetUserFeed)
+		r.Route("/{userID}", func(r chi.Router) {
+			r.Post("/follow", h.handleFollowUser)
+			r.Post("/unfollow", h.handleUnFollowUser)
+		})
 		r.Route("/profile", func(r chi.Router) {
 			r.Get("/{userID}", h.handleGetProfile)
 			r.Post("/", h.handleCreateProfile)

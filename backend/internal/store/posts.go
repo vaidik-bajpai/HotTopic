@@ -115,14 +115,16 @@ func (s *Store) GetPosts(ctx context.Context, gp *models.GetPostReq) ([]*models.
 	).With(
 		db.Post.User.Fetch(),
 		db.Post.Images.Fetch(),
-		db.Post.Like.Fetch(db.PostLike.UserID.Equals(gp.UserID)),
-		db.Post.Save.Fetch(db.Save.UserID.Equals(gp.UserID)),
+		db.Post.Like.Fetch(db.PostLike.UserID.Equals(gp.RequesterID)),
+		db.Post.Save.Fetch(db.Save.UserID.Equals(gp.RequesterID)),
 	).Take(
 		int(gp.PageSize),
 	).OrderBy(
 		db.Post.CreatedAt.Order(db.SortOrderDesc),
 		db.Post.ID.Order(db.SortOrderDesc),
 	)
+	/* log.Println("userID", gp.UserID)
+	log.Println("requesterID", gp.RequesterID) */
 
 	if gp.LastID != "" {
 		query = query.Cursor(db.Post.ID.Cursor(gp.LastID))

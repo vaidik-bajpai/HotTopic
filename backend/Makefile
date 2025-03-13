@@ -53,3 +53,10 @@ unSavePost:
 	curl -b json/cookies.txt -X POST "http://localhost:3000/post/40bfdc9b-eba4-4fa7-9e1d-624a227b9b89/unsave" \
 		-H "Content-Type: application/json" -w "\n"
 
+followUser:
+	curl -b json/cookies/txt -X POST "http://localhost:3000/user/{userID}/follow" \
+		-H "Content-Type: application/json" -w "\n"
+
+unFollowUser:
+	curl -b json/cookies/txt -X POST "http://localhost:3000/user/{userID}/unfollow" \
+		-H "Content-Type: application/json" -w "\n"
