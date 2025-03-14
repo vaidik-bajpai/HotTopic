@@ -1,7 +1,5 @@
 package models
 
-import "github.com/vaidik-bajpai/gopher-social/internal/db/db"
-
 type GetFollowReq struct {
 	RequesterID string
 	UserID      string
@@ -9,7 +7,8 @@ type GetFollowReq struct {
 }
 
 type GetFollowRes struct {
-	UserID      db.RawString  `json:"user_id"`
-	Username    db.RawString  `json:"username"`
-	IsFollowing db.RawBoolean `json:"is_following"`
+	UserID      string `json:"user_id"`
+	Username    string `json:"username"`
+	UserPic     string `json:"userpic"`
+	IsFollowing bool   `json:"is_following"`
 }

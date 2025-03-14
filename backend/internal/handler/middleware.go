@@ -12,6 +12,7 @@ import (
 	"github.com/vaidik-bajpai/gopher-social/internal/helper"
 	"github.com/vaidik-bajpai/gopher-social/internal/models"
 	"github.com/vaidik-bajpai/gopher-social/internal/store"
+	"go.uber.org/zap"
 )
 
 func (h *HTTPHandler) authenticate(next http.Handler) http.Handler {
@@ -39,6 +40,7 @@ func (h *HTTPHandler) authenticate(next http.Handler) http.Handler {
 		}
 
 		uCtx := context.WithValue(r.Context(), userCtx, &user)
+		h.logger.Info("inside user authenticate", zap.String("username", user.Username))
 
 		next.ServeHTTP(w, r.WithContext(uCtx))
 	})

@@ -15,8 +15,12 @@ var (
 )
 
 func (s *Store) IsFollower(ctx context.Context, followerID string, followingID string) error {
-	log.Printf("[followerID:%s] [followingID:%s]\n", followerID, followingID)
-	res, err := s.db.Follow.FindMany().Exec(ctx)
+	res, err := s.db.Follow.FindUnique(
+		db.Follow.FollowerIDFollowingID(
+			db.Follow.FollowerID.Equals(followerID),
+			db.Follow.FollowingID.Equals(followingID),
+		),
+	).Exec(ctx)
 	log.Println(res)
 	if err != nil {
 		if db.IsErrNotFound(err) {
@@ -65,27 +69,41 @@ func (s *Store) UnFollowUser(ctx context.Context, followerID, unFollowedID strin
 
 func (s *Store) GetFollowerList(ctx context.Context, fr *models.GetFollowReq) ([]*models.GetFollowRes, error) {
 	var followerList []*models.GetFollowRes
-	err := s.db.Prisma.Raw.QueryRaw(`
-		SELECT 
-			u.id AS user_id, 
-			u.username, 
-			CASE WHEN f2.follower_id IS NOT NULL THEN 'true' ELSE 'false' END AS is_following
-		FROM "Follow" f1
-		JOIN "User" u ON u.id = f1.follower_id
-		LEFT JOIN "Follow" f2 
-			ON f2.follower_id = u.id 
-			AND f2.following_id = ? 
-		WHERE f1.following_id = ? 
-		ORDER BY 
-			CASE WHEN f2.follower_id IS NOT NULL THEN 0 ELSE 1 END,  
-			u.username ASC  
-		LIMIT ? OFFSET ?`,
-		fr.RequesterID,
-		fr.UserID,
-		fr.PageSize,
-	).Exec(ctx, followerList)
+	query := s.db.Follow.FindMany(
+		db.Follow.FollowingID.Equals(fr.UserID),
+		db.Follow.FollowerID.Not(fr.RequesterID),
+	).With(
+		db.Follow.Follower.Fetch().With(
+			db.User.Following.Fetch(db.Follow.FollowerID.Equals(fr.RequesterID)),
+		),
+	).Take(
+		int(fr.PageSize),
+	).OrderBy(
+		db.Follow.CreatedAt.Order(db.SortOrderDesc),
+	)
+
+	if fr.LastID != "" {
+		query.Cursor(db.Follow.FollowerID.Cursor(fr.LastID))
+	}
+
+	followerRes, err := query.Exec(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	for _, follower := range followerRes {
+		user := follower.Follower()
+		if user == nil {
+			continue
+		}
+
+		isFollowing := len(user.Following()) > 0
+
+		followerList = append(followerList, &models.GetFollowRes{
+			UserID:      user.ID,
+			Username:    user.Username,
+			IsFollowing: isFollowing,
+		})
 	}
 
 	return followerList, nil
@@ -93,27 +111,48 @@ func (s *Store) GetFollowerList(ctx context.Context, fr *models.GetFollowReq) ([
 
 func (s *Store) GetFollowingList(ctx context.Context, fr *models.GetFollowReq) ([]*models.GetFollowRes, error) {
 	var followingList []*models.GetFollowRes
-	err := s.db.Prisma.Raw.QueryRaw(`
-		SELECT 
-			u.id AS user_id, 
-			u.username, 
-			CASE WHEN f2.follower_id IS NOT NULL THEN TRUE ELSE FALSE END AS is_following
-		FROM "Follow" f1
-		JOIN "User" u ON u.id = f1.following_id
-		LEFT JOIN "Follow" f2 
-			ON f2.follower_id = ?  
-			AND f2.following_id = u.id  
-		WHERE f1.follower_id = ?  
-		ORDER BY 
-			CASE WHEN f2.follower_id IS NOT NULL THEN 0 ELSE 1 END,  
-			u.username ASC  
-		LIMIT ? OFFSET ?`,
-		fr.RequesterID,
-		fr.UserID,
-		fr.PageSize,
-	).Exec(ctx, followingList)
+
+	query := s.db.Follow.FindMany(
+		db.Follow.FollowerID.Equals(fr.UserID),
+		db.Follow.FollowingID.Not(fr.RequesterID),
+	).With(
+		db.Follow.Following.Fetch().With(
+			db.User.Following.Fetch(db.Follow.FollowerID.Equals(fr.RequesterID)),
+		),
+	).Take(
+		int(fr.PageSize),
+	).OrderBy(
+		db.Follow.CreatedAt.Order(db.SortOrderDesc),
+	)
+
+	if fr.LastID != "" {
+		query.Cursor(db.Follow.FollowingID.Cursor(fr.LastID))
+	}
+
+	followingRes, err := query.Exec(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	for _, follow := range followingRes {
+		user := follow.Following()
+		if user == nil {
+			continue
+		}
+
+		pic, ok := user.Pic()
+		if !ok {
+			pic = ""
+		}
+
+		isFollowedByRequester := len(user.Following()) > 0
+
+		followingList = append(followingList, &models.GetFollowRes{
+			UserID:      user.ID,
+			Username:    user.Username,
+			UserPic:     pic,
+			IsFollowing: isFollowedByRequester,
+		})
 	}
 
 	return followingList, nil
