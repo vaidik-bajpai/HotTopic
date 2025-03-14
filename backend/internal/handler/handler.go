@@ -73,6 +73,8 @@ func (h *HTTPHandler) SetupRoutes() *chi.Mux {
 		r.With(h.canAccess).
 			With(h.paginate).
 			Get("/{userID}", h.handleGetUserPosts)
+		r.With(h.paginate).
+			Get("/saved", h.handleGetSavedPosts)
 	})
 
 	r.Route("/user", func(r chi.Router) {

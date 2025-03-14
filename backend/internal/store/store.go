@@ -15,6 +15,7 @@ type Storer interface {
 	GetFeed(context.Context, *models.FeedReq) ([]*models.Post, error)
 	SavePost(ctx context.Context, userID string, postID string) error
 	UnSavePost(ctx context.Context, userID string, postID string) error
+	GetSavedPost(ctx context.Context, gs *models.GetSavedReq) ([]*models.Post, error)
 
 	UserRegistration(context.Context, *User) (*models.Token, error)
 	UserViaEmail(context.Context, string) (*User, error)

@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/vaidik-bajpai/gopher-social/internal/db/db"
+	"github.com/vaidik-bajpai/gopher-social/internal/models"
 )
 
 var (
@@ -46,4 +47,60 @@ func (s *Store) UnSavePost(ctx context.Context, userID, postID string) error {
 	}
 
 	return nil
+}
+
+func (s *Store) GetSavedPost(ctx context.Context, gs *models.GetSavedReq) ([]*models.Post, error) {
+	query := s.db.Save.FindMany(
+		db.Save.UserID.Equals(gs.UserID),
+	).With(
+		db.Save.Post.Fetch().With(
+			db.Post.Like.Fetch(db.PostLike.UserID.Equals(gs.UserID)),
+			db.Post.Images.Fetch(),
+			db.Post.User.Fetch(),
+		),
+	).Take(
+		int(gs.PageSize),
+	).OrderBy(
+		db.Save.CreatedAt.Order(db.SortOrderDesc),
+	)
+
+	if gs.LastID != "" {
+		query = query.Cursor(db.Save.ID.Cursor(gs.LastID))
+	}
+
+	savedPost, err := query.Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var posts []*models.Post
+	for _, post := range savedPost {
+		pic, ok := post.Post().User().Pic()
+		if !ok {
+			pic = ""
+		}
+
+		var images []string
+		imagesRes := post.Post().Images()
+		for _, image := range imagesRes {
+			images = append(images, image.Media)
+		}
+
+		isLiked := len(post.Post().Like()) > 0
+
+		posts = append(posts, &models.Post{
+			ID:           post.PostID,
+			UserID:       post.Post().UserID,
+			Username:     post.Post().User().Username,
+			UserPic:      pic,
+			Media:        images,
+			Caption:      post.Post().Caption,
+			LikeCount:    int64(post.Post().Likes),
+			CommentCount: int64(post.Post().Comments),
+			IsLiked:      isLiked,
+			IsSaved:      true,
+		})
+	}
+
+	return posts, nil
 }
