@@ -4,9 +4,10 @@ interface UserBioInterface {
 
 function UserBio({bio}: UserBioInterface) {
     return (
-        <div className="font-mono text-xs max-w-4xl flex-wrap mt-3 leading-relaxed break-words 
+        <div className="font-mono text-xs max-w-4xl flex-wrap mt-3 leading-relaxed break-words text-black 
             sm:text-xs md:text-md lg:text-lg"
         >
+
             {bio}
         </div>
     )

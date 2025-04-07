@@ -10,10 +10,10 @@ import UserProfileSlider from "./UserProfileSlider";
 function UserProfile() {
     return (
         <div className="min-h-screen w-full flex flex-col">
-            <div className="bg-gray-100 shadow-md rounded-xl flex flex-col flex-grow">
-                <UserProfileHeader username="vaidik_bajpai"/>
+            <div className="bg-white shadow-md rounded-xl flex flex-col flex-grow">
+                {/* <UserProfileHeader username="vaidik_bajpai"/> */}
                 <div className="flex flex-col flex-grow">
-                    <div className="w-full px-4 border-b-2 bg-white shadow-none border-b border-gray-200">
+                    <div className="w-full px-4 border-b-2 shadow-none border-b border-gray-200">
                         <div className="flex flex-col max-w-6xl mx-auto justify-center rounded-lg gap-1 p-2 md:p-4">
                             <div className="flex gap-3 sm:gap-4 md:gap-8">
                                 <UserProfilePic profilePic="https://res.cloudinary.com/drg9zdr28/image/upload/v1739635652/co82d4cgoyr2uvaf03xt.jpg"/>

@@ -7,6 +7,8 @@ import (
 	"github.com/vaidik-bajpai/gopher-social/internal/models"
 )
 
+const DefaultUserPic = "https://wallpapers.com/images/hd/placeholder-profile-icon-8qmjk1094ijhbem9.jpg"
+
 type Storer interface {
 	CreatePost(context.Context, *CreateUserPosts) error
 	UpdatePost(context.Context, *UpdateUserPost) error

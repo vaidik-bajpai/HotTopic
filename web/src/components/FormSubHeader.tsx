@@ -1,11 +1,11 @@
-interface FormSubHeader {
-    subHeaderText: string
+interface FormSubHeaderProps {
+    subHeaderText: string;
 }
 
-export default function FormSubHeader({subHeaderText}: FormSubHeader) {
+export default function FormSubHeader({ subHeaderText }: FormSubHeaderProps) {
     return (
-        <div className="text-sm font-medium">
+        <p className="text-sm font-medium text-gray-600">
             {subHeaderText}
-        </div>
-    )
+        </p>
+    );
 }

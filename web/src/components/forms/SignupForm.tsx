@@ -11,66 +11,83 @@ import axios from "axios";
 import PasswordInput from "../PasswordInput";
 
 const schema = yup.object({
-    username: yup.string().required("username is required"),
-    email: yup.string().email("invalid email address").required("email address is required"),
-    password: yup.string().min(8, "password must be atleast 8 characters long.").required("password is required").max(72, "password cannot be more than 72 characters long.")
-}).required()
+    username: yup.string().required("Username is required"),
+    email: yup.string().email("Invalid email").required("Email is required"),
+    password: yup.string().min(8).max(72).required("Password is required"),
+}).required();
 
 type FormData = yup.InferType<typeof schema>;
 
 export default function SignupForm() {
     const navigate = useNavigate();
+
     const {
         register,
         handleSubmit,
-        formState: {errors, isSubmitting}
-    } = useForm({
-        resolver: yupResolver(schema),
-    })
+        formState: { errors, isSubmitting }
+    } = useForm<FormData>({ resolver: yupResolver(schema) });
 
     async function onSubmit(data: FormData) {
         try {
-            const response = await axios.post("http://localhost:3000/auth/signup", {
-                username: data.username,
-                email: data.email,
-                password: data.password
-            }, {
+            const response = await axios.post("http://localhost:3000/auth/signup", data, {
                 headers: { "Content-Type": "application/json" },
                 withCredentials: true,
-            })
-            console.log("Sign up successful", response.data)
-            navigate("/signin")
-        } catch(err: any) {
-            console.error("Signup failed:", err.response?.data || err.message)
+            });
+            console.log("Signup successful", response.data);
+            navigate("/signin");
+        } catch (err: any) {
+            console.error("Signup failed:", err.response?.data || err.message);
         }
     }
-    
-    return ( 
-        <div className="flex flex-col gap-1 font-mono w-full max-w-sm p-2"> 
+
+    return (
+        <div className="w-full max-w-md font-mono space-y-6">
             <form
-                onSubmit={handleSubmit(onSubmit)} 
-                className="bg-white flex flex-col gap-3 p-4 border rounded-xl rounded-xl border-blue-500">
-                <div className="mx-auto">
-                    <FormHeader headerText="Sign up"/>
+                onSubmit={handleSubmit(onSubmit)}
+                className="bg-white p-6 rounded-2xl shadow-lg border border-blue-300 space-y-4"
+            >
+                <FormHeader headerText="Sign up" />
+                <FormSubHeader subHeaderText="Join the hottest conversations now!" />
+
+                <FormInput
+                    labelText="Username"
+                    placeholder="Enter your username"
+                    error={errors.username?.message}
+                    {...register("username")}
+                />
+                <FormInput
+                    labelText="Email"
+                    placeholder="Enter your email"
+                    error={errors.email?.message}
+                    {...register("email")}
+                />
+                <PasswordInput
+                    labelText="Password"
+                    placeholder="Enter your password"
+                    error={errors.password?.message}
+                    {...register("password")}
+                />
+
+                <SubmitButton buttonText="Start Trending" isSubmitting={isSubmitting} />
+
+                <div className="text-sm text-center">
+                    Already have an account?{" "}
+                    <span
+                        className="text-blue-600 font-semibold cursor-pointer hover:underline"
+                        onClick={() => navigate("/signin")}
+                    >
+                        Sign in
+                    </span>
                 </div>
-                <div className="mx-auto">
-                    <FormSubHeader subHeaderText="Join the hottest conversations now!" />
-                </div>
-                <FormInput labelText="Username" placeholder="Enter your username" error={errors.username?.message} {...register("username")}/>
-                <FormInput labelText="Email" placeholder="Enter your email" error={errors.email?.message} {...register("email")}/>
-                <PasswordInput labelText="Password" placeholder="Enter your password" error={errors.password?.message} {...register("password")}/>
-                <div className="mt-2">
-                    <SubmitButton buttonText="Start Trending" isSubmitting={isSubmitting}/>
-                </div>
-                <div className="text-sm m-auto">Already have an account? <span className="text-blue-600 font-semibold cursor-pointer" onClick={() => navigate("/signin")}>Sign in</span></div>
             </form>
-            
-            <div className="flex justify-center items-center gap-2 px-2 my-3">
-                <div className="border-t-1 w-full h-0 "></div>
-                <div>Or</div>
-                <div className="border-t-1 w-full h-0 "></div>
+
+            <div className="flex items-center justify-center gap-2">
+                <hr className="flex-grow border-t border-gray-300" />
+                <span className="text-gray-500">Or</span>
+                <hr className="flex-grow border-t border-gray-300" />
             </div>
+
             <ContinueWithGoogle />
         </div>
-    )
+    );
 }

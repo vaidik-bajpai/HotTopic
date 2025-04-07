@@ -14,39 +14,45 @@ import PostRenderer from './components/renderers/PostRenderer'
 import Page from './components/Page'
 import Gallery from './components/LikePostGallery'
 import LikedPostViewer from './components/LikedPostsViewer'
-import { LikedPostProvider } from "./context/LikedPostContext";
+import LikedPostWrapper from './components/LikedPostWrapper'
+import SavedPostWrapper from './components/SavedPostWrapper'
+import SavedPostsGallery from './components/SavedPostsGallery'
 
 function App() {
   return (
     <>
-      <LikedPostProvider>
-        <div className='flex'>
-          <Routes>
-            <Route element={<WrapperWithHeader />}>
-              <Route path='/' element={<SigninForm />}/>
-              <Route path='/signup' element={<SignupForm />}/>
-            </Route>
-            <Route element={<Page />}>
-              <Route path='/dashboard' element={<FeedRenderer/>}/>
-              <Route path='/user-profile/:userID' element={<UserProfile />}>
-                <Route index element={<UserPostsPreview userID={"2"}/>}/>
-                <Route path='followers' element={<FollowerRenderer />}/>
-                <Route path='followings' element={<FollowingRenderer />}/>
-            </Route>
-            <Route path='liked-gallery' element={<Gallery />}/>
-            <Route path='liked-posts' element={<LikedPostViewer />}/>
-            </Route>
-            <Route element={<WrapperResetPassword />}>
-              <Route path='/forgot-password' element={<ForgotPasswordForm />}/>
-              <Route path='/reset-password/:token' element={<ResetPasswordForm />} />
-            </Route>
+      <div className='flex'>
+        <Routes>
+          <Route element={<WrapperWithHeader />}>
+            <Route path='/' element={<SigninForm />}/>
+            <Route path='/signup' element={<SignupForm />}/>
+          </Route>
+          <Route element={<Page />}>
+            <Route path='/dashboard' element={<FeedRenderer/>}/>
+            <Route path='/user-profile/:userID' element={<UserProfile />}>
+              <Route index element={<UserPostsPreview userID={"2"}/>}/>
+              <Route path='followers' element={<FollowerRenderer />}/>
+              <Route path='followings' element={<FollowingRenderer />}/>
+          </Route>
+          <Route element={<LikedPostWrapper />}>
+            <Route path='liked-gallery' element={<Gallery />} />
+            <Route path='liked-posts' element={<LikedPostViewer />} />
+          </Route>
+          <Route element={<SavedPostWrapper />}>
+            <Route path='saved-gallery' element={<SavedPostsGallery />} />
+            <Route path='saved-posts' element={<LikedPostViewer />} />
+          </Route>
+          </Route>
+          <Route element={<WrapperResetPassword />}>
+            <Route path='/forgot-password' element={<ForgotPasswordForm />}/>
+            <Route path='/reset-password/:token' element={<ResetPasswordForm />} />
+          </Route>
         
-            <Route path='/:userID'>
-              <Route path='posts' element={<PostRenderer />}/>
-            </Route>
-          </Routes>
-        </div>
-      </LikedPostProvider>
+          <Route path='/:userID'>
+            <Route path='posts' element={<PostRenderer />}/>
+          </Route>
+        </Routes>
+      </div>
     </>
   )
 }

@@ -197,7 +197,7 @@ func (s *Store) GetFeed(ctx context.Context, feedReq *models.FeedReq) ([]*models
 	for _, post := range postRes {
 		pic, ok := post.User().Pic()
 		if !ok {
-			pic = "https://wallpapers.com/images/hd/placeholder-profile-icon-8qmjk1094ijhbem9.jpg"
+			pic = DefaultUserPic
 		}
 
 		var images []string

@@ -11,71 +11,90 @@ import axios from "axios";
 import PasswordInput from "../PasswordInput";
 import { useSetRecoilState } from "recoil";
 import { userAtom } from "../../state/atoms/userAtom";
-/* import { userAtom } from "../../states/atoms/userAtom"; */
 
 const schema = yup.object({
-    email: yup.string().email("invalid email").required("email address is required"),
-    password: yup.string().min(8, "password must be atleast 8 characters long.").required("password is required").max(72, "password cannot be more than 72 characters long.")
+    email: yup.string().email("Invalid email").required("Email is required"),
+    password: yup.string().min(8).max(72).required("Password is required")
 }).required();
 
 type FormData = yup.InferType<typeof schema>;
 
-export default function Form() {
+export default function SigninForm() {
     const navigate = useNavigate();
     const setUser = useSetRecoilState(userAtom);
+
     const {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
-    } = useForm<FormData>({
-        resolver: yupResolver(schema),
-    });
+    } = useForm<FormData>({ resolver: yupResolver(schema) });
 
     async function onSubmit(data: FormData) {
         try {
-            const response = await axios.post("http://localhost:3000/auth/signin", {
-                email: data.email,
-                password: data.password,
-            }, {
-                headers: {"Content-Type": "application/json"},
-                withCredentials: true
-            })
-
-            console.log("Sign in Successful", response.data)
-            setUser({isLoggedIn: true, id: response.data.id })
-            navigate("/dashboard")
-        } catch(err) {  
-            console.error("Sign in Failed")
+            const response = await axios.post("http://localhost:3000/auth/signin", data, {
+                headers: { "Content-Type": "application/json" },
+                withCredentials: true,
+            });
+            setUser({ isLoggedIn: true, id: response.data.id });
+            navigate("/dashboard");
+        } catch (err) {
+            console.error("Sign in failed");
         }
     }
+
     return (
-        <div className="flex flex-col gap-1 font-mono max-w-md"> 
-            <form 
+        <div className="w-full max-w-md font-mono space-y-6">
+            <form
                 onSubmit={handleSubmit(onSubmit)}
-                className="bg-white flex flex-col gap-3 p-4 border rounded-xl rounded-xl border-blue-500">
-                <div className="mx-auto">
-                    <FormHeader headerText="Sign in"/>
+                className="bg-white p-6 rounded-2xl shadow-lg border border-blue-300 space-y-4"
+            >
+                <FormHeader headerText="Sign in" />
+                <FormSubHeader subHeaderText="Welcome back! Let’s pick up the conversation." />
+
+                <FormInput
+                    labelText="Email"
+                    placeholder="Enter your email"
+                    error={errors.email?.message}
+                    {...register("email")}
+                />
+
+                <PasswordInput
+                    labelText="Password"
+                    placeholder="Enter your password"
+                    error={errors.password?.message}
+                    {...register("password")}
+                />
+
+                <div className="text-right">
+                    <button
+                        type="button"
+                        className="text-sm font-semibold text-blue-600 hover:underline"
+                        onClick={() => navigate("/forgot-password")}
+                    >
+                        Forgot Password?
+                    </button>
                 </div>
-                <div className="mx-auto">
-                    <FormSubHeader subHeaderText="Welcome back! Let's pick up the conversation." />
+
+                <SubmitButton buttonText="Hop In" isSubmitting={isSubmitting} />
+
+                <div className="text-sm text-center">
+                    Don’t have an account?{" "}
+                    <span
+                        className="text-blue-600 font-semibold cursor-pointer hover:underline"
+                        onClick={() => navigate("/signup")}
+                    >
+                        Sign up
+                    </span>
                 </div>
-                <FormInput labelText="Email" placeholder="Enter your email" error={errors.email?.message} {...register("email")}/>
-                <PasswordInput labelText="Password" placeholder="Enter your password" error={errors.password?.message} {...register("password")}/>
-                <button
-                    className="mr-auto px-2 text-sm font-semibold text-blue-600 cursor-pointer"
-                    onClick={() => navigate("/forgot-password")}>Forgot Password ?</button>
-                <div className="mt-2">
-                    <SubmitButton buttonText="Hop In" isSubmitting={isSubmitting}/>
-                </div>
-                <div className="text-sm m-auto">Don't have an account? <span className="text-blue-600 font-semibold cursor-pointer" onClick={() => navigate("/signup")}>Sign up</span></div>
             </form>
-            
-            <div className="flex justify-center items-center gap-2 px-2 my-3">
-                <div className="border-t-1 w-full h-0 "></div>
-                <div>Or</div>
-                <div className="border-t-1 w-full h-0 "></div>
+
+            <div className="flex items-center justify-center gap-2">
+                <hr className="flex-grow border-t border-gray-300" />
+                <span className="text-gray-500">Or</span>
+                <hr className="flex-grow border-t border-gray-300" />
             </div>
+
             <ContinueWithGoogle />
         </div>
-    )
+    );
 }

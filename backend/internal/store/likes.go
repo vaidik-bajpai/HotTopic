@@ -80,16 +80,16 @@ func (s *Store) GetLikedPost(ctx context.Context, gl *models.GetLikedReq) ([]*mo
 		query = query.Cursor(db.PostLike.ID.Cursor(gl.LastID))
 	}
 
-	savedPost, err := query.Exec(ctx)
+	likedPosts, err := query.Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	var posts []*models.Post
-	for _, post := range savedPost {
+	for _, post := range likedPosts {
 		pic, ok := post.Post().User().Pic()
 		if !ok {
-			pic = ""
+			pic = DefaultUserPic
 		}
 
 		var images []string

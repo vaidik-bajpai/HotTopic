@@ -77,7 +77,7 @@ func (s *Store) GetSavedPost(ctx context.Context, gs *models.GetSavedReq) ([]*mo
 	for _, post := range savedPost {
 		pic, ok := post.Post().User().Pic()
 		if !ok {
-			pic = ""
+			pic = DefaultUserPic
 		}
 
 		var images []string

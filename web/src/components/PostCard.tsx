@@ -33,7 +33,7 @@ export function PostCard({
                 <p className="font-bold text-sm truncate">{username}</p>
             </div>
 
-            <div className="w-full aspect-square bg-blue-100 flex items-center justify-center object-cover border border-gray-500">
+            <div className="w-full aspect-square bg-blue-100 flex items-center justify-center object-cover border border-gray-500 mb-4">
                 <MediaRenderer media={postImages}/>
             </div>
 

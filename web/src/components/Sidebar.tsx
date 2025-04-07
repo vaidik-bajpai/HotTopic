@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { House, BookMarked, BookHeart, LogOut, User, FlameKindling, PlusSquare, Flame, Search} from 'lucide-react';
+import { House, BookMarked, BookHeart, LogOut, User, PlusSquare, Flame, Search} from 'lucide-react';
 import { useLocation, useNavigate } from "react-router";
 import {  useRecoilValue } from "recoil";
 import { userAtom } from "../state/atoms/userAtom";
@@ -9,16 +9,20 @@ export default function Sidebar() {
     const location = useLocation()
     const navigate = useNavigate()
     const user = useRecoilValue(userAtom)
+
     return (
         <>
             {/* Top bar with hamburger icon */}
-            <div className="flex w-full py-2 px-4 justify-end md:hidden">
-                <div className="cursor-pointer" onClick={() => setExpanded(true)}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu">
-                        <line x1="4" x2="20" y1="12" y2="12" />
-                        <line x1="4" x2="20" y1="6" y2="6" />
-                        <line x1="4" x2="20" y1="18" y2="18" />
-                    </svg>
+            <div className="flex w-full py-2 px-4 md:hidden">
+                <div className="flex justify-between items-center w-full">
+                    <h1 className="font-bold text-lg">Feed</h1>
+                    <div className="cursor-pointer" onClick={() => setExpanded(true)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu">
+                            <line x1="4" x2="20" y1="12" y2="12" />
+                            <line x1="4" x2="20" y1="6" y2="6" />
+                            <line x1="4" x2="20" y1="18" y2="18" />
+                        </svg>
+                    </div>
                 </div>
             </div>
 
@@ -42,7 +46,7 @@ export default function Sidebar() {
 
                 {/* Sidebar content */}
                 <ul className="h-full flex flex-col gap-6 mt-4 px-2 md:px-0">
-                    <LogoAppName icon={<Flame fill="Orange" size={40}/>} name="HotTopic" active={location.pathname == ""}/>
+                    <LogoAppName icon={<Flame fill="#3730a3" size={40}/>} name="HotTopic" active={location.pathname == ""}/>
 
                     <SidebarItem icon={<House />} name="Home" active={location.pathname.includes("/dashboard")} onClick={() => {console.log(location.pathname); navigate("/dashboard")}}/>
 
@@ -50,11 +54,11 @@ export default function Sidebar() {
 
                     <SidebarItem icon={<Search />} name="Search" active={location.pathname.includes("/search")} onClick={() => {console.log(location.pathname); navigate("search")}}/>
 
-                    <SidebarItem icon={<User />} name="Profile" active={location.pathname.includes(`user-profile/${user.id}`)} onClick={() => {console.log(location.pathname); navigate(`user-profile/${user.id}`)}}/>
+                    <SidebarItem icon={<User />} name="Profile" active={location.pathname.includes(`user-profile/${user.id}`)} onClick={() => {console.log(location.pathname); console.log(user); navigate(`user-profile/${user.id}`)}}/>
 
-                    <SidebarItem icon={<BookMarked />} name="Saved Posts" active={location.pathname.includes("saved-posts")} onClick={() => {console.log(location.pathname); navigate("saved-posts")}}/>
+                    <SidebarItem icon={<BookMarked />} name="Saved Posts" active={location.pathname.includes("/saved-gallery")} onClick={() => {console.log(location.pathname); navigate("saved-gallery")}}/>
 
-                    <SidebarItem icon={<BookHeart />} name="Liked Posts" active={location.pathname.includes("/liked-gallery")} onClick={() => {console.log(location.pathname); navigate("liked-posts")}}/>
+                    <SidebarItem icon={<BookHeart />} name="Liked Posts" active={location.pathname.includes("/liked-gallery")} onClick={() => {console.log(location.pathname); navigate("liked-gallery")}}/>
 
                     <SidebarItem icon={<LogOut />} name="Logout"/>
                 </ul>

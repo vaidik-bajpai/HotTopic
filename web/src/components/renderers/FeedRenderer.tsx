@@ -23,7 +23,10 @@ export default function FeedRenderer() {
             })
             console.log(res.data)
             setFeed(res.data.posts)
-            setLastID(res.data.posts[res.data.posts.length.id])
+            if (res.data.posts.length > 0) {
+                const lastPost = res.data.posts[res.data.posts.length - 1];
+                setLastID(lastPost.id); // Assuming posts have an `id` field
+              }              
             console.log(res.data.posts[res.data.posts.length-1].id)
         } catch(err) {
             console.log("error could not fetch the feed")
@@ -35,7 +38,7 @@ export default function FeedRenderer() {
     }, [])
     
     return (
-        <div className="flex flex-col mx-auto gap-5 max-w-xl my-4">
+        <div className="flex-grow flex flex-col mx-auto gap-5 max-w-xl my-4">
             {feed.map((post) => (
                 <PostCard 
                 userImage={post.userpic} 

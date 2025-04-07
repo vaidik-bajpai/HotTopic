@@ -157,7 +157,7 @@ func (s *Store) GetProfile(ctx context.Context, userID string) (*models.UserProf
 
 	pic, ok := up.Pic()
 	if !ok {
-		pic = ""
+		pic = DefaultUserPic
 	}
 
 	metadata, ok := up.Profile()
