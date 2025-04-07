@@ -1,5 +1,5 @@
 import { MainHeader } from "../components/Header";
-import { Preview } from "../components/Preview";
+import { Preview } from "../components/forms/Preview";
 
 export default {
     title: "Composite/Create Post",

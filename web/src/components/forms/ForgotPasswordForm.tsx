@@ -1,8 +1,8 @@
 import { useForm } from "react-hook-form";
-import FormHeader from "./FormHeader";
-import FormInput from "./FormInput";
-import FormSubHeader from "./FormSubHeader";
-import SubmitButton from "./SubmitButton";
+import FormHeader from "../FormHeader";
+import FormInput from "../FormInput";
+import FormSubHeader from "../FormSubHeader";
+import SubmitButton from "../buttons/SubmitButton";
 import * as yup from 'yup'
 import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";

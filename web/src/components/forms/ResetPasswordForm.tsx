@@ -1,12 +1,12 @@
 import { useForm } from "react-hook-form";
-import FormHeader from "./FormHeader";
-import FormInput from "./FormInput";
-import FormSubHeader from "./FormSubHeader";
-import SubmitButton from "./SubmitButton";
+import FormHeader from "../FormHeader";
+import FormSubHeader from "../FormSubHeader";
+import SubmitButton from "../buttons/SubmitButton";
 import * as yup from "yup"
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useParams } from "react-router";
 import axios from "axios";
+import PasswordInput from "../PasswordInput";
 
 const schema = yup.object({
     new_password: yup
@@ -60,8 +60,8 @@ function ResetPasswordForm() {
                 <div className="mx-auto text-center">
                     <FormSubHeader subHeaderText="" />
                 </div>
-                <FormInput labelText="New Password" placeholder="Enter your new password" error={errors.new_password?.message} {...register("new_password")}/>
-                <FormInput labelText="Confirm Password" placeholder="Confirm your new password" error={errors.confirm_password?.message} {...register("confirm_password")}/>
+                <PasswordInput labelText="New Password" placeholder="Enter your new password" error={errors.new_password?.message} {...register("new_password")}/>
+                <PasswordInput labelText="Confirm Password" placeholder="Confirm your new password" error={errors.confirm_password?.message} {...register("confirm_password")}/>
                 <div className="mt-2">
                     <SubmitButton buttonText="Reset" isSubmitting={isSubmitting}/>
                 </div>

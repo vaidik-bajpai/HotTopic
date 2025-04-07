@@ -1,23 +1,90 @@
+import { useNavigate } from "react-router";
+import SigninButton from "./buttons/SigninButton";
+import SignupButton from "./buttons/SignupButton";
+import { useRecoilState } from "recoil";
+import { userAtom } from "../state/atoms/userAtom";
+import { motion } from "framer-motion";
+import { useState } from "react";
+import axios from "axios";
+
 interface MainHeaderInterface {
-    headerText: string
-    notificationCount: number
+    headerText: string;
+    notificationCount: number;
 }
 
-export function MainHeader({headerText, notificationCount}: MainHeaderInterface) {
+const sidebarVariants = {
+    open: {
+        x: 0,
+        opacity: 1,
+        transition: { type: "spring", stiffness: 300, damping: 30 },
+    },
+    closed: {
+        x: "100%",
+        opacity: 0,
+        transition: { type: "spring", stiffness: 300, damping: 30 },
+    },
+};
+
+export function MainHeader({ headerText }: MainHeaderInterface) {
+    const navigate = useNavigate();
+    const [user, setUser] = useRecoilState(userAtom);
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+
+    async function handleLogout() {
+        try {
+            await axios.post("http://localhost:3000/auth/logout")
+            setUser({isLoggedIn: false, id: ""})
+            setIsOpen(false)
+        } catch(error) {
+            console.log(error)
+        }
+    }
+
     return (
-        <div className="flex justify-between items-center max-h-md px-2 py-2">
+        <div className="bg-blue-50 flex justify-between items-center px-4 py-3 border-b relative">
             <h1 className="font-mono font-bold text-2xl">{headerText}</h1>
-            <div className="flex gap-4">
-                <button className="pointer-cursor">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-square-plus"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
-                </button>
-                <button className="pointer-cursor relative">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-bell"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
-                    <div className={`${notificationCount === 0 ? "" : "hidden"} absolute top-0 right-0 w-2 h-2 bg-blue-500 rounded-full text-white`}>{notificationCount}</div>
-                </button>
-            </div>
+            {user.isLoggedIn ? (
+                <div className="flex gap-4">
+                    <SigninButton onClick={() => navigate("/signin")} />
+                    <SignupButton onClick={() => navigate("/signup")} />
+                </div>
+            ) : (
+                <div>
+                    <button onClick={() => setIsOpen(!isOpen)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu">
+                            <line x1="4" x2="20" y1="12" y2="12" />
+                            <line x1="4" x2="20" y1="6" y2="6" />
+                            <line x1="4" x2="20" y1="18" y2="18" />
+                        </svg>
+                    </button>
+                    <motion.nav
+                        initial="closed"
+                        animate={isOpen ? "open" : "closed"}
+                        variants={sidebarVariants}
+                        className="fixed top-0 right-0 w-64 h-full bg-white shadow-lg p-4"
+                    >
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="absolute top-4 right-4 text-gray-600"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        </button>
+                        <ul className="mt-10 space-y-4">
+                            <li className="cursor-pointer hover:text-blue-500" onClick={() => navigate("/home")}>
+                                Saved Posts
+                            </li>
+                            <li className="cursor-pointer hover:text-blue-500" onClick={() => navigate("/about")}>
+                                Liked Posts
+                            </li>
+                            <li 
+                                onClick={() => handleLogout()}
+                                className="cursor-pointer hover:text-blue-500">
+                                Log out
+                            </li>
+                        </ul>
+                    </motion.nav>
+                </div>
+            )}
         </div>
-    )
+    );
 }
-
-

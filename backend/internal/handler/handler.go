@@ -75,11 +75,13 @@ func (h *HTTPHandler) SetupRoutes() *chi.Mux {
 			Get("/{userID}", h.handleGetUserPosts)
 		r.With(h.paginate).
 			Get("/saved", h.handleGetSavedPosts)
+		r.With(h.paginate).
+			Get("/liked", h.handleGetLikedPosts)
 	})
 
 	r.Route("/user", func(r chi.Router) {
 		r.Use(h.authenticate)
-		r.Get("/feed", h.handleGetUserFeed)
+		r.With(h.paginate).Get("/feed", h.handleGetUserFeed)
 		r.Route("/{userID}", func(r chi.Router) {
 			r.Post("/follow", h.handleFollowUser)
 			r.Post("/unfollow", h.handleUnFollowUser)

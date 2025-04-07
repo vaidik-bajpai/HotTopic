@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/vaidik-bajpai/gopher-social/internal/db/db"
+	"github.com/vaidik-bajpai/gopher-social/internal/models"
 )
 
 var (
@@ -58,4 +59,60 @@ func (s *Store) UnlikeAPost(ctx context.Context, userID string, postID string) e
 	}
 
 	return nil
+}
+
+func (s *Store) GetLikedPost(ctx context.Context, gl *models.GetLikedReq) ([]*models.Post, error) {
+	query := s.db.PostLike.FindMany(
+		db.PostLike.UserID.Equals(gl.UserID),
+	).With(
+		db.PostLike.Post.Fetch().With(
+			db.Post.Like.Fetch(db.PostLike.UserID.Equals(gl.UserID)),
+			db.Post.Images.Fetch(),
+			db.Post.User.Fetch(),
+		),
+	).Take(
+		int(gl.PageSize),
+	).OrderBy(
+		db.PostLike.CreatedAt.Order(db.SortOrderDesc),
+	)
+
+	if gl.LastID != "" {
+		query = query.Cursor(db.PostLike.ID.Cursor(gl.LastID))
+	}
+
+	savedPost, err := query.Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var posts []*models.Post
+	for _, post := range savedPost {
+		pic, ok := post.Post().User().Pic()
+		if !ok {
+			pic = ""
+		}
+
+		var images []string
+		imagesRes := post.Post().Images()
+		for _, image := range imagesRes {
+			images = append(images, image.Media)
+		}
+
+		isLiked := len(post.Post().Like()) > 0
+
+		posts = append(posts, &models.Post{
+			ID:           post.PostID,
+			UserID:       post.Post().UserID,
+			Username:     post.Post().User().Username,
+			UserPic:      pic,
+			Media:        images,
+			Caption:      post.Post().Caption,
+			LikeCount:    int64(post.Post().Likes),
+			CommentCount: int64(post.Post().Comments),
+			IsLiked:      isLiked,
+			IsSaved:      true,
+		})
+	}
+
+	return posts, nil
 }

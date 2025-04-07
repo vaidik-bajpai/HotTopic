@@ -1,13 +1,14 @@
 import { useNavigate } from "react-router";
-import ContinueWithGoogle from "./ContinueWithGoogle";
-import FormHeader from "./FormHeader";
-import FormInput from "./FormInput";
-import FormSubHeader from "./FormSubHeader";
-import SubmitButton from "./SubmitButton";
+import ContinueWithGoogle from "../buttons/ContinueWithGoogle";
+import FormHeader from "../FormHeader";
+import FormInput from "../FormInput";
+import FormSubHeader from "../FormSubHeader";
+import SubmitButton from "../buttons/SubmitButton";
 import * as yup from 'yup'
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
+import PasswordInput from "../PasswordInput";
 
 const schema = yup.object({
     username: yup.string().required("username is required"),
@@ -37,8 +38,8 @@ export default function SignupForm() {
                 headers: { "Content-Type": "application/json" },
                 withCredentials: true,
             })
-
             console.log("Sign up successful", response.data)
+            navigate("/signin")
         } catch(err: any) {
             console.error("Signup failed:", err.response?.data || err.message)
         }
@@ -48,7 +49,7 @@ export default function SignupForm() {
         <div className="flex flex-col gap-1 font-mono w-full max-w-sm p-2"> 
             <form
                 onSubmit={handleSubmit(onSubmit)} 
-                className="flex flex-col gap-3 p-4 border rounded-xl rounded-xl border-blue-500">
+                className="bg-white flex flex-col gap-3 p-4 border rounded-xl rounded-xl border-blue-500">
                 <div className="mx-auto">
                     <FormHeader headerText="Sign up"/>
                 </div>
@@ -57,7 +58,7 @@ export default function SignupForm() {
                 </div>
                 <FormInput labelText="Username" placeholder="Enter your username" error={errors.username?.message} {...register("username")}/>
                 <FormInput labelText="Email" placeholder="Enter your email" error={errors.email?.message} {...register("email")}/>
-                <FormInput labelText="Password" placeholder="Enter your password" error={errors.password?.message} {...register("password")}/>
+                <PasswordInput labelText="Password" placeholder="Enter your password" error={errors.password?.message} {...register("password")}/>
                 <div className="mt-2">
                     <SubmitButton buttonText="Start Trending" isSubmitting={isSubmitting}/>
                 </div>

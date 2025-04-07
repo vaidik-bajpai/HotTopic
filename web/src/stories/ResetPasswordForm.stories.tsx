@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react";
-import ResetPasswordForm from "../components/ResetPasswordForm";
+import ResetPasswordForm from "../components/forms/ResetPasswordForm";
 
 const meta: Meta<typeof ResetPasswordForm> = {
     title: "Reset Password Form",

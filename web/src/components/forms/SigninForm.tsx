@@ -1,13 +1,17 @@
 import { useNavigate } from "react-router";
-import ContinueWithGoogle from "./ContinueWithGoogle";
-import FormHeader from "./FormHeader";
-import FormInput from "./FormInput";
-import FormSubHeader from "./FormSubHeader";
-import SubmitButton from "./SubmitButton";
+import ContinueWithGoogle from "../buttons/ContinueWithGoogle";
+import FormHeader from "../FormHeader";
+import FormInput from "../FormInput";
+import FormSubHeader from "../FormSubHeader";
+import SubmitButton from "../buttons/SubmitButton";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
+import PasswordInput from "../PasswordInput";
+import { useSetRecoilState } from "recoil";
+import { userAtom } from "../../state/atoms/userAtom";
+/* import { userAtom } from "../../states/atoms/userAtom"; */
 
 const schema = yup.object({
     email: yup.string().email("invalid email").required("email address is required"),
@@ -18,6 +22,7 @@ type FormData = yup.InferType<typeof schema>;
 
 export default function Form() {
     const navigate = useNavigate();
+    const setUser = useSetRecoilState(userAtom);
     const {
         register,
         handleSubmit,
@@ -37,7 +42,9 @@ export default function Form() {
             })
 
             console.log("Sign in Successful", response.data)
-        } catch(err) {
+            setUser({isLoggedIn: true, id: response.data.id })
+            navigate("/dashboard")
+        } catch(err) {  
             console.error("Sign in Failed")
         }
     }
@@ -45,7 +52,7 @@ export default function Form() {
         <div className="flex flex-col gap-1 font-mono max-w-md"> 
             <form 
                 onSubmit={handleSubmit(onSubmit)}
-                className="flex flex-col gap-3 p-4 border rounded-xl rounded-xl border-blue-500">
+                className="bg-white flex flex-col gap-3 p-4 border rounded-xl rounded-xl border-blue-500">
                 <div className="mx-auto">
                     <FormHeader headerText="Sign in"/>
                 </div>
@@ -53,7 +60,7 @@ export default function Form() {
                     <FormSubHeader subHeaderText="Welcome back! Let's pick up the conversation." />
                 </div>
                 <FormInput labelText="Email" placeholder="Enter your email" error={errors.email?.message} {...register("email")}/>
-                <FormInput labelText="Password" placeholder="Enter your password" error={errors.password?.message} {...register("password")}/>
+                <PasswordInput labelText="Password" placeholder="Enter your password" error={errors.password?.message} {...register("password")}/>
                 <button
                     className="mr-auto px-2 text-sm font-semibold text-blue-600 cursor-pointer"
                     onClick={() => navigate("/forgot-password")}>Forgot Password ?</button>

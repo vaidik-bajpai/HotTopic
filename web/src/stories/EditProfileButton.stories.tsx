@@ -1,5 +1,5 @@
 import {Meta, StoryObj} from '@storybook/react'
-import EditProfileButton from '../components/EditProfileButton'
+import EditProfileButton from '../components/buttons/EditProfileButton'
 
 const meta: Meta<typeof EditProfileButton> = {
     component: EditProfileButton,

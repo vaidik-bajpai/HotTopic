@@ -7,7 +7,7 @@ interface UserPostsPreviewInterface {
 export default function UserPostsPreview({userID}: UserPostsPreviewInterface) {
     const [postList, setPostList] = useState([]);
     return (
-        <div className="flex-grow flex justify-center items-center text-center bg-gray-50 border border-gray-200 rounded-lg"> 
+        <div className="flex-grow flex justify-center items-center text-center border border-gray-200 rounded-lg bg-blue-50"> 
             {postList.length === 0 ? 
             <div className="flex flex-col gap-2 font-mono">
                 <div className="text-md md:text-lg xl:text-xl 2xl:text-2xl font-bold">

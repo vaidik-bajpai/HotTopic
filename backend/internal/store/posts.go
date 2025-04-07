@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -167,33 +166,61 @@ func (s *Store) GetPosts(ctx context.Context, gp *models.GetPostReq) ([]*models.
 }
 
 func (s *Store) GetFeed(ctx context.Context, feedReq *models.FeedReq) ([]*models.Post, error) {
-	query := `
-		SELECT p.*, 
-			CASE WHEN l.id IS NOT NULL THEN true ELSE false END AS is_liked
-		FROM posts p
-		LEFT JOIN likes l ON l.post_id = p.id AND l.user_id = $1
-		WHERE p.deleted = false
-			AND p.user_id IN (
-				SELECT following_id FROM follows WHERE follower_id = $1
-			)
-			%s
-		ORDER BY p.created_at DESC, p.id DESC
-		LIMIT $2;
-	`
+	query := s.db.Post.FindMany(
+		db.Post.User.Where(
+			db.User.Following.Some(
+				db.Follow.FollowerID.Equals(feedReq.UserID),
+			),
+		),
+	).With(
+		db.Post.User.Fetch(),
+		db.Post.Images.Fetch(),
+		db.Post.Like.Fetch(db.PostLike.UserID.Equals(feedReq.UserID)),
+		db.Post.Save.Fetch(db.Save.UserID.Equals(feedReq.UserID)),
+	).Take(
+		int(feedReq.PageSize),
+	).OrderBy(
+		db.Post.CreatedAt.Order(db.SortOrderDesc),
+		db.Post.ID.Order(db.SortOrderDesc),
+	)
 
-	var pagination string
-	args := []interface{}{feedReq.UserID, feedReq.PageSize}
 	if feedReq.LastID != "" {
-		pagination = "AND p.id < $3"
-		args = append(args, feedReq.LastID)
+		query = query.Cursor(db.Post.ID.Cursor(feedReq.LastID))
 	}
-	query = fmt.Sprintf(query, pagination)
+
+	postRes, err := query.Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	var posts []*models.Post
-	err := s.db.Prisma.QueryRaw(query, args...).Exec(ctx, &posts)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch posts: %w", err)
-	}
+	for _, post := range postRes {
+		pic, ok := post.User().Pic()
+		if !ok {
+			pic = "https://wallpapers.com/images/hd/placeholder-profile-icon-8qmjk1094ijhbem9.jpg"
+		}
 
+		var images []string
+		imagesRes := post.Images()
+		for _, image := range imagesRes {
+			images = append(images, image.Media)
+		}
+
+		isLiked := len(post.Like()) > 0
+		isSaved := len(post.Save()) > 0
+
+		posts = append(posts, &models.Post{
+			ID:           post.ID,
+			UserID:       post.UserID,
+			Username:     post.User().Username,
+			UserPic:      pic,
+			Media:        images,
+			Caption:      post.Caption,
+			LikeCount:    int64(post.Likes),
+			CommentCount: int64(post.Comments),
+			IsLiked:      isLiked,
+			IsSaved:      isSaved,
+		})
+	}
 	return posts, nil
 }

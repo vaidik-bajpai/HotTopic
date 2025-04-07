@@ -1,4 +1,4 @@
-import { Preview } from "../components/Preview";
+import { Preview } from "../components/forms/Preview";
 
 export default {
     component: Preview,

@@ -126,7 +126,7 @@ func (h *HTTPHandler) handleUserSignin(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, cookie)
 
 	h.logger.Info("login successfull")
-	h.json.WriteJSONResponse(w, http.StatusOK, "user login successfull!")
+	h.json.WriteJSONResponse(w, http.StatusOK, map[string]string{"id": user.ID})
 }
 
 func (h *HTTPHandler) handleUserLogout(w http.ResponseWriter, r *http.Request) {

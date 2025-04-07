@@ -144,3 +144,41 @@ func (s *Store) ActivateUser(ctx context.Context, userID string) error {
 
 	return nil
 }
+
+func (s *Store) GetProfile(ctx context.Context, userID string) (*models.UserProfile, error) {
+	up, err := s.db.User.FindUnique(
+		db.User.ID.Equals(userID),
+	).With(
+		db.User.Profile.Fetch(),
+	).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	pic, ok := up.Pic()
+	if !ok {
+		pic = ""
+	}
+
+	metadata, ok := up.Profile()
+	if !ok {
+		return &models.UserProfile{
+			UserID:   up.ID,
+			Username: up.Username,
+			UserPic:  pic,
+		}, nil
+	}
+
+	bio, ok := metadata.Bio()
+	if !ok {
+		bio = ""
+	}
+
+	return &models.UserProfile{
+		UserID:   up.ID,
+		Username: up.Username,
+		UserPic:  pic,
+		Bio:      bio,
+	}, nil
+
+}

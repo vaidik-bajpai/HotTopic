@@ -5,7 +5,7 @@ function WrapperWithHeader() {
     return (
         <div className="flex flex-col min-h-screen w-full">
             <MainHeader headerText="HotTopic" notificationCount={0}/>
-            <div className="flex-1 flex justify-center items-center">
+            <div className="flex-1 flex justify-center items-center bg-blue-50">
                 <Outlet /> 
             </div>
         </div>

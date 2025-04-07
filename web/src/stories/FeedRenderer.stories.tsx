@@ -1,6 +1,6 @@
 import {Meta, StoryObj} from "@storybook/react"
 
-import FeedRenderer from "../components/FeedRenderer"
+import FeedRenderer from "../components/renderers/FeedRenderer"
 
 const meta: Meta<typeof FeedRenderer> =  {
     component: FeedRenderer,
