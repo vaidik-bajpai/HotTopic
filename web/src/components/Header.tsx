@@ -1,11 +1,10 @@
 import { useNavigate } from "react-router";
 import SigninButton from "./buttons/SigninButton";
 import SignupButton from "./buttons/SignupButton";
-import { useRecoilState } from "recoil";
-import { userAtom } from "../state/atoms/userAtom";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import axios from "axios";
+import { useUser } from "../context/UserContext";
 
 interface MainHeaderInterface {
     headerText: string;
@@ -27,13 +26,13 @@ const sidebarVariants = {
 
 export function MainHeader({ headerText }: MainHeaderInterface) {
     const navigate = useNavigate();
-    const [user, setUser] = useRecoilState(userAtom);
+    const {isLoggedIn, logout} = useUser();
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
     async function handleLogout() {
         try {
             await axios.post("http://localhost:3000/auth/logout")
-            setUser({isLoggedIn: false, id: ""})
+            logout()
             setIsOpen(false)
         } catch(error) {
             console.log(error)
@@ -43,7 +42,7 @@ export function MainHeader({ headerText }: MainHeaderInterface) {
     return (
         <div className="bg-blue-50 flex justify-between items-center px-4 py-3 border-b relative">
             <h1 className="font-mono font-bold text-2xl">{headerText}</h1>
-            {user.isLoggedIn ? (
+            {isLoggedIn ? (
                 <div className="flex gap-4">
                     <SigninButton onClick={() => navigate("/signin")} />
                     <SignupButton onClick={() => navigate("/signup")} />

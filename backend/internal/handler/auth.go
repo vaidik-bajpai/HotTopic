@@ -115,12 +115,11 @@ func (h *HTTPHandler) handleUserSignin(w http.ResponseWriter, r *http.Request) {
 		Name:     "hottopic-auth",
 		Value:    sessionID,
 		Path:     "/",
-		Domain:   "localhost", // change in production
 		Expires:  time.Now().Add(expirationTime),
 		MaxAge:   int(expirationTime.Seconds()),
 		HttpOnly: true,
-		Secure:   true,                 // Keep true in production
-		SameSite: http.SameSiteLaxMode, // Allows login flow in modern browsers
+		Secure:   false, // Set to true in production
+		SameSite: http.SameSiteLaxMode,
 	}
 
 	http.SetCookie(w, cookie)
@@ -149,11 +148,10 @@ func (h *HTTPHandler) handleUserLogout(w http.ResponseWriter, r *http.Request) {
 		Name:     "hottopic-auth",
 		Value:    "",
 		Path:     "/",
-		Domain:   "localhost",
-		MaxAge:   -1, // Deletes the cookie
+		MaxAge:   -1,
 		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteStrictMode,
+		Secure:   false, // ⬅️ false in dev
+		SameSite: http.SameSiteLaxMode,
 	})
 
 	h.logger.Info("user logged successfully")

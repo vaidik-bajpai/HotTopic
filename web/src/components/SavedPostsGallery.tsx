@@ -5,11 +5,40 @@ function SavedPostsGallery() {
   const { savedPosts } = useSavedPosts();
   const navigate = useNavigate();
 
+  if (savedPosts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center px-4 text-black h-full">
+        <h2 className="text-3xl font-bold text-indigo-600 mb-2">No Saved Posts Yet</h2>
+        <p className="text-md text-gray-700 mb-6">
+          Looks like you haven't saved anything. Discover amazing posts and save your favorites!
+        </p>
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="px-5 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 shadow transition"
+        >
+          Go to Home
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-3 gap-1 w-fit mx-auto my-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-6xl mx-auto p-4">
       {savedPosts.map((post, index) => (
-        <div key={post.id} className="cursor-pointer max-w-xs" onClick={() => navigate("/saved-posts", { state: { startIndex: index } })}>
-          <img src={post.media[0]} alt="post thumbnail" className="w-full aspect-square object-cover rounded" />
+        <div
+          key={post.id}
+          className="cursor-pointer overflow-hidden rounded-lg border border-gray-200 shadow hover:shadow-md transition"
+          onClick={() =>
+            navigate("/saved-posts", {
+              state: { startIndex: index },
+            })
+          }
+        >
+          <img
+            src={post.media[0]}
+            alt="post thumbnail"
+            className="w-full aspect-square object-cover"
+          />
         </div>
       ))}
     </div>

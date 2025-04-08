@@ -185,7 +185,7 @@ func (s *Store) GetFeed(ctx context.Context, feedReq *models.FeedReq) ([]*models
 	)
 
 	if feedReq.LastID != "" {
-		query = query.Cursor(db.Post.ID.Cursor(feedReq.LastID))
+		query = query.Cursor(db.Post.ID.Cursor(feedReq.LastID)).Skip(1)
 	}
 
 	postRes, err := query.Exec(ctx)

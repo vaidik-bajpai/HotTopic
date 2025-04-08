@@ -1,22 +1,34 @@
 import React, { useState } from "react"
 import { House, BookMarked, BookHeart, LogOut, User, PlusSquare, Flame, Search} from 'lucide-react';
 import { useLocation, useNavigate } from "react-router";
-import {  useRecoilValue } from "recoil";
-import { userAtom } from "../state/atoms/userAtom";
+import { useUser } from "../context/UserContext";
+import axios from "axios";
 
 export default function Sidebar() {
     const [expanded, setExpanded] = useState(false)
     const location = useLocation()
     const navigate = useNavigate()
-    const user = useRecoilValue(userAtom)
+    const user = useUser()
+
+    async function handleLogout() {
+        try {
+            await axios.post(
+                `http://localhost:3000/auth/logout`, null, 
+                { withCredentials: true }
+            );           
+            user.logout()
+        } catch(err) {
+            console.error(err)
+        }
+    }
 
     return (
         <>
             {/* Top bar with hamburger icon */}
-            <div className="flex w-full py-2 px-4 md:hidden">
+            <div className="flex flex-col w-full md:hidden z-100 py-2 px-4">
                 <div className="flex justify-between items-center w-full">
                     <h1 className="font-bold text-lg">Feed</h1>
-                    <div className="cursor-pointer" onClick={() => setExpanded(true)}>
+                    <div className="cursor-pointer " onClick={() => setExpanded(true)}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu">
                             <line x1="4" x2="20" y1="12" y2="12" />
                             <line x1="4" x2="20" y1="6" y2="6" />
@@ -60,7 +72,7 @@ export default function Sidebar() {
 
                     <SidebarItem icon={<BookHeart />} name="Liked Posts" active={location.pathname.includes("/liked-gallery")} onClick={() => {console.log(location.pathname); navigate("liked-gallery")}}/>
 
-                    <SidebarItem icon={<LogOut />} name="Logout"/>
+                    <SidebarItem icon={<LogOut />} name="Logout" onClick={handleLogout}/>
                 </ul>
             </div>
         </>

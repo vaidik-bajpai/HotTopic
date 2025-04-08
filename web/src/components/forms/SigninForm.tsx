@@ -9,8 +9,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
 import PasswordInput from "../PasswordInput";
-import { useSetRecoilState } from "recoil";
-import { userAtom } from "../../state/atoms/userAtom";
+import { useUser } from "../../context/UserContext";
 
 const schema = yup.object({
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -21,7 +20,7 @@ type FormData = yup.InferType<typeof schema>;
 
 export default function SigninForm() {
     const navigate = useNavigate();
-    const setUser = useSetRecoilState(userAtom);
+    const user = useUser()
 
     const {
         register,
@@ -35,7 +34,7 @@ export default function SigninForm() {
                 headers: { "Content-Type": "application/json" },
                 withCredentials: true,
             });
-            setUser({ isLoggedIn: true, id: response.data.id });
+            user.setUser({ isLoggedIn: true, id: response.data.id });
             navigate("/dashboard");
         } catch (err) {
             console.error("Sign in failed");

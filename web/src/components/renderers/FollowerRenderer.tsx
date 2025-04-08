@@ -2,13 +2,9 @@ import { useParams } from "react-router";
 import FollowerStrip from "../FollowerStrip";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import FollowerList from "../../types/FollowerList";
 
-interface FollowerList {
-    user_id: string;
-    username: string;
-    userpic: string;
-    is_following: boolean;
-}
+
 
 function FollowerRenderer() {
     const { userID } = useParams();
