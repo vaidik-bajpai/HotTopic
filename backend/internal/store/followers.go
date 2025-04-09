@@ -99,10 +99,16 @@ func (s *Store) GetFollowerList(ctx context.Context, fr *models.GetFollowReq) ([
 
 		isFollowing := len(user.Following()) > 0
 
+		pic, ok := user.Pic()
+		if !ok {
+			pic = DefaultUserPic
+		}
+
 		followerList = append(followerList, &models.GetFollowRes{
 			UserID:      user.ID,
 			Username:    user.Username,
 			IsFollowing: isFollowing,
+			UserPic:     pic,
 		})
 	}
 
@@ -142,7 +148,7 @@ func (s *Store) GetFollowingList(ctx context.Context, fr *models.GetFollowReq) (
 
 		pic, ok := user.Pic()
 		if !ok {
-			pic = ""
+			pic = DefaultUserPic
 		}
 
 		isFollowedByRequester := len(user.Following()) > 0

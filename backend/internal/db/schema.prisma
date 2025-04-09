@@ -57,13 +57,14 @@ model User {
 }
 
 model UserProfile {
-    uID        String  @unique
-    user       User    @relation(fields: [uID], references: [id])
+    uID        String   @unique
+    user       User     @relation(fields: [uID], references: [id])
     bio        String?
     gender     String?
-    postNumber Int     @default(0)
-    followers  Int     @default(0)
-    following  Int     @default(0)
+    pronouns   String[]
+    postNumber Int      @default(0)
+    followers  Int      @default(0)
+    following  Int      @default(0)
 }
 
 model Token {

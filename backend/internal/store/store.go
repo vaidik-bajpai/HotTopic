@@ -23,6 +23,8 @@ type Storer interface {
 	UserRegistration(context.Context, *User) (*models.Token, error)
 	UserViaEmail(context.Context, string) (*User, error)
 
+	GetProfile(ctx context.Context, userID string) (*models.UserProfile, error)
+
 	CreateForgotPasswordToken(context.Context, *models.Token) error
 	GetUserFromToken(context.Context, *models.Token) error
 	ResetPassword(context.Context, *models.ResetPassword) error

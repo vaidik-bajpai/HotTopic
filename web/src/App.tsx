@@ -20,6 +20,7 @@ import SavedPostsGallery from './components/SavedPostsGallery'
 import ProtectedComponent from './components/ProtectedComponent'
 import { Preview } from './components/forms/Preview'
 import SearchUser from './components/Search'
+import EditProfileForm from './components/forms/EditProfileForm'
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
                 <Route path='followers' element={<FollowerRenderer />}/>
                 <Route path='followings' element={<FollowingRenderer />}/>
               </Route>
+              <Route path='/edit' element={<EditProfileForm />}/>
               <Route element={<LikedPostWrapper />}>
                 <Route path='liked-gallery' element={<Gallery />} />
                 <Route path='liked-posts' element={<LikedPostViewer />} />

@@ -10,6 +10,11 @@ export default function Sidebar() {
     const navigate = useNavigate()
     const user = useUser()
 
+    function handleClickWrapper(fn: () => void) {
+        setExpanded(false);
+        fn()
+    }
+
     async function handleLogout() {
         try {
             await axios.post(
@@ -25,7 +30,7 @@ export default function Sidebar() {
     return (
         <>
             {/* Top bar with hamburger icon */}
-            <div className="flex flex-col w-full md:hidden z-100 py-2 px-4">
+            <div className="flex flex-col w-full md:hidden py-2 px-4">
                 <div className="flex justify-between items-center w-full">
                     <h1 className="font-bold text-lg">Feed</h1>
                     <div className="cursor-pointer " onClick={() => setExpanded(true)}>
@@ -60,17 +65,17 @@ export default function Sidebar() {
                 <ul className="h-full flex flex-col gap-6 mt-4 px-2 md:px-0">
                     <LogoAppName icon={<Flame fill="#3730a3" size={40}/>} name="HotTopic" active={location.pathname == ""}/>
 
-                    <SidebarItem icon={<House />} name="Home" active={location.pathname.includes("/dashboard")} onClick={() => {console.log(location.pathname); navigate("/dashboard")}}/>
+                    <SidebarItem icon={<House />} name="Home" active={location.pathname.includes("/dashboard")} onClick={() => {handleClickWrapper(() => navigate("/dashboard"))}}/>
 
-                    <SidebarItem icon={<PlusSquare />} name="Create" active={location.pathname.includes("/create-post")} onClick={() => {console.log(location.pathname); navigate("create-post")}}/>
+                    <SidebarItem icon={<PlusSquare />} name="Create" active={location.pathname.includes("/create-post")} onClick={() => {handleClickWrapper(() => navigate("create-post"))}}/>
 
-                    <SidebarItem icon={<Search />} name="Search" active={location.pathname.includes("/search")} onClick={() => {console.log(location.pathname); navigate("search")}}/>
+                    <SidebarItem icon={<Search />} name="Search" active={location.pathname.includes("/search")} onClick={() => {handleClickWrapper(() =>  navigate("search"))}}/>
 
-                    <SidebarItem icon={<User />} name="Profile" active={location.pathname.includes(`user-profile/${user.id}`)} onClick={() => {console.log(location.pathname); console.log(user); navigate(`user-profile/${user.id}`)}}/>
+                    <SidebarItem icon={<User />} name="Profile" active={location.pathname.includes(`user-profile/${user.id}`)} onClick={() => {handleClickWrapper(() => navigate(`user-profile/${user.id}`))}}/>
 
-                    <SidebarItem icon={<BookMarked />} name="Saved Posts" active={location.pathname.includes("/saved-gallery")} onClick={() => {console.log(location.pathname); navigate("saved-gallery")}}/>
+                    <SidebarItem icon={<BookMarked />} name="Saved Posts" active={location.pathname.includes("/saved-gallery")} onClick={() => {handleClickWrapper(() => navigate("saved-gallery"))}}/>
 
-                    <SidebarItem icon={<BookHeart />} name="Liked Posts" active={location.pathname.includes("/liked-gallery")} onClick={() => {console.log(location.pathname); navigate("liked-gallery")}}/>
+                    <SidebarItem icon={<BookHeart />} name="Liked Posts" active={location.pathname.includes("/liked-gallery")} onClick={() => {handleClickWrapper(() => navigate("liked-gallery"))}}/>
 
                     <SidebarItem icon={<LogOut />} name="Logout" onClick={handleLogout}/>
                 </ul>
