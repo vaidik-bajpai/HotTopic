@@ -28,7 +28,7 @@ func (h *HTTPHandler) handleLikeAPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.logger.Info("post has been un liked successfully", zap.String("user id", user.ID), zap.String("post id", postID))
+	h.logger.Info("post has been liked successfully", zap.String("user id", user.ID), zap.String("post id", postID))
 	h.json.WriteNoContentResponse(w)
 }
 

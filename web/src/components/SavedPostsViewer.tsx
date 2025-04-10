@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { useLikedPosts } from "../context/LikedPostContext";
 import { PostCard } from "./PostCard";
+import { useSavedPosts } from "../context/SavedPostContext";
 
-function LikedPostViewer() {
-    const { likedPosts, fetchMorePosts } = useLikedPosts();
+function SavedPostsViewer() {
+    const { savedPosts, fetchMorePosts } = useSavedPosts();
     const location = useLocation();
     const startIndex = location.state?.startIndex ?? 0;
 
@@ -15,11 +15,11 @@ function LikedPostViewer() {
         if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
         }
-    }, [startIndex, likedPosts.length]);
+    }, [startIndex, savedPosts.length]);
 
     return (
         <div className="flex flex-col mx-auto gap-5 max-w-xl my-4">
-            {likedPosts.map((post, index) => (
+            {savedPosts.map((post, index) => (
                 <div key={post.id} ref={(el) => (postRefs.current[index] = el)}>
                 <PostCard
                     id={post.id}
@@ -38,4 +38,4 @@ function LikedPostViewer() {
     );
 }
 
-export default LikedPostViewer;
+export default SavedPostsViewer;

@@ -1,9 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { useLikedPosts } from "../context/LikedPostContext";
+import { Copy } from "lucide-react";
 
 function LikedPostGallery() {
   const { likedPosts } = useLikedPosts();
+  
   const navigate = useNavigate();
+
   if(likedPosts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center text-center px-4 text-black h-full">
@@ -23,8 +26,9 @@ function LikedPostGallery() {
   return (
     <div className="grid grid-cols-3 gap-1 w-fit mx-auto my-4">
       {likedPosts.map((post, index) => (
-        <div key={post.id} className="cursor-pointer max-w-xs" onClick={() => navigate("/liked-posts", { state: { startIndex: index } })}>
+        <div key={post.id} className="relative cursor-pointer max-w-xs" onClick={() => navigate("/liked-posts", { state: { startIndex: index } })}>
           <img src={post.media[0]} alt="post thumbnail" className="w-full aspect-square object-cover rounded" />
+          {post.media.length > 1 && <div className="absolute z-10 right-0 top-0 opacity-50 p-2 -scale-x-100 overflow-hidden"><Copy className="text-black"/></div>}
         </div>
       ))}
     </div>

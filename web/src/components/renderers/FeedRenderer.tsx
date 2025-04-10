@@ -3,7 +3,7 @@ import { PostCard } from "../PostCard";
 import axios from "axios";
 
 interface Post {
-  id: string; // Ensure `id` is included here
+  id: string;
   username: string;
   userpic: string;
   caption: string;
@@ -74,6 +74,7 @@ export default function FeedRenderer() {
         {feed.map((post) => (
             <PostCard
             key={post.id}
+            id={post.id}
             userImage={post.userpic}
             username={post.username}
             postImages={post.media}

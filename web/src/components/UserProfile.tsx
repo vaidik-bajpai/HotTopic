@@ -8,6 +8,7 @@ import UserProfileSlider from "./UserProfileSlider";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import EditProfileForm from "./forms/EditProfileForm";
+import { useUser } from "../context/UserContext";
 
 interface UserProfileInterface {
     user_id: string
@@ -33,6 +34,7 @@ function UserProfile() {
     })
     
     const { userID } = useParams()
+    const user = useUser()
 
     async function getProfile() {
         const response = await axios.get(`http://localhost:3000/user/profile/${userID}`, {

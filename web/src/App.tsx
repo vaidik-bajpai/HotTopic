@@ -21,6 +21,7 @@ import ProtectedComponent from './components/ProtectedComponent'
 import { Preview } from './components/forms/Preview'
 import SearchUser from './components/Search'
 import EditProfileForm from './components/forms/EditProfileForm'
+import SavedPostsViewer from './components/SavedPostsViewer'
 
 function App() {
   return (
@@ -46,7 +47,7 @@ function App() {
               </Route>
               <Route element={<SavedPostWrapper />}>
                 <Route path='saved-gallery' element={<SavedPostsGallery />} />
-                <Route path='saved-posts' element={<LikedPostViewer />} />
+                <Route path='saved-posts' element={<SavedPostsViewer />} />
               </Route>
               <Route path='/create-post' element={<Preview userImage='' username='vaidik_bajpai'/>}/>
               <Route path='/search' element={<SearchUser />}/>
