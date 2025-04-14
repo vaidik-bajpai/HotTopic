@@ -3,9 +3,11 @@ import { House, BookMarked, BookHeart, LogOut, User, PlusSquare, Flame, Search} 
 import { useLocation, useNavigate } from "react-router";
 import { useUser } from "../context/UserContext";
 import axios from "axios";
+import CreatePost from "./CreatePost";
 
 export default function Sidebar() {
-    const [expanded, setExpanded] = useState(false)
+    const [expanded, setExpanded] = useState<boolean>(false)
+    const [createPost, setCreatePost] = useState<boolean>(false)
     const location = useLocation()
     const navigate = useNavigate()
     const user = useUser()
@@ -67,7 +69,7 @@ export default function Sidebar() {
 
                     <SidebarItem icon={<House />} name="Home" active={location.pathname.includes("/dashboard")} onClick={() => {handleClickWrapper(() => navigate("/dashboard"))}}/>
 
-                    <SidebarItem icon={<PlusSquare />} name="Create" active={location.pathname.includes("/create-post")} onClick={() => {handleClickWrapper(() => navigate("create-post"))}}/>
+                    <SidebarItem icon={<PlusSquare />} name="Create" active={location.pathname.includes("/create-post")} onClick={() => {handleClickWrapper(() => setCreatePost(true))}}/>
 
                     <SidebarItem icon={<Search />} name="Search" active={location.pathname.includes("/search")} onClick={() => {handleClickWrapper(() =>  navigate("search"))}}/>
 
@@ -80,6 +82,7 @@ export default function Sidebar() {
                     <SidebarItem icon={<LogOut />} name="Logout" onClick={handleLogout}/>
                 </ul>
             </div>
+            {createPost && <CreatePost setCreatePost={setCreatePost}/>}
         </>
     )
 }

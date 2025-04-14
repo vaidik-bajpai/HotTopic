@@ -5,6 +5,7 @@ import { useParams } from "react-router";
 import { Post } from "../../stories/UserProfileMetadata.stories";
 
 interface Post {
+    id: string
     username: string
     userPic: string
     caption: string
@@ -43,6 +44,7 @@ export default function FeedRenderer() {
         <div className="flex flex-col mx-auto gap-5 max-w-xl">
             {postList.map((post) => (
                 <PostCard 
+                    id={post.id}
                     userImage={post.userPic} 
                     username={post.username} 
                     postImages={post.media} 

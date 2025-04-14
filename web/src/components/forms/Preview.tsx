@@ -38,7 +38,7 @@ export function Preview({userImage, username}: PreviewInterface) {
                 formData.append('upload_preset', 'Cloudinary-demo')
                 formData.append('cloud_name', 'drg9zdr28')
 
-                const res = await axios.post("some url", formData)
+                const res = await axios.post("https://api.cloudinary.com/v1_1/drg9zdr28/image/upload", formData)
                 uploadedImagesURLs.push(res.data.url)
             }
 

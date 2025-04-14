@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface MediaRendererInterface {
@@ -29,7 +29,7 @@ function MediaRenderer({ media }: MediaRendererInterface) {
         ))}
         {media.length > 1 && (
           <>
-            <button className="z-10 absolute left-0 top-1/2 -translate-y-1/2 bg-white rounded-full opacity-50 md:p-1" onClick={() => {
+            {index !== 0 && <button className="z-10 absolute left-0 top-1/2 -translate-y-1/2 bg-white rounded-full opacity-50 md:p-0.5 mx-1" onClick={() => {
                 if (index !== 0 && index - 1 === left) {
                   setLeft(left - 1);
                   setRight(right - 1);
@@ -37,17 +37,17 @@ function MediaRenderer({ media }: MediaRendererInterface) {
                 index !== 0 && setIndex(index - 1);
               }}
             >
-              <ArrowLeft />
-            </button>
-            <button className="z-10 absolute right-0 top-1/2 -translate-y-1/2 bg-white rounded-full opacity-50 md:p-1" onClick={() => {
+              <ChevronLeft />
+            </button>}
+            {index !== media.length-1 && <button className="z-10 absolute right-0 top-1/2 -translate-y-1/2 bg-white rounded-full opacity-50 md:p-0.5 mx-1" onClick={() => {
               if (index !== media.length - 1 && index + 1 === right) {
                 setRight(right + 1);
                 setLeft(left + 1);
               }
               index !== media.length - 1 && setIndex(index + 1);
             }}>
-              <ArrowRight />
-            </button>
+              <ChevronRight />
+            </button>}
           </>
         )}
 

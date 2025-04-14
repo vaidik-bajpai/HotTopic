@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { PostCard } from "../PostCard";
 import axios from "axios";
+import { useNavigate } from "react-router";
 
 interface Post {
   id: string;
@@ -15,6 +16,7 @@ interface Post {
 }
 
 export default function FeedRenderer() {
+    const navigate = useNavigate();
     const [feed, setFeed] = useState<Post[]>([]);
     const [lastID, setLastID] = useState<string>("");
     const [loading, setLoading] = useState(false);
@@ -32,7 +34,7 @@ export default function FeedRenderer() {
             { withCredentials: true }
         );
 
-        const newPosts = res.data.posts;
+        const newPosts = Array.isArray(res.data.posts) ? res.data.posts : [];
         setFeed((prev) => [...prev, ...newPosts]);
         if (newPosts.length > 0) {
             const lastPost = newPosts[newPosts.length - 1];
@@ -68,6 +70,23 @@ export default function FeedRenderer() {
 
         return () => observerRef.current?.disconnect();
     }, [fetchFeed, loading, hasMore]);
+
+    if(feed.length === 0) {
+        return ( 
+            <div className="h-full flex flex-col items-center justify-center">
+                <p className="text-2xl font-bold text-indigo-600 text-gray-600 mb-4 text-center">
+                    Nothing here yet — check out people to follow!
+                </p>
+                
+                <button
+                    onClick={() => navigate("/search")}
+                    className="px-5 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 shadow transition"
+                >
+                    Go to Search
+                </button>
+            </div>
+        )
+    }
 
     return (
         <div className="flex-grow flex flex-col mx-auto gap-5 max-w-xl my-4">

@@ -1,6 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react";
 import { MemoryRouter } from "react-router-dom"; 
 import Sidebar from "../components/Sidebar";
+import { UserProvider } from "../context/UserContext"; // Adjust path if needed
 
 const meta: Meta<typeof Sidebar> = {
   title: "Side Bar",
@@ -9,7 +10,9 @@ const meta: Meta<typeof Sidebar> = {
   decorators: [
     (Story) => (
       <MemoryRouter>
-        <Story />
+        <UserProvider>
+        <div className="relative flex flex-col md:flex-row w-fit"><Story /></div>
+        </UserProvider>
       </MemoryRouter>
     ),
   ],

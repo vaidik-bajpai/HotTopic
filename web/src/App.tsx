@@ -19,7 +19,6 @@ import SavedPostWrapper from './components/SavedPostWrapper'
 import SavedPostsGallery from './components/SavedPostsGallery'
 import ProtectedComponent from './components/ProtectedComponent'
 import { Preview } from './components/forms/Preview'
-import SearchUser from './components/Search'
 import EditProfileForm from './components/forms/EditProfileForm'
 import SavedPostsViewer from './components/SavedPostsViewer'
 
@@ -50,7 +49,6 @@ function App() {
                 <Route path='saved-posts' element={<SavedPostsViewer />} />
               </Route>
               <Route path='/create-post' element={<Preview userImage='' username='vaidik_bajpai'/>}/>
-              <Route path='/search' element={<SearchUser />}/>
             </Route>
             <Route element={<WrapperResetPassword />}>
               <Route path='/forgot-password' element={<ForgotPasswordForm />}/>
