@@ -4,16 +4,26 @@ import { useLocation, useNavigate } from "react-router";
 import { useUser } from "../context/UserContext";
 import axios from "axios";
 import CreatePost from "./CreatePost";
+import UserSearch from "./UserSearch";
 
-export default function Sidebar() {
-    const [expanded, setExpanded] = useState<boolean>(false)
+interface SidebarInterface {
+    search: boolean,
+    setSearch: (val: boolean) => void,
+    expanded: boolean,
+    setExpanded: (val: boolean) => void
+}
+
+export default function Sidebar({search, setSearch, expanded, setExpanded}: SidebarInterface) {
     const [createPost, setCreatePost] = useState<boolean>(false)
     const location = useLocation()
     const navigate = useNavigate()
     const user = useUser()
 
     function handleClickWrapper(fn: () => void) {
-        setExpanded(false);
+        if(search === true) {
+            setSearch(false)
+            setExpanded(true)
+        }
         fn()
     }
 
@@ -27,6 +37,22 @@ export default function Sidebar() {
         } catch(err) {
             console.error(err)
         }
+    }
+
+    function handleMouseEnter() {
+        if(search) {
+            return 
+        }
+
+        setExpanded(true)
+    }
+
+    function handleMouseLeave() {
+        if(search) {
+            return 
+        }
+
+        setExpanded(false)
     }
 
     return (
@@ -47,12 +73,14 @@ export default function Sidebar() {
 
             {/* Full screen sidebar overlay */}
             <div className={`
-                fixed top-0 left-0 h-screen z-30 bg-white
+                fixed top-0 left-0 md:relative h-screen z-100 bg-white
                 transition-transform duration-500 p-4
                 ${expanded ? "translate-x-0 w-full" : "-translate-x-full"} md:transition-[width]
-                md:translate-x-0 md:w-18 md:hover:w-72 md:overflow-hidden md:border-r md:border-r-2 md:border-black
-                lg:w-72 group
-            `}>
+                md:translate-x-0 md:w-${expanded ? "72" : "18"} md:border-r md:border-r-2 md:border-black
+                lg:w-${search ? "18" : "72"} group
+            `}  
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}>
                 {/* Close button on top right */}
                 <div className="flex justify-end md:hidden">
                     <div className="cursor-pointer" onClick={() => setExpanded(false)}>
@@ -65,22 +93,23 @@ export default function Sidebar() {
 
                 {/* Sidebar content */}
                 <ul className="h-full flex flex-col gap-6 mt-4 px-2 md:px-0">
-                    <LogoAppName icon={<Flame fill="#3730a3" size={40}/>} name="HotTopic" active={location.pathname == ""}/>
+                    <LogoAppName icon={<Flame fill="#3730a3" size={40}/>} name="HotTopic" active={location.pathname == ""} expanded={expanded} search={search}/>
 
-                    <SidebarItem icon={<House />} name="Home" active={location.pathname.includes("/dashboard")} onClick={() => {handleClickWrapper(() => navigate("/dashboard"))}}/>
+                    <SidebarItem icon={<House />} name="Home" active={location.pathname.includes("/dashboard")} onClick={() => {handleClickWrapper(() => navigate("/dashboard"))}} expanded={expanded} search={search}/>
 
-                    <SidebarItem icon={<PlusSquare />} name="Create" active={location.pathname.includes("/create-post")} onClick={() => {handleClickWrapper(() => setCreatePost(true))}}/>
+                    <SidebarItem icon={<PlusSquare />} name="Create" active={location.pathname.includes("/create-post")} onClick={() => {handleClickWrapper(() => setCreatePost(true))}} expanded={expanded} search={search}/>
 
-                    <SidebarItem icon={<Search />} name="Search" active={location.pathname.includes("/search")} onClick={() => {handleClickWrapper(() =>  navigate("search"))}}/>
+                    <SidebarItem icon={<Search />} name="Search" active={location.pathname.includes("/search")} onClick={() => {setExpanded(false); setSearch(true)}} expanded={expanded} search={search}/>
 
-                    <SidebarItem icon={<User />} name="Profile" active={location.pathname.includes(`user-profile/${user.id}`)} onClick={() => {handleClickWrapper(() => navigate(`user-profile/${user.id}`))}}/>
+                    <SidebarItem icon={<User />} name="Profile" active={location.pathname.includes(`user-profile/${user.id}`)} onClick={() => {handleClickWrapper(() => navigate(`user-profile/${user.id}`))}} expanded={expanded} search={search}/>
 
-                    <SidebarItem icon={<BookMarked />} name="Saved Posts" active={location.pathname.includes("/saved-gallery")} onClick={() => {handleClickWrapper(() => navigate("saved-gallery"))}}/>
+                    <SidebarItem icon={<BookMarked />} name="Saved Posts" active={location.pathname.includes("/saved-gallery")} onClick={() => {handleClickWrapper(() => navigate("saved-gallery"))}} expanded={expanded} search={search}/>
 
-                    <SidebarItem icon={<BookHeart />} name="Liked Posts" active={location.pathname.includes("/liked-gallery")} onClick={() => {handleClickWrapper(() => navigate("liked-gallery"))}}/>
+                    <SidebarItem icon={<BookHeart />} name="Liked Posts" active={location.pathname.includes("/liked-gallery")} onClick={() => {handleClickWrapper(() => navigate("liked-gallery"))}} expanded={expanded} search={search}/>
 
-                    <SidebarItem icon={<LogOut />} name="Logout" onClick={handleLogout}/>
+                    <SidebarItem icon={<LogOut />} name="Logout" onClick={handleLogout} expanded={expanded} search={search}/>
                 </ul>
+                {search && <UserSearch search={search} setSearch={setSearch}/>}
             </div>
             {createPost && <CreatePost setCreatePost={setCreatePost}/>}
         </>
@@ -92,26 +121,38 @@ interface SidebarItemInterface {
     name: string
     onClick?: () => void
     active?: boolean
+    expanded: boolean
+    search: boolean
 }
 
-function SidebarItem({icon, name, onClick, active}: SidebarItemInterface) {
+function SidebarItem({icon, name, onClick, active, expanded, search}: SidebarItemInterface) {
     return (
-        <li className={`flex gap-4 py-2 px-2 rounded-lg group transition-[background] duration-500 cursor-pointer hover:text-indigo-800 hover:bg-indigo-100 md:gap-0 md:group-hover:gap-4 lg:gap-4
+        <li className={`flex gap-4 py-2 px-2 rounded-lg group transition-[background] duration-500 cursor-pointer hover:text-indigo-800 hover:bg-indigo-100 md:${expanded ? "gap-4" : "gap-0"} lg:${search ? "gap-0" : "gap-4"}
         ${active ? "bg-indigo-200 text-indigo-800" : ""}`}
         onClick={onClick}>
             {icon}
 
-            <div className="overflow-hidden whitespace-nowrap transition-opacity duration-300 md:w-0 md:group-hover:w-full lg:w-full ">{name}</div>
+            <div
+                className={`overflow-hidden whitespace-nowrap transition-[width] duration-300
+                    ${expanded ? "md:w-auto md:block" : "md:w-0 md:hidden"}
+                    ${!search ? "lg:w-auto lg:block" : "lg:w-0 lg:hidden"}`}
+            >
+                {name}
+            </div>
+
         </li>
     )
 }
 
-function LogoAppName({icon, name}: SidebarItemInterface) {
+function LogoAppName({icon, name, expanded, search}: SidebarItemInterface) {
     return (
         <h1 className="flex gap-3 items-center mb-2 md:gap-0 md:group-hover:gap-4 lg:gap-4">
             {icon}
 
-            <p className="overflow-hidden whitespace-nowrap transition-opacity duration-300 md:w-0 md:group-hover:w-full text-lg font-bold lg:w-full ">{name}</p>
+            <p className={`overflow-hidden whitespace-nowrap transition-opacity duration-300 ${expanded ? "md:w-auto md:block" : "md:w-0 md:hidden"}
+            ${!search ? "lg:w-auto lg:block" : "lg:w-0 lg:hidden"} text-lg font-bold`}>
+                {name}
+            </p>
         </h1>
-    )
+    )   
 }

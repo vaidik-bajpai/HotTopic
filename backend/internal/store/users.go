@@ -182,3 +182,46 @@ func (s *Store) GetProfile(ctx context.Context, userID string) (*models.UserProf
 	}, nil
 
 }
+
+func (s *Store) ListUsers(ctx context.Context, lu *models.ListUserReq) ([]*models.ListUserRes, error) {
+	userList, err := s.db.User.FindMany(
+		db.User.ID.Not(lu.UserID),
+		db.User.Or(
+			db.User.Username.Contains(lu.SearchTerm),
+			db.User.Name.Contains(lu.SearchTerm),
+			db.User.Profile.Where(
+				db.UserProfile.Bio.Contains(lu.SearchTerm),
+			),
+		),
+	).OrderBy(db.User.CreatedAt.Order(db.ASC)).Take(int(lu.PageSize)).Select(
+		db.User.ID.Field(),
+		db.User.Username.Field(),
+		db.User.Name.Field(),
+		db.User.Pic.Field(),
+	).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var res []*models.ListUserRes
+	for _, user := range userList {
+		pic, ok := user.Pic()
+		if !ok {
+			pic = DefaultUserPic
+		}
+
+		name, ok := user.Name()
+		if !ok {
+			name = ""
+		}
+
+		res = append(res, &models.ListUserRes{
+			ID:       user.ID,
+			Userpic:  pic,
+			Username: user.Username,
+			Name:     name,
+		})
+	}
+
+	return res, err
+}

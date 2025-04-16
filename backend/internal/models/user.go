@@ -20,3 +20,16 @@ type UserProfile struct {
 	TotalFollowers int64    `json:"followers_count"`
 	TotalFollowing int64    `json:"following_count"`
 }
+
+type ListUserReq struct {
+	Paginate
+	UserID     string
+	SearchTerm string
+}
+
+type ListUserRes struct {
+	ID       string `json:"id"`
+	Userpic  string `json:"user_pic"`
+	Username string `json:"username"`
+	Name     string `json:"name"`
+}

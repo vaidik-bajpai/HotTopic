@@ -22,6 +22,7 @@ type Storer interface {
 
 	UserRegistration(context.Context, *User) (*models.Token, error)
 	UserViaEmail(context.Context, string) (*User, error)
+	ListUsers(context.Context, *models.ListUserReq) ([]*models.ListUserRes, error)
 
 	GetProfile(ctx context.Context, userID string) (*models.UserProfile, error)
 
