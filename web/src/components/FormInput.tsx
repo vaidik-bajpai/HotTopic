@@ -4,6 +4,7 @@ interface FormInputInterface extends React.InputHTMLAttributes<HTMLInputElement>
     labelText: string;
     placeholder: string;
     error?: string;
+    value?: string
 }
 
 const FormInput = React.forwardRef<HTMLInputElement, FormInputInterface>(
@@ -11,7 +12,7 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputInterface>(
         return (
             <div className="flex flex-col-reverse gap-1 font-mono w-full">
                 {error && <div className="text-xs text-red-500 px-1 pt-1">{error}</div>}
-                
+
                 <input
                     {...props}
                     ref={ref}

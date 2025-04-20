@@ -1,5 +1,6 @@
 import { ArrowLeft, Check, X } from "lucide-react";
 import { useNavigate } from "react-router";
+import FormInput from "../FormInput";
 
 export default function EditProfileForm() {
     const navigate = useNavigate()
@@ -22,10 +23,10 @@ export default function EditProfileForm() {
                     </div>
 
                     <div className="flex flex-col gap-2">
-                        <EditProfileInput name={"Name"} placeholder={"John Doe"}/>
-                        <EditProfileInput name={"Username"} placeholder={"john_doe"}/>
-                        <EditProfileInput name={"Pronouns"} placeholder={"he/him"}/>
-                        <EditProfileInput name={"Bio"} placeholder={"I am John Doe, a simpleton"}/>
+                        <FormInput labelText={"Name"} placeholder={"John Doe"}/>
+                        <FormInput labelText={"Username"} placeholder={"john_doe"}/>
+                        <FormInput labelText={"Pronouns"} placeholder={"he/him"}/>
+                        <FormInput labelText={"Bio"} placeholder={"I am John Doe, a simpleton"} value={bio}/>
                     </div>
                     <div className="flex justify-center gap-8 mt-4">
                         <button className="flex items-center gap-2 group transition-colors bg-gray-100 duration-500 hover:bg-red-100 px-3 py-2 rounded-lg cursor-pointer">
