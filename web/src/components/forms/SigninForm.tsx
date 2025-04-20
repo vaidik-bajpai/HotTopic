@@ -20,7 +20,7 @@ type FormData = yup.InferType<typeof schema>;
 
 export default function SigninForm() {
     const navigate = useNavigate();
-    const user = useUser()
+    const user = useUser();
 
     const {
         register,
@@ -42,13 +42,13 @@ export default function SigninForm() {
     }
 
     return (
-        <div className="w-full max-w-md font-mono space-y-6">
+        <div className="w-full max-w-100 font-mono space-y-3">
             <form
                 onSubmit={handleSubmit(onSubmit)}
-                className="bg-white p-6 rounded-2xl shadow-lg border border-blue-300 space-y-4"
+                className="bg-white p-6 rounded-3xl shadow-xl border border-indigo-200 space-y-4 transition-all duration-300 ease-in-out"
             >
                 <FormHeader headerText="Sign in" />
-                <FormSubHeader subHeaderText="Welcome back! Let’s pick up the conversation." />
+                <FormSubHeader subHeaderText="Welcome back! Let’s pick up the conversation."/>
 
                 <FormInput
                     labelText="Email"
@@ -64,10 +64,10 @@ export default function SigninForm() {
                     {...register("password")}
                 />
 
-                <div className="text-right">
+                <div className="text-left">
                     <button
                         type="button"
-                        className="text-sm font-semibold text-blue-600 hover:underline"
+                        className="cursor-pointer text-sm font-semibold text-indigo-600 hover:underline transition-all"
                         onClick={() => navigate("/forgot-password")}
                     >
                         Forgot Password?
@@ -76,10 +76,10 @@ export default function SigninForm() {
 
                 <SubmitButton buttonText="Hop In" isSubmitting={isSubmitting} />
 
-                <div className="text-sm text-center">
+                <div className="text-sm text-center text-gray-700">
                     Don’t have an account?{" "}
                     <span
-                        className="text-blue-600 font-semibold cursor-pointer hover:underline"
+                        className="text-indigo-600 font-semibold cursor-pointer hover:underline transition-all"
                         onClick={() => navigate("/signup")}
                     >
                         Sign up
@@ -88,9 +88,9 @@ export default function SigninForm() {
             </form>
 
             <div className="flex items-center justify-center gap-2">
-                <hr className="flex-grow border-t border-gray-300" />
-                <span className="text-gray-500">Or</span>
-                <hr className="flex-grow border-t border-gray-300" />
+                <hr className="flex-grow border-t border-black" />
+                <span className="text-black">Or</span>
+                <hr className="flex-grow border-t border-black" />
             </div>
 
             <ContinueWithGoogle />

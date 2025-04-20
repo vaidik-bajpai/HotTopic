@@ -70,6 +70,13 @@ func (h *HTTPHandler) SetupRoutes() *chi.Mux {
 			r.Post("/unsave", h.handleUnsavePost)
 			r.With(h.onlyMe).Delete("/delete", h.handleDeletePost)
 		})
+		r.Route("/comment", func(r chi.Router) {
+			r.Post("/", h.handleWriteComment)
+			r.Route("/{commentID}", func(r chi.Router) {
+				r.Post("/", h.handleLikeComment)
+			})
+			r.With(h.paginate).Get("/{postID}", h.handleGetComments)
+		})
 		r.With(h.canAccess).
 			With(h.paginate).
 			Get("/{userID}", h.handleGetUserPosts)

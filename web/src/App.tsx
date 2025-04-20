@@ -35,7 +35,7 @@ function App() {
             <Route element={<Page />}>  
               <Route path='/dashboard' element={<FeedRenderer/>}/>
               <Route path='/user-profile/:userID' element={<UserProfile />}>
-                <Route index element={<UserPostsPreview userID={"2"}/>}/>
+                <Route index element={<UserPostsPreview />}/>
                 <Route path='followers' element={<FollowerRenderer />}/>
                 <Route path='followings' element={<FollowingRenderer />}/>
               </Route>
@@ -48,7 +48,6 @@ function App() {
                 <Route path='saved-gallery' element={<SavedPostsGallery />} />
                 <Route path='saved-posts' element={<SavedPostsViewer />} />
               </Route>
-              <Route path='/create-post' element={<Preview userImage='' username='vaidik_bajpai'/>}/>
             </Route>
             <Route element={<WrapperResetPassword />}>
               <Route path='/forgot-password' element={<ForgotPasswordForm />}/>

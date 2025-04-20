@@ -193,12 +193,14 @@ func (s *Store) ListUsers(ctx context.Context, lu *models.ListUserReq) ([]*model
 				db.UserProfile.Bio.Contains(lu.SearchTerm),
 			),
 		),
-	).OrderBy(db.User.CreatedAt.Order(db.ASC)).Take(int(lu.PageSize)).Select(
-		db.User.ID.Field(),
-		db.User.Username.Field(),
-		db.User.Name.Field(),
-		db.User.Pic.Field(),
-	).Exec(ctx)
+	).With(
+		db.User.Followers.Fetch(
+			db.Follow.FollowerID.Equals(lu.UserID),
+		),
+	).OrderBy(
+		db.User.CreatedAt.Order(db.ASC),
+	).Take(int(lu.PageSize)).
+		Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -215,11 +217,14 @@ func (s *Store) ListUsers(ctx context.Context, lu *models.ListUserReq) ([]*model
 			name = ""
 		}
 
+		isFollowing := len(user.Followers()) > 0
+
 		res = append(res, &models.ListUserRes{
-			ID:       user.ID,
-			Userpic:  pic,
-			Username: user.Username,
-			Name:     name,
+			ID:          user.ID,
+			Userpic:     pic,
+			Username:    user.Username,
+			Name:        name,
+			IsFollowing: isFollowing,
 		})
 	}
 

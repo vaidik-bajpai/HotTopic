@@ -1,7 +1,6 @@
 import { Outlet } from "react-router-dom"
 import Sidebar from "./Sidebar"
 import { useState } from "react";
-import UserSearch from "./UserSearch";
 
 function Page() {
   const [search, setSearch] = useState<boolean>(false);

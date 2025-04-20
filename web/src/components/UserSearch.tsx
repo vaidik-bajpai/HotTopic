@@ -3,12 +3,15 @@ import { useState, useEffect } from "react";
 import { throttle } from "lodash";
 import axios from "axios";
 import { useNavigate } from "react-router";
+import { FollowButton, UnFollowButton } from "./FollowerStrip";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ListInterface {
     id: string;
     user_pic: string;
     username: string;
     name: string;
+    is_following: boolean;
 }
 
 export default function UserSearch({
@@ -56,42 +59,48 @@ export default function UserSearch({
     }, [searchTerm]);
 
     return (
-        <div
-            className={`absolute top-0 right-0 w-screen translate-x-full md:w-100 z-100 h-full shadow-md transform transition-transform duration-300 ease-in-out bg-indigo-400 text-slate-50
-                ${search ? "-translate-x-0" : "-translate-x-100"}`}
-        >
-            <div>
-                <div className="p-3 flex flex-col border-b-1 py-4 px-4">
-                    <div className="flex justify-between items-center">
-                        <h1 className="font-semibold text-2xl mb-10 px-2">Search</h1>
-                        <X
-                            className="block md:hidden"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setSearch(false);
+        <AnimatePresence mode="wait">
+            {search && <motion.div
+                key="user-search"
+                className={`absolute top-0 right-0 w-screen md:w-100 z-100 h-full shadow-md bg-white text-black`}
+                initial={{ x: "-100%" }}     
+                animate={search ? { x: "100%" } : { x: "-100%" }}        
+                exit={{ x: "-100%"}}        
+                transition={{ duration: 0.5 }}
+            >
+                <div>
+                    <div className="p-3 flex flex-col border-b-1 py-4 px-4">
+                        <div className="flex justify-between items-center">
+                            <h1 className="font-semibold text-2xl mb-10 px-2">Search</h1>
+                            <X
+                                className="block md:hidden"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSearch(false);
+                                }}
+                            />
+                        </div>
+                        <input
+                            type="text"
+                            className="appearance-none border-none outline-none bg-indigo-100 w-full p-2 text-black rounded-lg placeholder:text-gray-700"
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value);
                             }}
+                            placeholder="Search"
                         />
                     </div>
-                    <input
-                        type="text"
-                        className="appearance-none border-none outline-none bg-indigo-100 w-full p-2 text-black rounded-lg placeholder:text-gray-700"
-                        onChange={(e) => {
-                            setSearchTerm(e.target.value);
-                        }}
-                        placeholder="Search"
-                    />
-                </div>
-                {loading ? <ul className="px-6 py-6">
-                    {Array.from({ length: 5 }).map((_, idx) => (
-                        <UserItemSkeleton key={idx} />
-                    ))}
-                </ul> : <ul className="px-6 py-6 space-y-4">
-                    {users.map((user) => (
-                        <UserListItem userpic={user.user_pic} username={user.username} name={user.name} onClick={() => {setSearch(false); navigate(`/user-profile/${user.id}`)}}/>
-                    ))}
-                </ul>}
-            </div>
-        </div>
+                    {loading ? <ul className="px-6 py-6">
+                        {Array.from({ length: 5 }).map((_, idx) => (
+                            <UserItemSkeleton key={idx} />
+                        ))}
+                    </ul> : <ul className="px-6 py-6 space-y-4">
+                        {users.map((user) => (
+                            <UserListItem userpic={user.user_pic} username={user.username} name={user.name} onClick={() => {setSearch(false); navigate(`/user-profile/${user.id}`)}} is_following={user.is_following}/>
+                        ))}
+                    </ul>}
+                </div>  
+            </motion.div>}
+        </AnimatePresence>
     );
 }
 
@@ -100,16 +109,20 @@ interface UserListItemInterface {
     username: string
     name: string
     onClick: () => void
+    is_following: boolean
 }
 
-function UserListItem({userpic, username, name, onClick: handleClick}: UserListItemInterface) {
+function UserListItem({userpic, username, name, onClick: handleClick, is_following}: UserListItemInterface) {
     return (
-        <li className="flex gap-4" onClick={handleClick}>
-            <img src={userpic} alt={`${username}'s profile pic`} className="w-11 aspect-square object-cover rounded-full border border-slate"/>
-            <div className="flex flex-col justify-center">
-                <div className="font-semibold text-sm">{username}</div>
-                <div className="text-sm text-slate-100">{name}</div>
+        <li className="flex justify-between" onClick={handleClick}>
+            <div className="flex gap-4">
+                <img src={userpic} alt={`${username}'s profile pic`} className="w-11 aspect-square object-cover rounded-full border border-slate"/>
+                <div className="flex flex-col justify-center">
+                    <div className="font-semibold text-sm">{username}</div>
+                    <div className="text-sm text-slate-100">{name}</div>
+                </div>
             </div>
+            {is_following ? <UnFollowButton onClick={handleClick}/> : <FollowButton onClick={handleClick}/>}
         </li>
     )
 }

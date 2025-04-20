@@ -28,8 +28,9 @@ type ListUserReq struct {
 }
 
 type ListUserRes struct {
-	ID       string `json:"id"`
-	Userpic  string `json:"user_pic"`
-	Username string `json:"username"`
-	Name     string `json:"name"`
+	ID          string `json:"id"`
+	Userpic     string `json:"user_pic"`
+	Username    string `json:"username"`
+	Name        string `json:"name"`
+	IsFollowing bool   `json:"is_following"`
 }

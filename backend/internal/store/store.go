@@ -42,7 +42,8 @@ type Storer interface {
 	UnlikeAPost(ctx context.Context, userID string, postID string) error
 
 	WriteComment(ctx context.Context, wc *models.WriteCommentReq) error
-	WriteReplyToComment(ctx context.Context, wcr *models.WriteReplyToCommentReq) error
+	GetComments(ctx context.Context, gc *models.GetCommentsReq) ([]*models.GetCommentsRes, error)
+	LikeAComment(ctx context.Context, lc *models.LikeCommentReq) error
 }
 
 type Store struct {

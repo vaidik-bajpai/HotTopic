@@ -14,7 +14,6 @@ import (
 func (h *HTTPHandler) handleGetUserPosts(w http.ResponseWriter, r *http.Request) {
 	user := getUserFromCtx(r)
 	paginate := getPaginateFromCtx(r)
-	h.logger.Info("get posts called")
 	userID := chi.URLParam(r, "userID")
 	if err := h.validate.Var(userID, "required,uuid"); err != nil {
 		h.json.FailedValidationResponse(w, r, err)

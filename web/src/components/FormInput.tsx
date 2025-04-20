@@ -9,20 +9,26 @@ interface FormInputInterface extends React.InputHTMLAttributes<HTMLInputElement>
 const FormInput = React.forwardRef<HTMLInputElement, FormInputInterface>(
     ({ labelText, placeholder, error, ...props }, ref) => {
         return (
-        <div className="flex flex-col gap-1 font-mono">
-            <label className="px-2 font-bold text-sm">{labelText}</label>
+            <div className="flex flex-col-reverse gap-1 font-mono">
+                <input
+                    {...props}
+                    ref={ref}
+                    type="text"
+                    placeholder={placeholder}
+                    className={`peer px-3 py-2 rounded-xl bg-white border transition-all duration-200
+                        placeholder-gray-400 text-black shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                        ${error ? "border-red-500" : "border-gray-300"}`}
+                />
 
-            <input
-            {...props}
-            ref={ref} // Attach ref here
-            type="text"
-            placeholder={placeholder}
-            className="px-2 py-2 rounded bg-blue-100 appearance-none min-w-2xs border border-transparent focus:outline-none"
-            />
+                <label
+                    className="px-1 text-sm font-semibold text-black transform transition-transform duration-400 peer-focus:text-indigo-500 peer-focus:translate-x-2"
+                >
+                    {labelText}
+                </label>
 
-            {error && <div className="text-red-500 text-xs px-2">{error}</div>}
-        </div>
-        );
+                {error && <div className="text-xs text-red-500 px-1 pt-1">{error}</div>}
+            </div>
+        );  
     }
 );
 

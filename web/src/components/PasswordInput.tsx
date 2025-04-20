@@ -1,3 +1,4 @@
+import { Eye, EyeClosed } from "lucide-react";
 import React, { useState } from "react";
 
 interface PasswordInputInterface extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -11,40 +12,35 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputInterface>
         const [visible, setVisible] = useState<boolean>(false);
 
         return (
-            <div className="flex flex-col gap-1 font-mono">
-                <label className="px-2 font-bold text-sm">{labelText}</label>
-
-                <div className="flex justify-between">
+            <div className="flex flex-col-reverse gap-1 font-mono">
+                <div className="relative peer">
                     <input
                         {...props}
-                        ref={ref} // Forward the ref properly
+                        ref={ref}
                         type={visible ? "text" : "password"}
                         placeholder={placeholder}
-                        className="px-2 py-2 w-full rounded bg-blue-100 appearance-none min-w-2xs border border-transparent focus:outline-none"
+                        className={`w-full px-3 py-2 pr-10 rounded-xl bg-white border text-black shadow-sm
+                            placeholder-gray-400 transition-all duration-200 appearance-none
+                            focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                            ${error ? "border-red-500" : "border-gray-300"}`}
                     />
+
                     <button
                         type="button"
-                        className="w-fit px-2 pointer-cursor"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-indigo-600 cursor-pointer"
                         onClick={() => setVisible(!visible)}
+                        aria-label={visible ? "Hide password" : "Show password"}
                     >
                         {visible ? (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye">
-                                <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
-                                <circle cx="12" cy="12" r="3"/>
-                            </svg>
+                            <EyeClosed />
                         ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye-closed">
-                                <path d="m15 18-.722-3.25"/>
-                                <path d="M2 8a10.645 10.645 0 0 0 20 0"/>
-                                <path d="m20 15-1.726-2.05"/>
-                                <path d="m4 15 1.726-2.05"/>
-                                <path d="m9 18 .722-3.25"/>
-                            </svg>
+                            <Eye />
                         )}
                     </button>
                 </div>
+                <label className="px-1 text-sm font-semibold text-black transform transition-transform duration-500 peer-focus-within:text-indigo-500 peer-focus-within:translate-x-2">{labelText}</label>
 
-                {error && <div className="text-red-500 text-xs px-2">{error}</div>}
+                {error && <div className="text-xs text-red-500 px-1 pt-1">{error}</div>}
             </div>
         );
     }

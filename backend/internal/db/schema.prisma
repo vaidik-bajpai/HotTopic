@@ -51,7 +51,6 @@ model User {
     followers   Follow[]      @relation("UserFollowers")
     Like        PostLike[]
     Comment     Comment[]
-    Reply       Reply[]
     Save        Save[]
     CommentLike CommentLike[]
 }
@@ -99,6 +98,25 @@ model PostLike {
     @@unique([userId, postId])
 }
 
+model Comment {
+    id        String   @id @default(uuid()) // Your ID
+    userId    String // Your UserID
+    postId    String // Your PostID
+    message   String // Your Message
+    likes     Int      @default(0) // Your Likes
+    replies   Int      @default(0) // ✅ Count of replies to THIS comment (only if top-level)
+    parentId  String? // ✅ Self-reference (null = top-level comment)
+    createdAt DateTime @default(now()) // Your CreatedAt
+
+    // Relations
+    user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    post     Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+    parent   Comment?  @relation("ReplyParent", fields: [parentId], references: [id], onDelete: Cascade)
+    children Comment[] @relation("ReplyParent") // ✅ Replies to this comment
+
+    Like CommentLike[]
+}
+
 model CommentLike {
     id        String   @id @default(uuid())
     userId    String
@@ -107,46 +125,8 @@ model CommentLike {
 
     user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
     comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
-    Reply   Reply?  @relation(fields: [replyId], references: [id])
-    replyId String?
 
-    @@unique([userId, commentId]) // Ensure a user can like a comment only once
-}
-
-enum LikeType {
-    POST
-    COMMENT
-    REPLY
-}
-
-model Comment {
-    id        String        @id @default(uuid())
-    userId    String
-    postId    String
-    comment   String
-    user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-    post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
-    likes     BigInt        @default(0)
-    createdAt DateTime      @default(now())
-    Reply     Reply[]
-    Like      CommentLike[]
-}
-
-model Reply {
-    id            String  @id @default(uuid())
-    userId        String
-    commentId     String
-    parentReplyId String?
-    reply         String
-    user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    comment     Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
-    parentReply Reply?   @relation("ReplyToReply", fields: [parentReplyId], references: [id], onDelete: Cascade)
-    replies     Reply[]  @relation("ReplyToReply")
-
-    createdAt DateTime      @default(now())
-    likes     BigInt        @default(0)
-    Like      CommentLike[]
+    @@unique([userId, commentId]) // one like per comment per user
 }
 
 model Save {

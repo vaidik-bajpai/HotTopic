@@ -1,11 +1,10 @@
 package models
 
-import "github.com/vaidik-bajpai/gopher-social/internal/db/db"
-
 type WriteCommentReq struct {
-	PostID  string
-	UserID  string
-	Comment string
+	PostID          string
+	UserID          string
+	Comment         string
+	ParentCommentID string
 }
 
 type WriteReplyToCommentReq struct {
@@ -15,22 +14,25 @@ type WriteReplyToCommentReq struct {
 	ParentID  string
 }
 
-type GetCommentsRes struct {
-	CommentID db.RawString `json:"comment_id"`
-	UserID    db.RawString `json:"user_id"`
-	Username  db.RawString `json:"username"`
-	Comment   db.RawString `json:"comment"`
-	Likes     db.RawBigInt `json:"comment_likes"`
-	ReplyNo   db.RawBigInt `json:"total_replies"`
-	UserLiked bool         `json:"user_liked_comment"`
-	Replies   []ReplyRes   `json:"replies"`
+type GetCommentsReq struct {
+	Paginate
+	RequesterID string
+	PostID      string
 }
 
-type ReplyRes struct {
-	ID        db.RawString `json:"id"`
-	UserID    db.RawString `json:"user_id"`
-	Username  db.RawString `json:"username"`
-	Reply     db.RawString `json:"reply"`
-	Likes     db.RawBigInt `json:"likes"`
-	UserLiked bool         `json:"user_liked"`
+type GetCommentsRes struct {
+	ID               string `json:"id"`
+	UserID           string `json:"user_id"`
+	Username         string `json:"username"`
+	Comment          string `json:"comment"`
+	Likes            int64  `json:"likes"`
+	Replies          int64  `json:"replies"`
+	ParentAuthorID   string `json:"parent_author_id"`
+	ParentAuthorName string `json:"parent_author_name"`
+	IsLiked          bool   `json:"is_likes"`
+}
+
+type LikeCommentReq struct {
+	UserID    string
+	CommentID string
 }

@@ -101,6 +101,8 @@ func (h *HTTPHandler) paginate(next http.Handler) http.Handler {
 			return
 		}
 
+		h.logger.Info("paginate data", zap.Any("data", paginate))
+
 		pCtx := context.WithValue(r.Context(), paginateCtxKey, paginate)
 
 		next.ServeHTTP(w, r.WithContext(pCtx))

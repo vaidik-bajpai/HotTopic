@@ -5,14 +5,17 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-chi/chi"
 	"github.com/vaidik-bajpai/gopher-social/internal/models"
+	"go.uber.org/zap"
 )
 
 func (h *HTTPHandler) handleWriteComment(w http.ResponseWriter, r *http.Request) {
 	user := getUserFromCtx(r)
 	var payload struct {
-		Comment string `json:"comment" validate:"required,min=1,max=200"`
-		PostID  string `json:"post_id" validate:"required,uuid"`
+		Comment         string `json:"comment" validate:"required,min=1,max=200"`
+		PostID          string `json:"post_id" validate:"required,uuid"`
+		ParentCommentID string `json:"parent_comment_id" validate:"omitempty,uuid"`
 	}
 
 	if err := h.json.ReadJSON(w, r, &payload); err != nil {
@@ -29,9 +32,10 @@ func (h *HTTPHandler) handleWriteComment(w http.ResponseWriter, r *http.Request)
 	defer cancel()
 
 	if err := h.store.WriteComment(ctx, &models.WriteCommentReq{
-		PostID:  payload.PostID,
-		Comment: payload.Comment,
-		UserID:  user.ID,
+		PostID:          payload.PostID,
+		Comment:         payload.Comment,
+		UserID:          user.ID,
+		ParentCommentID: payload.ParentCommentID,
 	}); err != nil {
 		h.json.ServerErrorResponse(w, r, err)
 		return
@@ -41,47 +45,10 @@ func (h *HTTPHandler) handleWriteComment(w http.ResponseWriter, r *http.Request)
 	h.json.WriteJSONResponse(w, http.StatusOK, "your comments has been posted")
 }
 
-func (h *HTTPHandler) WriteReplyToAComment(w http.ResponseWriter, r *http.Request) {
-	user := getUserFromCtx(r)
-
-	var payload struct {
-		Reply     string `json:"comment" validate:"required,min=1,max=200"`
-		CommentID string `json:"post_id" validate:"required,uuid"`
-		ParentID  string `json:"parent_id" validate:"required,uuid"`
-	}
-
-	if err := h.json.ReadJSON(w, r, &payload); err != nil {
-		h.json.BadRequestResponse(w, r, err)
-		return
-	}
-
-	if err := h.validate.Struct(payload); err != nil {
-		h.json.FailedValidationResponse(w, r, err)
-		return
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	err := h.store.WriteReplyToComment(ctx, &models.WriteReplyToCommentReq{
-		CommentID: payload.CommentID,
-		UserID:    user.ID,
-		ReplyText: payload.Reply,
-		ParentID:  payload.ParentID,
-	})
-	if err != nil {
-		h.json.ServerErrorResponse(w, r, err)
-		return
-	}
-
-	h.json.WriteNoContentResponse(w)
-}
-
-/*
 func (h *HTTPHandler) handleGetComments(w http.ResponseWriter, r *http.Request) {
+	user := getUserFromCtx(r)
 	paginate := getPaginateFromCtx(r)
-	userID := getUserFromCtx(r)
-
+	h.logger.Info("paginate context data", zap.Any("data", paginate))
 	postID := chi.URLParam(r, "postID")
 	if err := h.validate.Var(postID, "required,uuid"); err != nil {
 		h.json.FailedValidationResponse(w, r, err)
@@ -91,5 +58,40 @@ func (h *HTTPHandler) handleGetComments(w http.ResponseWriter, r *http.Request) 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	h.store.GetComments(ctx, )
-} */
+	comments, err := h.store.GetComments(ctx, &models.GetCommentsReq{
+		RequesterID: user.ID,
+		PostID:      postID,
+		Paginate:    *paginate,
+	})
+	if err != nil {
+		h.json.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	h.logger.Info("comments have been fetched successfully")
+	h.json.WriteJSONResponse(w, http.StatusOK, map[string][]*models.GetCommentsRes{"comments": comments})
+}
+
+func (h *HTTPHandler) handleLikeComment(w http.ResponseWriter, r *http.Request) {
+	user := getUserFromCtx(r)
+	commentID := chi.URLParam(r, "commentID")
+	if err := h.validate.Var(commentID, "required,uuid"); err != nil {
+		h.json.FailedValidationResponse(w, r, err)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err := h.store.LikeAComment(ctx, &models.LikeCommentReq{
+		UserID:    user.ID,
+		CommentID: commentID,
+	})
+	if err != nil {
+		h.json.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	h.logger.Info("comments have been fetched successfully")
+	h.json.WriteNoContentResponse(w)
+}

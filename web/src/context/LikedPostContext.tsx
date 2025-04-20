@@ -1,17 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
-
-export interface Post {
-  id: string;
-  username: string;
-  userpic: string;
-  caption: string;
-  media: string[];
-  like_count: number;
-  comment_count: number;
-  is_liked: boolean;
-  is_saved: boolean;
-}
+import { Post } from "../types/post";
 
 interface LikedPostContextType {
   likedPosts: Post[];

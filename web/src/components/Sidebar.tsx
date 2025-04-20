@@ -72,13 +72,15 @@ export default function Sidebar({search, setSearch, expanded, setExpanded}: Side
             </div>
 
             {/* Full screen sidebar overlay */}
-            <div className={`
+            <div className={` 
                 fixed top-0 left-0 md:relative h-screen z-100 bg-white
-                transition-transform duration-500 p-4
-                ${expanded ? "translate-x-0 w-full" : "-translate-x-full"} md:transition-[width]
-                md:translate-x-0 md:w-${expanded ? "72" : "18"} md:border-r md:border-r-2 md:border-black
-                lg:w-${search ? "18" : "72"} group
-            `}  
+                transition-all duration-500 p-4
+                ${expanded ? "translate-x-0 w-full" : "-translate-x-full"} 
+                md:transition-all 
+                md:translate-x-0 md:${expanded ? "w-72" : "w-18"} 
+                md:border-r md:border-r-2 md:border-black 
+                lg:${search ? "w-18" : "w-72"} group
+            `}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}>
                 {/* Close button on top right */}
