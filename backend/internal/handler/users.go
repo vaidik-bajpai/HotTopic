@@ -13,6 +13,7 @@ import (
 )
 
 func (h *HTTPHandler) handleGetProfile(w http.ResponseWriter, r *http.Request) {
+	user := getUserFromCtx(r)
 	userID := chi.URLParam(r, "userID")
 	if err := h.validate.Var(userID, "required,uuid"); err != nil {
 		h.json.FailedValidationResponse(w, r, err)
@@ -22,7 +23,10 @@ func (h *HTTPHandler) handleGetProfile(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	profile, err := h.store.GetProfile(ctx, userID)
+	profile, err := h.store.GetProfile(ctx, &models.GetProfileReq{
+		UserID:      userID,
+		RequesterID: user.ID,
+	})
 	if err != nil {
 		h.json.ServerErrorResponse(w, r, err)
 		return

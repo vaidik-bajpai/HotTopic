@@ -41,7 +41,7 @@ export default function SignupForm() {
     }
 
     return (
-        <div className="w-full max-w-100 font-mono space-y-3">
+        <div className="w-full max-w-md mx-auto px-4 sm:px-0 font-mono space-y-3">
             <form
                 onSubmit={handleSubmit(onSubmit)}
                 className="bg-white p-6 rounded-2xl shadow-lg border border-blue-300 space-y-4"
@@ -75,21 +75,13 @@ export default function SignupForm() {
                 <div className="text-sm text-center">
                     Already have an account?{" "}
                     <span
-                        className="text-blue-600 font-semibold cursor-pointer hover:underline"
+                        className="text-indigo-600 font-semibold cursor-pointer hover:underline transition-all"
                         onClick={() => navigate("/")}
                     >
                         Sign in
                     </span>
                 </div>
             </form>
-
-            <div className="flex items-center justify-center gap-2">
-                <hr className="flex-grow border-t border-gray-300" />
-                <span className="text-gray-500">Or</span>
-                <hr className="flex-grow border-t border-gray-300" />
-            </div>
-
-            <ContinueWithGoogle />
         </div>
     );
 }

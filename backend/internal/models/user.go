@@ -19,6 +19,7 @@ type UserProfile struct {
 	TotalPosts     int64    `json:"post_count"`
 	TotalFollowers int64    `json:"followers_count"`
 	TotalFollowing int64    `json:"following_count"`
+	IsFollowing    bool     `json:"is_following"`
 }
 
 type ListUserReq struct {
@@ -33,4 +34,9 @@ type ListUserRes struct {
 	Username    string `json:"username"`
 	Name        string `json:"name"`
 	IsFollowing bool   `json:"is_following"`
+}
+
+type GetProfileReq struct {
+	UserID      string
+	RequesterID string
 }

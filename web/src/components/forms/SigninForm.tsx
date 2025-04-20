@@ -42,10 +42,10 @@ export default function SigninForm() {
     }
 
     return (
-        <div className="w-full max-w-100 font-mono space-y-3">
+        <div className="w-full max-w-md mx-auto px-4 sm:px-0 font-mono space-y-3">
             <form
                 onSubmit={handleSubmit(onSubmit)}
-                className="bg-white p-6 rounded-3xl shadow-xl border border-indigo-200 space-y-4 transition-all duration-300 ease-in-out"
+                className="bg-white p-4 sm:p-6 rounded-2xl shadow-xl border border-indigo-200 space-y-4 transition-all duration-300 ease-in-out"
             >
                 <FormHeader headerText="Sign in" />
                 <FormSubHeader subHeaderText="Welcome back! Let’s pick up the conversation."/>
@@ -86,14 +86,6 @@ export default function SigninForm() {
                     </span>
                 </div>
             </form>
-
-            <div className="flex items-center justify-center gap-2">
-                <hr className="flex-grow border-t border-black" />
-                <span className="text-black">Or</span>
-                <hr className="flex-grow border-t border-black" />
-            </div>
-
-            <ContinueWithGoogle />
         </div>
     );
 }

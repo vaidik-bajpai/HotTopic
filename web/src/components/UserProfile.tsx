@@ -7,8 +7,10 @@ import UserProfilePic from "./UserProfilePic";
 import UserProfileSlider from "./UserProfileSlider";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import EditProfileForm from "./forms/EditProfileForm";
 import { useUser } from "../context/UserContext";
+import ProfileFollowButton from "./buttons/ProfileFollowButton";
+import ProfileUnFollowButton from "./buttons/ProfileUnfollowButton";
+import { Preview } from "./forms/Preview";
 
 interface UserProfileInterface {
     user_id: string
@@ -19,7 +21,9 @@ interface UserProfileInterface {
     post_count: number
     followers_count: number
     following_count: number
+    is_following: boolean
 }
+
 function UserProfile() {
     const navigate = useNavigate()
     const [profile, setProfile] = useState<UserProfileInterface>({
@@ -31,7 +35,13 @@ function UserProfile() {
         post_count: 0,
         followers_count: 0,
         following_count: 0,
+        is_following: false,
     })
+
+    function handleClick() {
+        setProfile((prev) => ({ ...prev, is_following: !prev.is_following }));
+    }
+    
     
     const { userID } = useParams()
     const user = useUser()
@@ -67,7 +77,7 @@ function UserProfile() {
                                 </div>
                             </div>
                             <UserBio bio={profile.bio} />
-                            <EditProfileButton onClick={() => navigate("/edit")}/>
+                            {userID == user.id ? <EditProfileButton onClick={() => navigate("/edit")}/> :  profile.is_following ? <ProfileUnFollowButton onClick={handleClick}/> : <ProfileFollowButton onClick={handleClick}/>}
                         </div>
                         <div className="mt-2">
                             <UserProfileSlider />

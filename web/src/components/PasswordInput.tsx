@@ -13,6 +13,7 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputInterface>
 
         return (
             <div className="flex flex-col-reverse gap-1 font-mono">
+                {error && <div className="text-xs text-red-500 px-1 pt-1">{error}</div>}
                 <div className="relative peer">
                     <input
                         {...props}
@@ -39,8 +40,6 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputInterface>
                     </button>
                 </div>
                 <label className="px-1 text-sm font-semibold text-black transform transition-transform duration-500 peer-focus-within:text-indigo-500 peer-focus-within:translate-x-2">{labelText}</label>
-
-                {error && <div className="text-xs text-red-500 px-1 pt-1">{error}</div>}
             </div>
         );
     }

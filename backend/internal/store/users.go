@@ -3,7 +3,9 @@ package store
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -145,11 +147,23 @@ func (s *Store) ActivateUser(ctx context.Context, userID string) error {
 	return nil
 }
 
-func (s *Store) GetProfile(ctx context.Context, userID string) (*models.UserProfile, error) {
+func (s *Store) GetProfile(ctx context.Context, gp *models.GetProfileReq) (*models.UserProfile, error) {
+	prevRID := gp.RequesterID
+	newReqID := strings.TrimSpace(gp.RequesterID)
+
+	if prevRID == newReqID {
+		fmt.Println("passed")
+	}
+
+	fmt.Println("requester ID: ", gp.RequesterID)
+
 	up, err := s.db.User.FindUnique(
-		db.User.ID.Equals(userID),
+		db.User.ID.Equals(gp.UserID),
 	).With(
 		db.User.Profile.Fetch(),
+		db.User.Following.Fetch(
+			db.Follow.FollowerID.Equals(gp.RequesterID),
+		),
 	).Exec(ctx)
 	if err != nil {
 		return nil, err
@@ -160,12 +174,15 @@ func (s *Store) GetProfile(ctx context.Context, userID string) (*models.UserProf
 		pic = DefaultUserPic
 	}
 
+	isFollowing := len(up.Following()) > 0
+
 	metadata, ok := up.Profile()
 	if !ok {
 		return &models.UserProfile{
-			UserID:   up.ID,
-			Username: up.Username,
-			UserPic:  pic,
+			UserID:      up.ID,
+			Username:    up.Username,
+			UserPic:     pic,
+			IsFollowing: isFollowing,
 		}, nil
 	}
 
@@ -175,10 +192,11 @@ func (s *Store) GetProfile(ctx context.Context, userID string) (*models.UserProf
 	}
 
 	return &models.UserProfile{
-		UserID:   up.ID,
-		Username: up.Username,
-		UserPic:  pic,
-		Bio:      bio,
+		UserID:      up.ID,
+		Username:    up.Username,
+		UserPic:     pic,
+		Bio:         bio,
+		IsFollowing: isFollowing,
 	}, nil
 
 }

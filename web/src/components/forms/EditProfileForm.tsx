@@ -1,5 +1,4 @@
-import { ArrowLeft, Check, Cross, X } from "lucide-react";
-import React, { useRef, useState } from "react";
+import { ArrowLeft, Check, X } from "lucide-react";
 import { useNavigate } from "react-router";
 
 export default function EditProfileForm() {
@@ -27,7 +26,6 @@ export default function EditProfileForm() {
                         <EditProfileInput name={"Username"} placeholder={"john_doe"}/>
                         <EditProfileInput name={"Pronouns"} placeholder={"he/him"}/>
                         <EditProfileInput name={"Bio"} placeholder={"I am John Doe, a simpleton"}/>
-                        <EditProfileInput name={"Gender (not a part of public profile)"} placeholder={"Male"}/>
                     </div>
                     <div className="flex justify-center gap-8 mt-4">
                         <button className="flex items-center gap-2 group transition-colors bg-gray-100 duration-500 hover:bg-red-100 px-3 py-2 rounded-lg cursor-pointer">
@@ -64,7 +62,7 @@ function EditProfileInput({name, placeholder}: EditProfileInterface) {
     return (
         <div className="flex flex-col gap-1">
             <label htmlFor="" className="text-indigo-800 font-semibold">{name}</label>
-            <input type="text" placeholder={placeholder} className="bg-indigo-200 p-2 rounded transition-shadow duration-500 appearance-none outline-none border-none hover:shadow-md hover:shadow-indigo-400"/>
+            <input type="text" placeholder={placeholder} className="bg-white border-1 p-2 rounded transition-shadow duration-500 appearance-none outline-none border-none hover:shadow-md hover:shadow-indigo-400"/>
         </div>
     )
 }

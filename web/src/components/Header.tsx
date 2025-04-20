@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router";
 import GetStartedButton from "./buttons/GetStartedButton";
-import SignupButton from "./buttons/SignupButton";
 import { useState } from "react";
 import { useUser } from "../context/UserContext";
 

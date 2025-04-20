@@ -65,24 +65,34 @@ interface ButtonInterface {
     onClick: () => void
 }
 
-export function FollowButton({onClick}: ButtonInterface) {
+export function FollowButton({ onClick }: ButtonInterface) {
     return (
-        <button className="
-            px-4 py-2 sm:px-3 sm:py-2 rounded-md text-sm font-semibold
-            transition-colors duration-200 w-20 bg-indigo-100 text-indigo-600
-            hover:bg-indigo-200"
-            onClick={onClick}>
-                Follow
+        <button
+            className="
+                px-4 py-2 text-sm font-semibold rounded-md
+                bg-indigo-100 text-indigo-600 hover:bg-indigo-200
+                transition-colors duration-200 w-20
+                sm:px-3 sm:py-2 sm:text-xs sm:w-fit min-w-[4.5rem]
+            "
+            onClick={onClick}
+        >
+            Follow
         </button>
-    )
+    );
 }
 
-export function UnFollowButton({onClick}: ButtonInterface) {
-    return <button className="
-        px-4 py-2 sm:px-3 sm:py-2 rounded-md text-sm font-semibold
-        transition-colors duration-200 w-20 bg-red-100 text-red-600 
-        hover:bg-red-200"
-        onClick={onClick}>
-            UnFollow
-    </button>
+export function UnFollowButton({ onClick }: ButtonInterface) {
+    return (
+        <button
+            className="
+                px-4 py-2 text-sm font-semibold rounded-md
+                bg-red-100 text-red-600 hover:bg-red-200
+                transition-colors duration-200 w-20
+                sm:px-3 sm:py-2 sm:text-xs sm:w-fit min-w-[4.5rem]
+            "
+            onClick={onClick}
+        >
+            Unfollow
+        </button>
+    );
 }
