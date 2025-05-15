@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router";
-import ContinueWithGoogle from "../buttons/ContinueWithGoogle";
 import FormHeader from "../FormHeader";
 import FormInput from "../FormInput";
 import FormSubHeader from "../FormSubHeader";
@@ -34,17 +33,17 @@ export default function SignupForm() {
                 withCredentials: true,
             });
             console.log("Signup successful", response.data);
-            navigate("/signin");
+            navigate("/");
         } catch (err: any) {
             console.error("Signup failed:", err.response?.data || err.message);
         }
     }
 
     return (
-        <div className="w-full max-w-md mx-auto px-4 sm:px-0 font-mono space-y-3">
+        <div className="w-full max-w-lg mx-auto px-1 sm:px-0 font-mono space-y-3">
             <form
                 onSubmit={handleSubmit(onSubmit)}
-                className="bg-white p-6 rounded-2xl shadow-lg border border-blue-300 space-y-4"
+                className="bg-white p-4 sm:p-6 rounded-2xl shadow-xl border border-indigo-200 space-y-4 transition-all duration-300 ease-in-out"
             >
                 <FormHeader headerText="Sign up" />
                 <FormSubHeader subHeaderText="Join the hottest conversations now!" />

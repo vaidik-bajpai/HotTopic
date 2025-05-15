@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface MediaRendererInterface {
@@ -54,7 +54,7 @@ function MediaRenderer({ media }: MediaRendererInterface) {
       </div>
       <div className={`${media.length == 1 ? "hidden" : ""} flex justify-center items-center`}>
         <div className="flex justify-center items-center gap-1 mt-2">
-          {media.map((item, i) => (
+          {media.map((_, i) => (
             <div
               key={i}
               className={`${

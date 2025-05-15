@@ -2,6 +2,7 @@ import { useParams } from "react-router";
 import FollowerStrip from "../FollowerStrip";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { UserPlus } from "lucide-react";
 
 interface FollowingList {
     user_id: string;
@@ -37,9 +38,11 @@ function FollowingRenderer() {
     }, []);
 
     return (
-        <div className="flex-grow w-full bg-indigo-50 py-4 px-2 overflow-y-auto">
+        <div className="flex-grow flex flex-col w-full bg-indigo-50 py-4 px-2 overflow-y-auto">
             {followingList.length === 0 ? ( 
-                <div>You don't follow anyone</div>
+                <div className="flex-grow w-full flex justify-center items-center">
+                    <NoFollowing />
+                </div>
             ) : (
                 <div className="max-w-3xl mx-auto space-y-3">
                     {followingList.map((follower) => (
@@ -58,3 +61,17 @@ function FollowingRenderer() {
 }
 
 export default FollowingRenderer;
+
+function NoFollowing() {
+    return (
+        <div className="bg-white rounded-lg shadow-md p-8 flex flex-col items-center justify-center text-center max-w-md mx-auto">
+            <UserPlus className="w-16 h-16 mb-4 text-indigo-400"/>
+
+            <h3 className="text-lg font-semibold text-indigo-700 mb-2">You're not following anyone</h3>
+            <p className="text-indigo-600 text-sm">
+                Start connecting with others by exploring profiles and following people you're interested in.
+            </p>
+        </div>
+    );
+}
+    

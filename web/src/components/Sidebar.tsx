@@ -5,6 +5,7 @@ import { useUser } from "../context/UserContext";
 import axios from "axios";
 import CreatePost from "./CreatePost";
 import UserSearch from "./UserSearch";
+import { toast } from "react-toastify";
 
 interface SidebarInterface {
     search: boolean,
@@ -30,12 +31,20 @@ export default function Sidebar({search, setSearch, expanded, setExpanded}: Side
     async function handleLogout() {
         try {
             await axios.post(
-                `http://localhost:3000/auth/logout`, null, 
+                `http://localhost:3000/auth/logout`,
+                null,
                 { withCredentials: true }
-            );           
-            user.logout()
-        } catch(err) {
-            console.error(err)
+            );
+            user.logout();
+
+            toast.success("Logged out successfully", {
+                position: "top-center",
+            });
+        } catch (err) {
+            console.error(err);
+            toast.error("Logout failed. Please try again.", {
+                position: "top-center",
+            });
         }
     }
 

@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router";
 import { useUserPosts, UserPostProvider } from "../context/UserPostContext"; // adjust path
-import { Copy } from "lucide-react";
+import { Copy, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 function UserPostsContent() {
@@ -31,14 +31,7 @@ function UserPostsContent() {
     if (userPosts.length === 0) {
         return (
             <div className="flex-grow flex flex-col items-center justify-center text-center bg-indigo-50 rounded-xl shadow-sm">
-                <div className="text-md md:text-lg xl:text-xl 2xl:text-2xl font-semibold text-gray-800">
-                    No posts yet. Start sharing your thoughts!
-                </div>
-                <div
-                    className="mt-2 text-blue-600 font-medium cursor-pointer text-sm md:text-md xl:text-lg 2xl:text-xl hover:underline"
-                >
-                    Create Post
-                </div>
+                <NoPosts />
             </div>
         );
     }
@@ -89,5 +82,26 @@ export default function UserPostsPreview() {
         <UserPostProvider userID={userID}>
             <UserPostsContent />
         </UserPostProvider>
+    );
+}
+
+function NoPosts() {
+    const navigate = useNavigate();
+    
+    return (
+        <div className="bg-white rounded-lg shadow-md p-8 flex flex-col items-center justify-center text-center max-w-md mx-auto">
+            <Plus className="w-16 h-16 mb-4 text-indigo-400"/>
+
+            <h3 className="text-lg font-semibold text-indigo-700 mb-2">No posts yet</h3>
+            <p className="text-indigo-600 text-sm mb-4">
+                Start sharing your thoughts and moments with others!
+            </p>
+            <button
+                onClick={() => navigate("/create-post")}
+                className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+            >
+                Create Post
+            </button>
+        </div>
     );
 }

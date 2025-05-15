@@ -1,7 +1,6 @@
 import { useForm } from "react-hook-form";
 import FormHeader from "../FormHeader";
 import FormInput from "../FormInput";
-import FormSubHeader from "../FormSubHeader";
 import SubmitButton from "../buttons/SubmitButton";
 import * as yup from 'yup'
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -38,21 +37,21 @@ export function ForgotPasswordForm() {
     }
 
     return (
-        <div className="flex flex-col gap-1 font-mono"> 
+        <div className="w-full max-w-md mx-auto px-1 sm:px-0 font-mono space-y-3">
             <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="flex flex-col gap-3 p-4 border rounded-xl rounded-xl border-blue-500 max-w-md"
+            onSubmit={handleSubmit(onSubmit)}
+            className="bg-white p-4 sm:p-6 rounded-2xl shadow-xl border border-indigo-200 space-y-4 transition-all duration-300 ease-in-out"
             >
-                <div className="mx-auto">
-                    <FormHeader headerText="Forgot Password!"/>
-                </div>
-                <div className="mx-auto text-center">
-                    <FormSubHeader subHeaderText="Forgot your password? Enter your email, and we'll send you a reset link." />
-                </div>
-                <FormInput labelText="Email" placeholder="Enter your email" error={errors.email?.message} {...register("email")}/>
-                <div className="mt-2">
-                    <SubmitButton buttonText="Send Link" isSubmitting={isSubmitting}/>
-                </div>
+            <FormHeader headerText="Forgot Password" />
+            
+            <FormInput
+                labelText="New Password"
+                placeholder="Enter your new password"
+                error={errors.email?.message}
+                {...register("email")}
+            />
+        
+            <div className="mt-6"><SubmitButton buttonText="Reset" isSubmitting={isSubmitting} /></div>
             </form>
         </div>
     )

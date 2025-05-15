@@ -10,7 +10,6 @@ import axios from "axios";
 import { useUser } from "../context/UserContext";
 import ProfileFollowButton from "./buttons/ProfileFollowButton";
 import ProfileUnFollowButton from "./buttons/ProfileUnfollowButton";
-import { Preview } from "./forms/Preview";
 
 interface UserProfileInterface {
     user_id: string
@@ -56,8 +55,7 @@ function UserProfile() {
     useEffect(() => {
         getProfile()
     }, [userID])
-
-
+    
     return (
         <div className="min-h-screen w-full flex flex-col">
             <div className="bg-white shadow-md rounded-xl flex flex-col flex-grow">

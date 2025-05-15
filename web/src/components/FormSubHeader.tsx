@@ -4,7 +4,7 @@ interface FormSubHeaderProps {
 
 export default function FormSubHeader({ subHeaderText }: FormSubHeaderProps) {
     return (
-        <p className="text-base font-medium text-gray-700 leading-snug">
+        <p className="text-sm sm:text-base md:text-lg font-medium text-gray-700 leading-snug">
             {subHeaderText}
         </p>
     );

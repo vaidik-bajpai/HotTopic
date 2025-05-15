@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router";
-import ContinueWithGoogle from "../buttons/ContinueWithGoogle";
 import FormHeader from "../FormHeader";
 import FormInput from "../FormInput";
 import FormSubHeader from "../FormSubHeader";
@@ -7,9 +6,10 @@ import SubmitButton from "../buttons/SubmitButton";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import PasswordInput from "../PasswordInput";
 import { useUser } from "../../context/UserContext";
+import { toast } from "react-toastify";
 
 const schema = yup.object({
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -34,15 +34,41 @@ export default function SigninForm() {
                 headers: { "Content-Type": "application/json" },
                 withCredentials: true,
             });
+
             user.setUser({ isLoggedIn: true, id: response.data.id });
+            toast.success("Welcome back! 🎉");
             navigate("/dashboard");
-        } catch (err) {
-            console.error("Sign in failed");
+        } catch (error) {
+            const err = error as AxiosError;
+
+            if (err.response) {
+                switch (err.response.status) {
+                    case 400:
+                        toast.error("Invalid request. Please try again.");
+                        break;
+                    case 422:
+                        toast.error("Validation error. Please check your input.");
+                        break;
+                    case 401:
+                        toast.error("Invalid email or password.");  
+                        break;
+                    case 500:
+                        toast.error("Something went wrong. Please try later.");
+                        break;
+                    default:
+                        toast.error(`Unexpected error: ${err.response.status}`);
+                        break;
+                }
+            } else {
+                toast.error("Network error. Please check your connection.");
+            }
+
+            console.error("Sign in failed", err);
         }
     }
 
     return (
-        <div className="w-full max-w-md mx-auto px-4 sm:px-0 font-mono space-y-3">
+        <div className="w-full max-w-md md:max-w-lg mx-auto px-1 sm:px-0 font-mono space-y-3">
             <form
                 onSubmit={handleSubmit(onSubmit)}
                 className="bg-white p-4 sm:p-6 rounded-2xl shadow-xl border border-indigo-200 space-y-4 transition-all duration-300 ease-in-out"
@@ -64,7 +90,7 @@ export default function SigninForm() {
                     {...register("password")}
                 />
 
-                <div className="text-left">
+                <div className="text-left px-1">
                     <button
                         type="button"
                         className="cursor-pointer text-sm font-semibold text-indigo-600 hover:underline transition-all"

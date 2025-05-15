@@ -18,9 +18,9 @@ import LikedPostWrapper from './components/LikedPostWrapper'
 import SavedPostWrapper from './components/SavedPostWrapper'
 import SavedPostsGallery from './components/SavedPostsGallery'
 import ProtectedComponent from './components/ProtectedComponent'
-import { Preview } from './components/forms/Preview'
 import EditProfileForm from './components/forms/EditProfileForm'
 import SavedPostsViewer from './components/SavedPostsViewer'
+import { ToastContainer } from 'react-toastify'
 
 function App() {
   return (
@@ -36,7 +36,7 @@ function App() {
               <Route path='/dashboard' element={<FeedRenderer/>}/>
               <Route path='/user-profile/:userID' element={<UserProfile />}>
                 <Route index element={<UserPostsPreview />}/>
-                <Route path='followers' element={<FollowerRenderer />}/>
+                <Route path='followers' element={<FollowerRenderer />}/>  
                 <Route path='followings' element={<FollowingRenderer />}/>
               </Route>
               <Route path='/edit' element={<EditProfileForm />}/>
@@ -59,6 +59,8 @@ function App() {
             <Route path='posts' element={<PostRenderer />}/>
           </Route>
         </Routes>
+        <ToastContainer 
+          position='top-center'/>
       </div>
     </>
   )

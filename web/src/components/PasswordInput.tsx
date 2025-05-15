@@ -12,7 +12,7 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputInterface>
         const [visible, setVisible] = useState<boolean>(false);
 
         return (
-            <div className="flex flex-col-reverse gap-1 font-mono">
+            <div className="flex flex-col-reverse gap-1 font-mono w-full">
                 {error && <div className="text-xs text-red-500 px-1 pt-1">{error}</div>}
                 <div className="relative peer">
                     <input
@@ -20,9 +20,9 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputInterface>
                         ref={ref}
                         type={visible ? "text" : "password"}
                         placeholder={placeholder}
-                        className={`w-full px-3 py-2 pr-10 rounded-xl bg-white border text-black shadow-sm
-                            placeholder-gray-400 transition-all duration-200 appearance-none
-                            focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                        className={`w-full peer px-3 py-2 sm:py-2.5 md:py-3 rounded-xl bg-white border transition-all duration-200
+                            placeholder:text-sm sm:placeholder:text-base text-sm sm:text-base md:text-lg
+                            placeholder-gray-400 text-black shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
                             ${error ? "border-red-500" : "border-gray-300"}`}
                     />
 
