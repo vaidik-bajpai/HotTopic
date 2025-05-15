@@ -85,6 +85,10 @@ func (h *HTTPHandler) handleUserSignin(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.store.UserViaEmail(ctx, payload.Email)
 	if err != nil {
+		if err == store.ErrUserNotFound {
+			h.json.UnauthorizedResponse(w, r, err)
+			return
+		}
 		h.json.ServerErrorResponse(w, r, err)
 		return
 	}

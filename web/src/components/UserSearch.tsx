@@ -62,7 +62,7 @@ export default function UserSearch({
         <AnimatePresence mode="wait">
             {search && <motion.div
                 key="user-search"
-                className={`absolute top-0 right-0 w-screen md:w-100 z-100 h-full shadow-md bg-white text-black`}
+                className="absolute top-0 right-0 w-screen md:w-[28rem] h-full z-50 bg-gradient-to-br from-indigo-100 to-indigo-200 text-black shadow-xl sm:p-4 border-1 border-indigo-400 md:rounded-r-lg"
                 initial={{ x: "-100%" }}     
                 animate={search ? { x: "100%" } : { x: "-100%" }}        
                 exit={{ x: "-100%"}}        
@@ -70,8 +70,9 @@ export default function UserSearch({
             >
                 <div>
                     <div className="p-3 flex flex-col border-b-1 py-4 px-4">
-                        <div className="flex justify-between items-center">
-                            <h1 className="font-semibold text-2xl mb-10 px-2">Search</h1>
+                        <div className="h-1 w-12 bg-indigo-300 rounded-full mx-auto mb-4 opacity-50" />
+                        <div className="flex items-center justify-between mb-10">
+                            <h1 className="font-semibold text-lg sm:text-2xl px-2 text-indigo-800">Search</h1>
                             <X
                                 className="block md:hidden"
                                 onClick={(e) => {
@@ -82,11 +83,11 @@ export default function UserSearch({
                         </div>
                         <input
                             type="text"
-                            className="appearance-none border-none outline-none bg-indigo-100 w-full p-2 text-black rounded-lg placeholder:text-gray-700"
+                            className="w-full px-4 py-2 rounded-md border border-indigo-300 bg-white placeholder:text-gray-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
                             }}
-                            placeholder="Search"
+                            placeholder="Search for users"  
                         />
                     </div>
                     {loading ? <ul className="px-6 py-6">
@@ -114,7 +115,7 @@ interface UserListItemInterface {
 
 function UserListItem({userpic, username, name, onClick: handleClick, is_following}: UserListItemInterface) {
     return (
-        <li className="flex justify-between" onClick={handleClick}>
+        <li className="flex justify-between items-center bg-white hover:bg-indigo-50 border border-indigo-200 shadow-sm rounded-md px-4 py-3 transition-colors" onClick={handleClick}>
             <div className="flex gap-4">
                 <img src={userpic} alt={`${username}'s profile pic`} className="w-11 aspect-square object-cover rounded-full border border-slate"/>
                 <div className="flex flex-col justify-center">
@@ -129,7 +130,7 @@ function UserListItem({userpic, username, name, onClick: handleClick, is_followi
 
 function UserItemSkeleton() {
     return (
-        <li className="flex gap-4 animate-pulse py-2">
+        <li className="flex gap-4 animate-pulse py-3 px-4 bg-white rounded-md border border-indigo-200 shadow-sm">
             <div className="w-11 aspect-square bg-indigo-300 rounded-full" />
             <div className="flex flex-col justify-center gap-2 w-full">
                 <div className="h-3 bg-indigo-300 rounded w-2/3"></div>

@@ -15,6 +15,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var (
+	ErrUserNotFound = errors.New("user not found")
+)
+
 const (
 	ScopeActivation     = "scope:activation"
 	ScopeForgotPassword = "scope:forgot-password"
@@ -101,6 +105,9 @@ func (s *Store) UserViaEmail(ctx context.Context, email string) (*User, error) {
 		db.User.Email.Equals(email),
 	).Exec(ctx)
 	if err != nil {
+		if ok := db.IsErrNotFound(err); ok {
+			return nil, ErrUserNotFound
+		}
 		return nil, err
 	}
 

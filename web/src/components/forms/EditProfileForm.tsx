@@ -21,38 +21,35 @@ interface UserProfile extends FormData {
   image: string | null;
 }
 
-export default function EditProfileForm() {
+export interface EditProfileFormProps {
+    user: UserProfile;
+}
+
+export default function EditProfileForm({ user }: EditProfileFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [initialData, setInitialData] = useState<UserProfile | null>(null);
+  const [initialData, setInitialData] = useState<UserProfile | null>(user);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(user.image);
 
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-    watch,
-  } = useForm<FormData>({ resolver: yupResolver(schema) });
+  } = useForm<FormData>({
+    resolver: yupResolver(schema),
+  });
 
   useEffect(() => {
-    const fetchUser = async () => {
-      // Replace with real API call
-      const user: UserProfile = {
-        username: "utkarsh_dev",
-        bio: "Building cool things with code 🚀",
-        pronouns: "he/him",
-        image: "/default-avatar.png",
-      };
+  console.log("Incoming user to EditProfileForm", user); // ✅ debug
+  if (user) {
+    reset(user); // resets form fields
+    setInitialData(user);
+    setImagePreview(user.image);
+  }
+}, [user, reset]);
 
-      setInitialData(user);
-      reset(user);
-      setImagePreview(user.image);
-    };
-
-    fetchUser();
-  }, [reset]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -113,10 +110,10 @@ export default function EditProfileForm() {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 font-mono space-y-6">
+    <div className="w-full max-w-md sm:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 font-mono space-y-6">
         <form
             onSubmit={handleSubmit(onSubmit)}
-            className="bg-white p-2 sm:p-4 md:p-4 lg:p-6 rounded-2xl shadow-xl border border-indigo-200 space-y-3 transition-all duration-300 ease-in-out"
+            className="bg-white p-4 md:p-6 rounded-2xl shadow-xl border border-indigo-200 space-y-3 transition-all duration-300 ease-in-out"
         >
         <FormHeader headerText="Edit Profile" />
         <FormSubHeader subHeaderText="Update your personal info and preferences" />
@@ -136,7 +133,7 @@ export default function EditProfileForm() {
           <button
             type="button"
             onClick={triggerFileInput}
-            className="text-sm text-indigo-600 hover:underline"
+            className="text-sm text-indigo-600 hover:underline font-bold"
           >
             Change Photo
           </button>

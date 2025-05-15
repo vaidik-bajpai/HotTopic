@@ -9,7 +9,7 @@ export default function UserProfileSlider() {
     const basePath = `/user-profile/${userID}`;
 
     return (
-        <div className="flex justify-center items-center w-full border border-indigo-200 rounded-md overflow-hidden">
+        <div className="flex justify-center items-center w-full rounded-md overflow-hidden divide-x sm:divide-x-2 divide-indigo-400 border sm:border-2 border-indigo-400">
             <UserProfileSliderItem
                 itemText="posts"
                 selected={location.pathname === basePath}

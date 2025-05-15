@@ -107,7 +107,7 @@ export default function CreatePost({
         <div className="fixed flex flex-col z-200 inset-0 p-2 backdrop-blur-sm">
             <div className="w-full cursor-pointer" onClick={() => setCreatePost(false)}>
                 <X className="ml-auto" />
-            </div>
+            </div>  
             <div className="flex-grow flex flex-col justify-center items-center">
                 {medias.length === 0 && (
                     <>

@@ -33,7 +33,7 @@ function FollowerRenderer() {
     }, []);
 
     return (
-        <div className="flex-grow flex flex-col w-full bg-indigo-50 py-4 px-2 overflow-y-auto">
+        <div className="flex-grow flex flex-col w-full bg-indigo-200 py-4 px-2 overflow-y-auto">
             {
                 followerList.length == 0 ? (
                     <div className="flex-grow w-full flex justify-center items-center">

@@ -10,6 +10,7 @@ import axios from "axios";
 import { useUser } from "../context/UserContext";
 import ProfileFollowButton from "./buttons/ProfileFollowButton";
 import ProfileUnFollowButton from "./buttons/ProfileUnfollowButton";
+import EditProfilePage from "./EditProfilePage";
 
 interface UserProfileInterface {
     user_id: string
@@ -36,7 +37,7 @@ function UserProfile() {
         following_count: 0,
         is_following: false,
     })
-
+    const [isEditProfile, setIsEditProfile] = useState<boolean>(false);
     function handleClick() {
         setProfile((prev) => ({ ...prev, is_following: !prev.is_following }));
     }
@@ -55,11 +56,10 @@ function UserProfile() {
     useEffect(() => {
         getProfile()
     }, [userID])
-    
+
     return (
-        <div className="min-h-screen w-full flex flex-col">
+        <div className="relative min-h-screen w-full flex flex-col">
             <div className="bg-white shadow-md rounded-xl flex flex-col flex-grow">
-                {/* <UserProfileHeader username="vaidik_bajpai"/> */}
                 <div className="flex flex-col flex-grow">
                     <div className="w-full px-4 border-b-2 shadow-none border-b border-gray-200">
                         <div className="flex flex-col max-w-6xl mx-auto justify-center rounded-lg gap-1 p-2 md:p-4">
@@ -75,15 +75,20 @@ function UserProfile() {
                                 </div>
                             </div>
                             <UserBio bio={profile.bio} />
-                            {userID == user.id ? <EditProfileButton onClick={() => navigate("/edit")}/> :  profile.is_following ? <ProfileUnFollowButton onClick={handleClick}/> : <ProfileFollowButton onClick={handleClick}/>}
+                            {userID == user.id ? <EditProfileButton onClick={() => setIsEditProfile(true)}/> :  profile.is_following ? <ProfileUnFollowButton onClick={handleClick}/> : <ProfileFollowButton onClick={handleClick}/>}
                         </div>
                         <div className="mt-2">
                             <UserProfileSlider />
                         </div>
                     </div>
-                    <Outlet />
+                    <Outlet />  
                 </div>
             </div>
+            {isEditProfile && <EditProfilePage user={{
+                ...profile,
+                pronouns: profile.pronouns != null && profile.pronouns.length > 0  ? profile.pronouns.join("/") : "",
+                image: profile.userpic
+            }} setIsEditProfile={setIsEditProfile}/>}
         </div>
     )
 }

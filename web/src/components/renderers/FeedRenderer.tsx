@@ -81,7 +81,7 @@ export default function FeedRenderer() {
                 <button
                     className="px-5 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 shadow transition"
                 >
-                    Go to Search
+                    Open Search
                 </button>
             </div>
         )

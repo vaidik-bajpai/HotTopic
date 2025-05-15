@@ -30,14 +30,14 @@ function UserPostsContent() {
 
     if (userPosts.length === 0) {
         return (
-            <div className="flex-grow flex flex-col items-center justify-center text-center bg-indigo-50 rounded-xl shadow-sm">
+            <div className="flex-grow flex flex-col items-center justify-center text-center bg-indigo-200 rounded-xl shadow-sm p-2">
                 <NoPosts />
             </div>
         );
     }
 
     return (
-        <div className="flex-grow w-full bg-indigo-50 py-4 px-2 overflow-y-auto">
+        <div className="flex-grow w-full bg-indigo-400 py-4 px-2 overflow-y-auto">
             <div className="max-w-3xl mx-auto">
                 <div className="grid grid-cols-3 gap-1 w-fit mx-auto my-4">
                     {userPosts.map((post, index) => (
@@ -87,7 +87,7 @@ export default function UserPostsPreview() {
 
 function NoPosts() {
     const navigate = useNavigate();
-    
+
     return (
         <div className="bg-white rounded-lg shadow-md p-8 flex flex-col items-center justify-center text-center max-w-md mx-auto">
             <Plus className="w-16 h-16 mb-4 text-indigo-400"/>
