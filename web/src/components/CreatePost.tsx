@@ -18,6 +18,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router";
 
 const schema = yup.object().shape({
     caption: yup.string().required("Caption is required"),
@@ -28,6 +29,7 @@ export default function CreatePost({
 }: {
     setCreatePost: Dispatch<SetStateAction<boolean>>;
 }) {
+    const navigate = useNavigate()
     const [medias, setMedias] = useState<File[]>([]);
     const [previewImages, setPreviewImages] = useState<string[]>([]);
     const [isNext, setIsNext] = useState<boolean>(false);
@@ -52,6 +54,7 @@ export default function CreatePost({
         setMedias((prevMedias) => [...prevMedias, ...Array.from(selectedMedias)]);
     }
 
+    
     const onSubmit = async (data: { caption: string }) => {
         if (medias.length === 0) {
             toast.error("Media is required!", { position: "top-right" });
@@ -69,22 +72,38 @@ export default function CreatePost({
                 formData.append("upload_preset", "Cloudinary-demo");
                 formData.append("cloud_name", "drg9zdr28");
 
-                const res = await axios.post("https://api.cloudinary.com/v1_1/drg9zdr28/image/upload", formData);
+                const res = await axios.post(
+                    "https://api.cloudinary.com/v1_1/drg9zdr28/image/upload",
+                    formData
+                );
                 uploadedImagesURLs.push(res.data.url);
             }
 
-            const res = await axios.post("http://localhost:3000/post/create", {
-                caption: data.caption,
-                medias: uploadedImagesURLs,
-            }, { withCredentials: true });
+            await axios.post(
+                "http://localhost:3000/post/create",
+                {
+                    caption: data.caption,
+                    medias: uploadedImagesURLs,
+                },
+                { withCredentials: true }
+            );
 
             toast.success("Posted", { position: "top-right" });
 
-            reset();    
+            reset();
             setMedias([]);
             setIsNext(false);
         } catch (err) {
-            console.error("Error Occurred!", err);
+            if (axios.isAxiosError(err)) {
+                if (err.response?.status === 401) {
+                    toast.error("Unauthorized. Please login again.", { position: "top-right" });
+                    navigate("/");
+                } else {
+                    console.error("Error Occurred!", err.response?.data || err.message);
+                }
+            } else {
+                console.error("Unknown error occurred!", err);
+            }
         } finally {
             setIsLoading(false);
         }

@@ -1,11 +1,13 @@
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import FollowerStrip from "../FollowerStrip";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import FollowerList from "../../types/FollowerList";
+import FollowerList from "../../types/FollowerList";    
 import { User } from "lucide-react";
+import { toast } from "react-toastify";
 
 function FollowerRenderer() {
+    const navigate = useNavigate();
     const { userID } = useParams();
     const [followerList, setFollowerList] = useState<FollowerList[]>([]);
     const [lastID, setLastID] = useState<string>("");
@@ -17,14 +19,28 @@ function FollowerRenderer() {
                 { withCredentials: true }
             );
 
-            const data = res.data   
-            
+            const data = res.data;
+
             if (Array.isArray(data) && data.length > 0) {
                 setLastID(data[data.length - 1].user_id);
                 setFollowerList((prev) => [...prev, ...data]);
             }
         } catch (err) {
-            console.log("error:", err);
+            if (axios.isAxiosError(err)) {
+                if (err.response?.status === 401) {
+                    toast.error("Session expired. Redirecting to login...", {
+                    position: 'top-center',
+                    autoClose: 2000,
+                    });
+
+                
+                    navigate('/');
+                } else {
+                    console.error("Error fetching followers:", err.response?.data || err.message);
+                }
+            } else {
+                console.error("Unknown error fetching followers:", err);
+            }
         }
     }
 
@@ -40,7 +56,7 @@ function FollowerRenderer() {
                         <NoFollowers />
                     </div>
                 ) : (
-                    <div className="max-w-3xl mx-auto space-y-3">
+                    <div className="max-w-4xl lg:max-w-5xl mx-auto space-y-3 w-full px-2 md:px-4">
                         {followerList.map((follower) => (
                             <FollowerStrip
                                 userID={follower.user_id}

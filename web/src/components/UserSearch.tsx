@@ -1,6 +1,6 @@
 import { X } from "lucide-react";
-import { useState, useEffect } from "react";
-import { throttle } from "lodash";
+import { useState, useEffect, useCallback } from "react";
+import { debounce, throttle } from "lodash";
 import axios from "axios";
 import { useNavigate } from "react-router";
 import { FollowButton, UnFollowButton } from "./FollowerStrip";
@@ -42,8 +42,7 @@ export default function UserSearch({
         } catch(err) {
             console.log(err)
             setLoading(false)
-        }
-        
+        }  
     };
 
     const throttledSearch = throttle((value: string) => {
@@ -94,9 +93,9 @@ export default function UserSearch({
                         {Array.from({ length: 5 }).map((_, idx) => (
                             <UserItemSkeleton key={idx} />
                         ))}
-                    </ul> : <ul className="px-6 py-6 space-y-4">
+                    </ul> : <ul className="px-6 py-6 md:px-4 md:py-4 space-y-4">
                         {users.map((user) => (
-                            <UserListItem userpic={user.user_pic} username={user.username} name={user.name} onClick={() => {setSearch(false); navigate(`/user-profile/${user.id}`)}} is_following={user.is_following}/>
+                            <UserListItem id={user.id} userpic={user.user_pic} username={user.username} name={user.name} is_following={user.is_following}/>
                         ))}
                     </ul>}
                 </div>  
@@ -106,24 +105,48 @@ export default function UserSearch({
 }
 
 interface UserListItemInterface {
+    id: string
     userpic: string
     username: string
     name: string
-    onClick: () => void
     is_following: boolean
 }
 
-function UserListItem({userpic, username, name, onClick: handleClick, is_following}: UserListItemInterface) {
+function UserListItem({id, userpic, username, name, is_following}: UserListItemInterface) {
+    const [isFollowing, setIsFollowing] = useState(is_following)
+    const navigate = useNavigate();
+
+    const debounceFollow = useCallback(
+        debounce(async (shouldFollow: boolean) => {
+        try {
+            const url = `http://localhost:3000/user/${id}/${shouldFollow ? "follow" : "unfollow"}`;
+            await axios.post(url, {}, { withCredentials: true });
+        } catch (err) {
+            console.error(err);
+            setIsFollowing(prev => !prev); 
+        }
+        }, 500),
+        [id]
+      );
+
+    function handleFollow() {
+        setIsFollowing(prev => {
+            const newFollowState = !prev
+            debounceFollow(newFollowState)
+            return newFollowState
+        });
+    }
+
     return (
-        <li className="flex justify-between items-center bg-white hover:bg-indigo-50 border border-indigo-200 shadow-sm rounded-md px-4 py-3 transition-colors" onClick={handleClick}>
+        <li className="flex justify-between items-center bg-white hover:bg-indigo-50 border border-indigo-200 shadow-sm rounded-md px-3 py-3 transition-colors cursor-pointer" onClick={() => navigate(`/user-profile/${id}`)}>
             <div className="flex gap-4">
-                <img src={userpic} alt={`${username}'s profile pic`} className="w-11 aspect-square object-cover rounded-full border border-slate"/>
+                <img src={userpic} alt={`${username}'s profile pic`} className="w-11 aspect-square object-cover rounded-full border border-indigo-800"/>
                 <div className="flex flex-col justify-center">
-                    <div className="font-semibold text-sm">{username}</div>
+                    <div className="font-semibold text-sm md:text-md">{username}</div>
                     <div className="text-sm text-slate-100">{name}</div>
                 </div>
             </div>
-            {is_following ? <UnFollowButton onClick={handleClick}/> : <FollowButton onClick={handleClick}/>}
+            {isFollowing ? <UnFollowButton onClick={handleFollow}/> : <FollowButton onClick={handleFollow}/>}
         </li>
     )
 }

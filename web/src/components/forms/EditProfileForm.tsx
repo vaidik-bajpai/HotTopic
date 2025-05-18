@@ -8,11 +8,12 @@ import FormInput from "../FormInput";
 import SubmitButton from "../buttons/SubmitButton";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { useNavigate } from "react-router";
 
 const schema = yup.object({
-  username: yup.string().min(3).max(30).required("Username is required"),
-  bio: yup.string().max(200),
-  pronouns: yup.string().max(30),
+  username: yup.string().min(3).max(30).required("Username is required").matches(/^\S*$/, "Username cannot contain spaces").trim(),
+  bio: yup.string().max(200).trim(),
+  pronouns: yup.string().max(30).trim(),
 }).required();
 
 type FormData = yup.InferType<typeof schema>;
@@ -26,6 +27,7 @@ export interface EditProfileFormProps {
 }
 
 export default function EditProfileForm({ user }: EditProfileFormProps) {
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [initialData, setInitialData] = useState<UserProfile | null>(user);
@@ -91,8 +93,7 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
     }
 
     try {
-      // Replace with real API call
-      await axios.patch("http://localhost:3000/user/profile", updatedFields, {
+      await axios.put("http://localhost:3000/user/profile", updatedFields, {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
@@ -100,8 +101,13 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
       toast.success("Profile updated successfully ✨");
       setInitialData({ ...initialData, ...updatedFields });
     } catch (err) {
-      toast.error("Failed to update profile.");
-      console.error("Update error", err);
+      if (axios.isAxiosError(err) && err.response?.status === 401) {
+          toast.error("Unauthorized. Please login again.", { position: "top-right" });
+          navigate("/");
+      } else {
+          toast.error("Failed to update profile.", { position: "top-right" });
+          console.error("Update error", err);
+      }
     }
   };
 

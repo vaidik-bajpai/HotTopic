@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { PostCard } from "../PostCard";
 import axios from "axios";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { Post } from "../../stories/UserProfileMetadata.stories";
+import { toast } from "react-toastify";
 
 interface Post {
     id: string
@@ -16,23 +17,40 @@ interface Post {
     is_saved: boolean
 }
 
-export default function FeedRenderer() {  
+export default function FeedRenderer() { 
+    const navigate = useNavigate(); 
     const [postList, setPostList] = useState<Post[]>([])
     const [lastID, setLastID] = useState<string>("")
     const { userID } = useParams()
     
+    
     async function fetchPosts() {
         try {
-            const res = await axios.get(`http://localhost:3000/post/${userID}?page_size=10&last_id=${lastID}`, {
-                withCredentials: true,
-            })
-            console.log(res)
-            if(res.data?.posts.length != 0) {
-                setPostList((prev) => [...prev, ...res.data.posts])
-                setLastID(res.data.posts[res.data?.posts.length-1].id)
+            const res = await axios.get(
+                `http://localhost:3000/post/${userID}?page_size=10&last_id=${lastID}`,
+                {
+                    withCredentials: true,
+                }
+            );
+        
+            if (res.data?.posts.length !== 0) {
+                setPostList((prev) => [...prev, ...res.data.posts]);
+                setLastID(res.data.posts[res.data.posts.length - 1].id);
             }
-        } catch(err) {
-            console.log("error could not fetch the posts")
+        } catch (err) {
+            if (axios.isAxiosError(err)) {
+                if (err.response?.status === 401) {
+                    toast.error("Unauthorized access. Please login again.", {
+                        position: 'top-center',
+                        autoClose: 2000
+                    });
+                    navigate('/');
+                } else {
+                    console.error("Error fetching posts:", err.response?.data || err.message);
+                }
+            } else {
+                console.error("Unknown error fetching posts:", err);
+            }
         }
     }
 

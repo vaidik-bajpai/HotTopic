@@ -1,8 +1,9 @@
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import FollowerStrip from "../FollowerStrip";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { UserPlus } from "lucide-react";
+import { toast } from "react-toastify";
 
 interface FollowingList {
     user_id: string;
@@ -12,6 +13,7 @@ interface FollowingList {
 }
 
 function FollowingRenderer() {
+    const navigate = useNavigate();
     const { userID } = useParams();
     const [followingList, setFollowingList] = useState<FollowingList[]>([]);
     const [lastID, setLastID] = useState<string>("");
@@ -23,13 +25,25 @@ function FollowingRenderer() {
                 { withCredentials: true }
             );
 
-            const data = res.data 
-            if ( Array.isArray(data) && data.length > 0) {
-                setLastID(res.data[res.data.length - 1].user_id);
-                setFollowingList((prev) => [...prev, ...res.data]);
+            const data = res.data;
+            if (Array.isArray(data) && data.length > 0) {
+                setLastID(data[data.length - 1].user_id);
+                setFollowingList((prev) => [...prev, ...data]);
             }
         } catch (err) {
-            console.log("error:", err);
+            if (axios.isAxiosError(err)) {
+                if (err.response?.status === 401) {
+                    toast.error("Unauthorized access. Please login again.", {
+                        position: 'top-center',
+                        autoClose: 2000
+                    });
+                    navigate('/');
+                } else {
+                    console.error("Error fetching followings:", err.response?.data || err.message);
+                }
+            } else {
+                console.error("Unknown error fetching followings:", err);
+            }
         }
     }
 
@@ -44,7 +58,7 @@ function FollowingRenderer() {
                     <NoFollowing />
                 </div>
             ) : (
-                <div className="max-w-3xl mx-auto space-y-3">
+                <div className="max-w-4xl lg:max-w-5xl mx-auto space-y-3 w-full px-2 md:px-4">
                     {followingList.map((follower) => (
                         <FollowerStrip
                             key={follower.user_id}

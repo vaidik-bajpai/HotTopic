@@ -6,6 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import PasswordInput from "../PasswordInput";
+import { toast } from "react-toastify";
 
 const schema = yup.object({
   new_password: yup
@@ -36,24 +37,32 @@ function ResetPasswordForm() {
 
   async function onSubmit(data: FormData) {
     try {
-      const response = await axios.post(
-        `http://localhost:3000/auth/reset-password/${token}`,
-        {
-          new_password: data.new_password,
-          confirm_password: data.confirm_password,
-        },
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-        }
-      );
+        const response = await axios.post(
+            `http://localhost:3000/auth/reset-password/${token}`,
+            {
+                new_password: data.new_password,
+                confirm_password: data.confirm_password,
+            },
+            {
+                headers: { "Content-Type": "application/json" },
+                withCredentials: true,
+            }
+        );
 
-      console.log("reset password successful", response.data);
-      navigate("/login"); // Navigate on success
+        console.log("reset password successful", response.data);
+        toast.success("Password reset successful!", { position: "top-right" });
+        navigate("/login");
     } catch (err) {
-      console.error("Failed to reset password");
+        if (axios.isAxiosError(err) && err.response?.status === 401) {
+            toast.error("Unauthorized. Please login again.", { position: "top-right" });
+            navigate("/");
+        } else {
+            toast.error("Failed to reset password.", { position: "top-right" });
+            console.error("Failed to reset password", err);
+        }
     }
   }
+
 
   return (
     <div className="w-full max-w-md md:max-w-lg mx-auto px-1 sm:px-0 font-mono space-y-3">

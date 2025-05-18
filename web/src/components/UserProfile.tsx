@@ -11,6 +11,7 @@ import { useUser } from "../context/UserContext";
 import ProfileFollowButton from "./buttons/ProfileFollowButton";
 import ProfileUnFollowButton from "./buttons/ProfileUnfollowButton";
 import EditProfilePage from "./EditProfilePage";
+import { toast } from "react-toastify";
 
 interface UserProfileInterface {
     user_id: string
@@ -42,15 +43,24 @@ function UserProfile() {
         setProfile((prev) => ({ ...prev, is_following: !prev.is_following }));
     }
     
-    
     const { userID } = useParams()
     const user = useUser()
 
     async function getProfile() {
-        const response = await axios.get(`http://localhost:3000/user/profile/${userID}`, {
-            withCredentials: true
-        })
-        setProfile(response.data.profile)
+        try {
+            const response = await axios.get(`http://localhost:3000/user/profile/${userID}`, {
+                withCredentials: true
+            });
+            setProfile(response.data.profile);
+        } catch (error: any) {
+            if (axios.isAxiosError(error) && error.response?.status === 401) {
+                toast.error("You are not logged in.");
+                navigate("/");
+            } else {
+                toast.error("An error occurred while fetching the profile.");
+                console.error(error);
+            }
+        }
     }
 
     useEffect(() => {

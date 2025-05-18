@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { PostCard } from "../PostCard";
 import axios from "axios";
 import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
 
 interface Post {
   id: string;
@@ -29,31 +30,45 @@ export default function FeedRenderer() {
         if (loading || !hasMore) return;
         setLoading(true);
         try {
-        const res = await axios.get(
-            `http://localhost:3000/user/feed?page_size=10&last_id=${lastID}`,
-            { withCredentials: true }
-        );
+            const res = await axios.get(
+                `http://localhost:3000/user/feed?page_size=10&last_id=${lastID}`,
+                { withCredentials: true }
+            );
 
-        const newPosts = Array.isArray(res.data.posts) ? res.data.posts : [];
-        setFeed((prev) => [...prev, ...newPosts]);
-        if (newPosts.length > 0) {
-            const lastPost = newPosts[newPosts.length - 1];
-            setLastID(lastPost.id);
-        }
+            const newPosts = Array.isArray(res.data.posts) ? res.data.posts : [];
+            setFeed((prev) => [...prev, ...newPosts]);
 
-        if (newPosts.length < 10) {
-            setHasMore(false); // No more posts to load
-        }
+            if (newPosts.length > 0) {
+                const lastPost = newPosts[newPosts.length - 1];
+                setLastID(lastPost.id);
+            }
+
+            if (newPosts.length < 10) {
+                setHasMore(false);
+            }
         } catch (err) {
-        console.error("Error fetching feed:", err);
+            if (axios.isAxiosError(err)) {
+                if (err.response?.status === 401) {
+                    toast.error("Session expired. Redirecting to login...", {
+                    position: 'top-center',
+                    autoClose: 2000,
+                    });
+                
+                    navigate('/');
+                } else {
+                    console.error("Error fetching feed:", err.response?.data || err.message);
+                }
+            } else {
+                console.error("Unknown error fetching feed:", err);
+            }
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
-    }, [lastID, loading, hasMore]);
+    }, [lastID, loading, hasMore, navigate]);
 
     useEffect(() => {
         fetchFeed();
-    }, []); // Initial load
+    }, []);
 
     useEffect(() => {
         if (observerRef.current) observerRef.current.disconnect();

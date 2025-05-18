@@ -5,6 +5,8 @@ import SubmitButton from "../buttons/SubmitButton";
 import * as yup from 'yup'
 import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router";
 
 const schema = yup.object({
     email: yup.string().email("invalid email").required("email is required")
@@ -13,6 +15,8 @@ const schema = yup.object({
 type FormData = yup.InferType<typeof schema>
 
 export function ForgotPasswordForm() {
+    const navigate = useNavigate();
+    
     const {
         register,
         handleSubmit,
@@ -20,21 +24,31 @@ export function ForgotPasswordForm() {
     } = useForm({
         resolver: yupResolver(schema),
     })
-
+    
     async function onSubmit(data: FormData) {
-        console.log(data)
+        console.log(data);
         try {
-            const response = await axios.post("http://localhost:3000/auth/forgot-password", {
-                email: data.email,
-            }, {
-                headers: {"Content-Type": "application/json"},
-                withCredentials: true,
-            })
-            console.log("Forgot password call successful", response.data)
-        } catch(err) {
-            console.error("Forgot password call unsuccessful")
+            const response = await axios.post(
+                "http://localhost:3000/auth/forgot-password",
+                { email: data.email },
+                {
+                    headers: { "Content-Type": "application/json" },
+                    withCredentials: true,
+                }
+            );
+            console.log("Forgot password call successful", response.data);
+            toast.success("Password reset email sent!", { position: "top-right" });
+        } catch (err) {
+            if (axios.isAxiosError(err) && err.response?.status === 401) {
+                toast.error("Unauthorized. Please login again.", { position: "top-right" });
+                navigate("/");
+            } else {
+                toast.error("Failed to send forgot password email.", { position: "top-right" });
+                console.error("Forgot password call unsuccessful", err);
+            }
         }
     }
+
 
     return (
         <div className="w-full max-w-md mx-auto px-1 sm:px-0 font-mono space-y-3">

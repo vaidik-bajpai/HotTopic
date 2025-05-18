@@ -20,7 +20,7 @@ import SavedPostsGallery from './components/SavedPostsGallery'
 import ProtectedComponent from './components/ProtectedComponent'
 import SavedPostsViewer from './components/SavedPostsViewer'
 import { ToastContainer } from 'react-toastify'
-import EditProfilePage from './components/EditProfilePage'
+import NotFoundPage from './components/NotFoundPage'
 
 function App() {
   return (
@@ -47,6 +47,7 @@ function App() {
                 <Route path='saved-gallery' element={<SavedPostsGallery />} />
                 <Route path='saved-posts' element={<SavedPostsViewer />} />
               </Route>
+              <Route path='*' element={<NotFoundPage />}/>
             </Route>
             <Route element={<WrapperResetPassword />}>
               <Route path='/forgot-password' element={<ForgotPasswordForm />}/>
@@ -57,6 +58,8 @@ function App() {
           <Route path='/:userID'>
             <Route path='posts' element={<PostRenderer />}/>
           </Route>
+
+          <Route path='*' element={<NotFoundPage />}/>
         </Routes>
         <ToastContainer 
           position='top-center'/>
