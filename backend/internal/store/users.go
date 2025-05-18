@@ -92,7 +92,14 @@ func (s *Store) UserRegistration(ctx context.Context, cu *User) (*models.Token, 
 		),
 	).Tx()
 
-	if err := s.db.Prisma.Transaction(userTxn, tokenTxn).Exec(ctx); err != nil {
+	userProfileTxn := s.db.UserProfile.CreateOne(
+		db.UserProfile.User.Link(
+			db.User.ID.Equals(userID),
+		),
+		db.UserProfile.Bio.Set(""),
+	).Tx()
+
+	if err := s.db.Prisma.Transaction(userTxn, tokenTxn, userProfileTxn).Exec(ctx); err != nil {
 		log.Printf("[error:%v]\n", err)
 		return nil, err
 	}
@@ -254,4 +261,50 @@ func (s *Store) ListUsers(ctx context.Context, lu *models.ListUserReq) ([]*model
 	}
 
 	return res, err
+}
+
+func (s *Store) UpdateProfile(ctx context.Context, up *models.UpdateProfile) error {
+	query := s.db.User.FindUnique(
+		db.User.ID.Equals(up.UserID),
+	)
+
+	var profileParam []db.UserSetParam
+
+	if up.Userpic != "" {
+		profileParam = append(profileParam, db.User.Pic.Set(up.Userpic))
+	}
+
+	if up.Username != "" {
+		profileParam = append(profileParam, db.User.Username.Set(up.Username))
+	}
+
+	query2 := s.db.UserProfile.FindUnique(
+		db.UserProfile.UID.Equals(up.UserID),
+	)
+
+	var userProfileParam []db.UserProfileSetParam
+
+	if up.Bio != "" {
+		userProfileParam = append(userProfileParam, db.UserProfile.Bio.Set(up.Bio))
+	}
+
+	if len(up.Pronouns) != 0 {
+		userProfileParam = append(userProfileParam, db.UserProfile.Pronouns.Set(up.Pronouns))
+	}
+
+	var txns []db.PrismaTransaction
+
+	if len(profileParam) != 0 {
+		txns = append(txns, query.Update(profileParam...).Tx())
+	}
+
+	if len(userProfileParam) != 0 {
+		txns = append(txns, query2.Update(userProfileParam...).Tx())
+	}
+
+	if err := s.db.Prisma.Transaction(txns...).Exec(ctx); err != nil {
+		return err
+	}
+
+	return nil
 }

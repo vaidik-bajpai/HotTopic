@@ -98,7 +98,6 @@ func (h *HTTPHandler) SetupRoutes() *chi.Mux {
 		})
 		r.Route("/profile", func(r chi.Router) {
 			r.Get("/{userID}", h.handleGetProfile)
-			r.Post("/", h.handleCreateProfile)
 			r.Put("/", h.handleUpdateProfile)
 		})
 	})

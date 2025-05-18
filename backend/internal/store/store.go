@@ -25,6 +25,7 @@ type Storer interface {
 	ListUsers(context.Context, *models.ListUserReq) ([]*models.ListUserRes, error)
 
 	GetProfile(ctx context.Context, gp *models.GetProfileReq) (*models.UserProfile, error)
+	UpdateProfile(ctx context.Context, up *models.UpdateProfile) error
 
 	CreateForgotPasswordToken(context.Context, *models.Token) error
 	GetUserFromToken(context.Context, *models.Token) error

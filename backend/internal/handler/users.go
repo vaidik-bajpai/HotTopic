@@ -9,7 +9,9 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
+	"github.com/vaidik-bajpai/gopher-social/internal/db/db"
 	"github.com/vaidik-bajpai/gopher-social/internal/models"
+	"go.uber.org/zap"
 )
 
 func (h *HTTPHandler) handleGetProfile(w http.ResponseWriter, r *http.Request) {
@@ -67,12 +69,36 @@ func (h *HTTPHandler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 	h.json.WriteJSONResponse(w, http.StatusOK, map[string]interface{}{"results": list})
 }
 
-func (h *HTTPHandler) handleCreateProfile(w http.ResponseWriter, r *http.Request) {
-	panic("unimplemented")
-}
-
 func (h *HTTPHandler) handleUpdateProfile(w http.ResponseWriter, r *http.Request) {
-	panic("unimplemented")
+	user := getUserFromCtx(r)
+	var req *models.UpdateProfile
+	if err := h.json.ReadJSON(w, r, &req); err != nil {
+		h.json.BadRequestResponse(w, r, err)
+		return
+	}
+
+	req.UserID = user.ID
+
+	if err := h.validate.Struct(req); err != nil {
+		h.json.BadRequestResponse(w, r, err)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err := h.store.UpdateProfile(ctx, req)
+	if err != nil {
+		if _, ok := db.IsErrUniqueConstraint(err); ok {
+			h.json.ConflictResponse(w, r, errors.New("username taken"))
+			return
+		}
+		h.json.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	h.logger.Info("user updated successfully", zap.String("username", user.Username))
+	h.json.WriteNoContentResponse(w)
 }
 
 func (h *HTTPHandler) handleGetCommentedPosts(w http.ResponseWriter, r *http.Request) {

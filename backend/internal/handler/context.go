@@ -10,12 +10,10 @@ import (
 type userKey string
 type tokenKey string
 type paginateKey string
-type postKey string
 
 const userCtx userKey = "user"
 const tokenCtx tokenKey = "token"
 const paginateCtxKey paginateKey = "paginate"
-const postCtxKey postKey = "post"
 
 func getUserFromCtx(r *http.Request) *store.User {
 	user, _ := r.Context().Value(userCtx).(*store.User)
@@ -30,9 +28,4 @@ func getTokenFromCtx(r *http.Request) *models.Token {
 func getPaginateFromCtx(r *http.Request) *models.Paginate {
 	paginate, _ := r.Context().Value(paginateCtxKey).(*models.Paginate)
 	return paginate
-}
-
-func getPostFromCtx(r *http.Request) *models.PostModel {
-	post, _ := r.Context().Value(postCtxKey).(*models.PostModel)
-	return post
 }
