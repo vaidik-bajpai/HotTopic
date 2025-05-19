@@ -35,7 +35,7 @@ func (h *HTTPHandler) authenticate(next http.Handler) http.Handler {
 		var user store.User
 		err = json.Unmarshal(userJSON, &user)
 		if err != nil {
-			h.json.ServerErrorResponse(w, r, err)
+			h.json.UnauthorizedResponse(w, r, err)
 			return
 		}
 
@@ -123,7 +123,7 @@ func (h *HTTPHandler) canAccess(next http.Handler) http.Handler {
 
 		err := h.store.IsFollower(ctx, self.ID, userID)
 		if err != nil {
-			h.json.UnauthorizedResponse(w, r, err)
+			h.json.ForbiddenResponse(w, r, err)
 			return
 		}
 
@@ -140,6 +140,6 @@ func (h *HTTPHandler) onlyMe(next http.Handler) http.Handler {
 			return
 		}
 
-		h.json.UnauthorizedResponse(w, r, errors.New("you cannot access this endpoint"))
+		h.json.ForbiddenResponse(w, r, errors.New("you cannot access this endpoint"))
 	})
 }

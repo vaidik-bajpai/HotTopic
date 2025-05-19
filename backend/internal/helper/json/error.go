@@ -71,3 +71,9 @@ func (j *JSON) ConflictResponse(w http.ResponseWriter, r *http.Request, err erro
 	j.logError(r, message, message)
 	j.errorResponse(w, r, http.StatusConflict, message)
 }
+
+func (j *JSON) ForbiddenResponse(w http.ResponseWriter, r *http.Request, err error) {
+	message := err.Error()
+	j.logError(r, message, message)
+	j.errorResponse(w, r, http.StatusForbidden, message)
+}
