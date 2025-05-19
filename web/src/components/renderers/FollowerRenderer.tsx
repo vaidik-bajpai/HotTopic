@@ -5,12 +5,14 @@ import axios from "axios";
 import FollowerList from "../../types/FollowerList";    
 import { User } from "lucide-react";
 import { toast } from "react-toastify";
+import NotAFollower from "../NotAFollower";
 
 function FollowerRenderer() {
     const navigate = useNavigate();
     const { userID } = useParams();
     const [followerList, setFollowerList] = useState<FollowerList[]>([]);
     const [lastID, setLastID] = useState<string>("");
+    const [isForbidden, setIsForbidden] = useState(false);
 
     async function fetchFollower() {
         try {
@@ -35,6 +37,8 @@ function FollowerRenderer() {
 
                 
                     navigate('/');
+                } else if (err.response?.status === 403) {
+                    setIsForbidden(true);  // Update state on 403
                 } else {
                     console.error("Error fetching followers:", err.response?.data || err.message);
                 }
@@ -47,6 +51,14 @@ function FollowerRenderer() {
     useEffect(() => {
         fetchFollower();
     }, []);
+
+    if(isForbidden) {
+        return (
+            <div className="flex-grow w-full flex justify-center items-center bg-indigo-200">
+                <NotAFollower text={"Only followers can view this user's content. Follow them to gain access."}/>
+            </div>
+        )
+    }
 
     return (
         <div className="flex-grow flex flex-col w-full bg-indigo-200 py-4 px-2 overflow-y-auto">

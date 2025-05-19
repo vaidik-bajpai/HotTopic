@@ -1,23 +1,22 @@
 import { motion } from 'framer-motion';
 
-function ProfileFollowButton({onClick}: {onClick: () => void}) {
-    return (
-        <motion.button
-            onClick={onClick}
-            className="mx-1 text-xs py-2 px-5 bg-indigo-800 hover:bg-indigo-700 text-white font-semibold md:text-base md:px-8 md:py-2 md:mx-2 rounded-full shadow-md border border-indigo-500 w-fit cursor-pointer"
-            initial={{ scale: 1, boxShadow: "4px 4px rgba(49, 46, 129, 0.4)" }}
-            whileHover={{
-                scale: 1.05,
-                y: -3,
-                boxShadow: "0px 10px 24px rgba(49, 46, 129, 0.5)"
-            }}
-            whileTap={{ scale: 0.96 }}
-            exit={{scale: 0}}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        >
-            Follow
-        </motion.button>
-    );
+function ProfileFollowButton({ onClick }: { onClick: () => void }) {
+  return (
+    <motion.button
+      onClick={onClick}
+      className="w-fit font-mono flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white 
+                 px-4 py-2 md:px-5 md:py-2.5 lg:px-6 lg:py-3 rounded-full cursor-pointer mt-3 
+                 transition-colors duration-300 shadow-md text-xs sm:text-sm md:text-base font-bold"
+      whileHover={{
+        y: -2,
+        boxShadow: "0px 6px 16px rgba(79, 70, 229, 0.3)",
+      }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ type: "spring", stiffness: 300 }}
+    >
+      Follow
+    </motion.button>
+  );
 }
 
 export default ProfileFollowButton;

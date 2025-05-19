@@ -1,10 +1,12 @@
 import { useNavigate, useParams } from "react-router";
-import { useUserPosts, UserPostProvider } from "../context/UserPostContext"; // adjust path
+import { useUserPosts } from "../context/UserPostContext"; // adjust path
 import { Copy, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import NotAFollower from "./NotAFollower";
 
-function UserPostsContent() {
-    const { userPosts, fetchMorePosts } = useUserPosts();
+export default function UserPostsGallery() {
+    const { userID } = useParams()
+    const { userPosts, fetchMorePosts, forbidden } = useUserPosts();
     const [hasMore, setHasMore] = useState(true);
     const loaderRef = useRef<HTMLDivElement | null>(null);
     const observerRef = useRef<IntersectionObserver | null>(null);
@@ -28,6 +30,14 @@ function UserPostsContent() {
         return () => observerRef.current?.disconnect();
     }, [fetchMorePosts, userPosts.length, hasMore]);
 
+    if (forbidden) {
+        return (
+            <div className="flex-grow w-full flex justify-center items-center bg-indigo-200 rounded-xl shadow-sm p-2">
+                <NotAFollower text={"Only followers can view this user's content. Follow them to gain access."}/>
+            </div>
+        );
+    }
+
     if (userPosts.length === 0) {
         return (
             <div className="flex-grow flex flex-col items-center justify-center text-center bg-indigo-200 rounded-xl shadow-sm p-2">
@@ -37,14 +47,14 @@ function UserPostsContent() {
     }
 
     return (
-        <div className="flex-grow w-full bg-indigo-400 py-4 px-2 overflow-y-auto">
+        <div className="flex-grow w-full bg-indigo-200 py-4 px-2 overflow-y-auto">
             <div className="max-w-3xl mx-auto">
                 <div className="grid grid-cols-3 gap-1 w-fit mx-auto my-4">
                     {userPosts.map((post, index) => (
                         <div
                             key={post.id || `${post.media[0]}-${index}`}
                             className="relative cursor-pointer max-w-xs"
-                            onClick={() => navigate(`/post/${post.id}`)}
+                            onClick={() => navigate(`/${userID}/posts`)}
                         >
                             <img
                                 src={post.media[0]}
@@ -60,28 +70,8 @@ function UserPostsContent() {
                     ))}
                     <div ref={loaderRef} className="h-10 col-span-3"></div>
                 </div>
-                {!hasMore && (
-                    <p className="text-center text-gray-500 text-sm mt-4">
-                        No more posts to load.
-                    </p>
-                )}
             </div>
         </div>
-    );
-}
-
-
-export default function UserPostsPreview() {
-    const { userID } = useParams();
-
-    if (!userID) {
-        return <div className="text-center text-red-500">User ID not found in URL</div>;
-    }
-
-    return (
-        <UserPostProvider userID={userID}>
-            <UserPostsContent />
-        </UserPostProvider>
     );
 }
 

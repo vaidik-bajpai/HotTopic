@@ -95,7 +95,7 @@ export default function UserSearch({
                         ))}
                     </ul> : <ul className="px-6 py-6 md:px-4 md:py-4 space-y-4">
                         {users.map((user) => (
-                            <UserListItem id={user.id} userpic={user.user_pic} username={user.username} name={user.name} is_following={user.is_following}/>
+                            <UserListItem id={user.id} userpic={user.user_pic} username={user.username} name={user.name} is_following={user.is_following} setSearch={setSearch}/>
                         ))}
                     </ul>}
                 </div>  
@@ -110,9 +110,10 @@ interface UserListItemInterface {
     username: string
     name: string
     is_following: boolean
+    setSearch: (e: boolean) => void
 }
 
-function UserListItem({id, userpic, username, name, is_following}: UserListItemInterface) {
+function UserListItem({id, userpic, username, name, is_following, setSearch}: UserListItemInterface) {
     const [isFollowing, setIsFollowing] = useState(is_following)
     const navigate = useNavigate();
 
@@ -121,6 +122,8 @@ function UserListItem({id, userpic, username, name, is_following}: UserListItemI
         try {
             const url = `http://localhost:3000/user/${id}/${shouldFollow ? "follow" : "unfollow"}`;
             await axios.post(url, {}, { withCredentials: true });
+            setSearch(false);
+
         } catch (err) {
             console.error(err);
             setIsFollowing(prev => !prev); 
@@ -129,7 +132,7 @@ function UserListItem({id, userpic, username, name, is_following}: UserListItemI
         [id]
       );
 
-    function handleFollow() {
+    function handleFollow(e: React.MouseEvent) {
         setIsFollowing(prev => {
             const newFollowState = !prev
             debounceFollow(newFollowState)
@@ -138,7 +141,7 @@ function UserListItem({id, userpic, username, name, is_following}: UserListItemI
     }
 
     return (
-        <li className="flex justify-between items-center bg-white hover:bg-indigo-50 border border-indigo-200 shadow-sm rounded-md px-3 py-3 transition-colors cursor-pointer" onClick={() => navigate(`/user-profile/${id}`)}>
+        <li className="flex justify-between items-center bg-white hover:bg-indigo-50 border border-indigo-200 shadow-sm rounded-md px-3 py-3 transition-colors cursor-pointer" onClick={() => {setSearch(false); navigate(`/user-profile/${id}`)}}>
             <div className="flex gap-4">
                 <img src={userpic} alt={`${username}'s profile pic`} className="w-11 aspect-square object-cover rounded-full border border-indigo-800"/>
                 <div className="flex flex-col justify-center">
@@ -146,7 +149,11 @@ function UserListItem({id, userpic, username, name, is_following}: UserListItemI
                     <div className="text-sm text-slate-100">{name}</div>
                 </div>
             </div>
-            {isFollowing ? <UnFollowButton onClick={handleFollow}/> : <FollowButton onClick={handleFollow}/>}
+            {isFollowing ? (
+              <UnFollowButton onClick={(e: React.MouseEvent) => handleFollow(e)} />
+            ) : (
+              <FollowButton onClick={(e: React.MouseEvent) => handleFollow(e)} />
+            )}
         </li>
     )
 }

@@ -72,11 +72,11 @@ export default function FollowerStrip({
 }
 
 interface ButtonInterface {
-    onClick: () => void
+    onClick: (e: React.MouseEvent) => void
 }
 
 export function FollowButton({ onClick }: ButtonInterface) {
-    return (
+    return (    
         <button
             className="
                 sm:px-4 sm:py-2 sm:text-sm font-semibold rounded-md

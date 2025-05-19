@@ -8,6 +8,7 @@ interface UserPostContextType {
     fetchMorePosts: () => Promise<void>;
     setUserPosts: React.Dispatch<React.SetStateAction<Post[]>>;
     loading: boolean;
+    forbidden: boolean;   // add forbidden here
 }
 
 const UserPostsContext = createContext<UserPostContextType | null>(null);
@@ -28,9 +29,10 @@ export const UserPostProvider = ({
     const [userPosts, setUserPosts] = useState<Post[]>([]);
     const [lastID, setLastID] = useState("");
     const [loading, setLoading] = useState(false);
+    const [forbidden, setForbidden] = useState(false); // Track 403 state
 
     const fetchMorePosts = async () => {
-        if (loading || !userID) return;
+        if (loading || !userID || forbidden) return;  // Don't fetch if forbidden
         setLoading(true);
         try {
             const res = await axios.get(`http://localhost:3000/post/${userID}?page_size=10&last_id=${lastID}`, {
@@ -47,7 +49,17 @@ export const UserPostProvider = ({
                 setLastID(newPosts[newPosts.length - 1].id);
             }
         } catch (err) {
-            console.error("Failed to fetch user posts", err);
+            if (axios.isAxiosError(err)) {
+                if (err.response?.status === 403) {
+                    setForbidden(true);
+                    // optionally notify user here with toast or other UI
+                    console.warn("Access forbidden: you do not have permission to view these posts.");
+                } else {
+                    console.error("Failed to fetch user posts", err);
+                }
+            } else {
+                console.error("Unknown error fetching user posts", err);
+            }
         } finally {
             setLoading(false);
         }
@@ -56,11 +68,12 @@ export const UserPostProvider = ({
     useEffect(() => {
         setUserPosts([]);
         setLastID("");
+        setForbidden(false); // reset forbidden state when userID changes
         fetchMorePosts();
     }, [userID]);
 
     return (
-        <UserPostsContext.Provider value={{ userPosts, lastID, fetchMorePosts, setUserPosts, loading }}>
+        <UserPostsContext.Provider value={{ userPosts, lastID, fetchMorePosts, setUserPosts, loading, forbidden }}>
             {children}
         </UserPostsContext.Provider>
     );
