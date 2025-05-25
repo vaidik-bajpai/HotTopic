@@ -20,6 +20,7 @@ type UserProfile struct {
 	TotalFollowers int64    `json:"followers_count"`
 	TotalFollowing int64    `json:"following_count"`
 	IsFollowing    bool     `json:"is_following"`
+	IsSelf         bool     `json:"is_self"`
 }
 
 type ListUserReq struct {

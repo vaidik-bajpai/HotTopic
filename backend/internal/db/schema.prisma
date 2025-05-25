@@ -28,7 +28,7 @@ model Media {
     id    String @id @default(uuid())
     pID   String
     media String
-    Post  Post   @relation(fields: [pID], references: [id])
+    Post  Post   @relation(fields: [pID], references: [id], onDelete: Cascade)
 }
 
 model User {

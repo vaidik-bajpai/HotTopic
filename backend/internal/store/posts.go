@@ -42,6 +42,12 @@ func (s *Store) CreatePost(ctx context.Context, cp *CreateUserPosts) error {
 		transactions = append(transactions, txn)
 	}
 
+	postCountTxn := s.db.UserProfile.FindUnique(
+		db.UserProfile.UID.Equals(cp.UserID),
+	).Update(db.UserProfile.PostNumber.Increment(1)).Tx()
+
+	transactions = append(transactions, postCountTxn)
+
 	if err := s.db.Prisma.Transaction(transactions...).Exec(ctx); err != nil {
 		return err
 	}

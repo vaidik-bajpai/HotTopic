@@ -33,15 +33,28 @@ func (s *Store) IsFollower(ctx context.Context, followerID string, followingID s
 }
 
 func (s *Store) FollowUser(ctx context.Context, followerID string, followingID string) error {
-	_, err := s.db.Follow.CreateOne(
+	followTxn := s.db.Follow.CreateOne(
 		db.Follow.Follower.Link(
 			db.User.ID.Equals(followerID),
 		),
 		db.Follow.Following.Link(
 			db.User.ID.Equals(followingID),
 		),
-	).Exec(ctx)
-	if err != nil {
+	).Tx()
+
+	followingNoTxn := s.db.UserProfile.FindUnique(
+		db.UserProfile.UID.Equals(followerID),
+	).Update(
+		db.UserProfile.Following.Increment(1),
+	).Tx()
+
+	followerNoTxn := s.db.UserProfile.FindUnique(
+		db.UserProfile.UID.Equals(followingID),
+	).Update(
+		db.UserProfile.Followers.Increment(1),
+	).Tx()
+
+	if err := s.db.Prisma.Transaction(followTxn, followerNoTxn, followingNoTxn).Exec(ctx); err != nil {
 		if _, ok := db.IsErrUniqueConstraint(err); ok {
 			return ErrAlreadyAFollower
 		}
@@ -52,13 +65,26 @@ func (s *Store) FollowUser(ctx context.Context, followerID string, followingID s
 }
 
 func (s *Store) UnFollowUser(ctx context.Context, followerID, unFollowedID string) error {
-	_, err := s.db.Follow.FindUnique(
+	unfollowTxn := s.db.Follow.FindUnique(
 		db.Follow.FollowerIDFollowingID(
 			db.Follow.FollowerID.Equals(followerID),
 			db.Follow.FollowingID.Equals(unFollowedID),
 		),
-	).Delete().Exec(ctx)
-	if err != nil {
+	).Delete().Tx()
+
+	unFollowerTxn := s.db.UserProfile.FindUnique(
+		db.UserProfile.UID.Equals(followerID),
+	).Update(
+		db.UserProfile.Following.Decrement(1),
+	).Tx()
+
+	unFollowedTxn := s.db.UserProfile.FindUnique(
+		db.UserProfile.UID.Equals(unFollowedID),
+	).Update(
+		db.UserProfile.Followers.Decrement(1),
+	).Tx()
+
+	if err := s.db.Prisma.Transaction(unfollowTxn, unFollowedTxn, unFollowerTxn).Exec(ctx); err != nil {
 		if errors.Is(err, db.ErrNotFound) {
 			return ErrNotAFollower
 		}

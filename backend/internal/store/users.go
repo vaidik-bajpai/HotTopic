@@ -3,9 +3,7 @@ package store
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -162,15 +160,6 @@ func (s *Store) ActivateUser(ctx context.Context, userID string) error {
 }
 
 func (s *Store) GetProfile(ctx context.Context, gp *models.GetProfileReq) (*models.UserProfile, error) {
-	prevRID := gp.RequesterID
-	newReqID := strings.TrimSpace(gp.RequesterID)
-
-	if prevRID == newReqID {
-		fmt.Println("passed")
-	}
-
-	fmt.Println("requester ID: ", gp.RequesterID)
-
 	up, err := s.db.User.FindUnique(
 		db.User.ID.Equals(gp.UserID),
 	).With(
@@ -206,13 +195,16 @@ func (s *Store) GetProfile(ctx context.Context, gp *models.GetProfileReq) (*mode
 	}
 
 	return &models.UserProfile{
-		UserID:      up.ID,
-		Username:    up.Username,
-		UserPic:     pic,
-		Bio:         bio,
-		IsFollowing: isFollowing,
+		UserID:         up.ID,
+		Username:       up.Username,
+		UserPic:        pic,
+		Bio:            bio,
+		IsFollowing:    isFollowing,
+		Pronouns:       metadata.Pronouns,
+		TotalPosts:     int64(metadata.PostNumber),
+		TotalFollowers: int64(metadata.Followers),
+		TotalFollowing: int64(metadata.Following),
 	}, nil
-
 }
 
 func (s *Store) ListUsers(ctx context.Context, lu *models.ListUserReq) ([]*models.ListUserRes, error) {

@@ -17,6 +17,7 @@ import (
 func (h *HTTPHandler) handleGetProfile(w http.ResponseWriter, r *http.Request) {
 	user := getUserFromCtx(r)
 	userID := chi.URLParam(r, "userID")
+
 	if err := h.validate.Var(userID, "required,uuid"); err != nil {
 		h.json.FailedValidationResponse(w, r, err)
 		return
@@ -32,6 +33,10 @@ func (h *HTTPHandler) handleGetProfile(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.json.ServerErrorResponse(w, r, err)
 		return
+	}
+
+	if profile.UserID == user.ID {
+		profile.IsSelf = true
 	}
 
 	h.json.WriteJSONResponse(w, http.StatusOK, map[string]interface{}{"profile": profile})
