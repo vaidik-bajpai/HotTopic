@@ -11,15 +11,37 @@ import axios from "axios";
 import { useNavigate } from "react-router";
 
 const schema = yup.object({
-  username: yup.string().min(3).max(30).required("Username is required").matches(/^\S*$/, "Username cannot contain spaces").trim(),
-  bio: yup.string().max(200).trim(),
-  pronouns: yup.string().max(30).trim(),
-}).required();
+  username: yup
+    .string()
+    .min(3, "Too short")
+    .max(30, "Too long")
+    .required("Required")
+    .matches(/^\S*$/, "No spaces")
+    .trim(),
+
+  bio: yup.string().max(200, "Max 200 chars").trim(),
+
+  pronouns: yup
+    .string()
+    .trim()
+    .matches(
+      /^([a-zA-Z]+\/)*[a-zA-Z]+$/,
+      "Use format: he/him"
+    )
+    .test(
+      "valid-pronouns",
+      "Letters only, no empty parts",
+      (value) => {
+        if (!value) return true;
+        return value.split("/").every((p) => /^[a-zA-Z]+$/.test(p));
+      }
+    ),
+});
 
 type FormData = yup.InferType<typeof schema>;
 
 interface UserProfile extends FormData {
-  image: string | null;
+  userpic: string | null;
 }
 
 export interface EditProfileFormProps {
@@ -32,7 +54,7 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
 
   const [initialData, setInitialData] = useState<UserProfile | null>(user);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(user.image);
+  const [imagePreview, setImagePreview] = useState<string | null>(user.userpic);
 
   const {
     register,
@@ -48,7 +70,7 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
   if (user) {
     reset(user); // resets form fields
     setInitialData(user);
-    setImagePreview(user.image);
+    setImagePreview(user.userpic);
   }
 }, [user, reset]);
 
@@ -70,21 +92,34 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
   const onSubmit = async (data: FormData) => {
     if (!initialData) return;
 
-    const updatedFields: Partial<UserProfile> = {};
+    // Pronouns as string[] for backend update
+    const pronounsArray = data.pronouns?.trim().split("/") ?? [];
+
+    // Fields to check
     const current = {
       username: data.username,
       bio: data.bio,
-      pronouns: data.pronouns,
+      pronouns: pronounsArray, // string[]
     };
 
-    for (const key of Object.keys(current) as (keyof FormData)[]) {
-      if (current[key] !== initialData[key]) {
+    // Fields to send in API
+    const updatedFields: Partial<Omit<UserProfile, "pronouns">> & {
+      pronouns?: string[];
+    } = {};
+
+    for (const key of Object.keys(current) as (keyof typeof current)[]) {
+      if (key === "pronouns") {
+        const originalPronounsArray = initialData.pronouns?.split("/") ?? [];
+        if (JSON.stringify(pronounsArray) !== JSON.stringify(originalPronounsArray)) {
+          updatedFields.pronouns = pronounsArray;
+        }
+      } else if (current[key] !== initialData[key]) {
         updatedFields[key] = current[key];
       }
     }
 
     if (imageFile) {
-      updatedFields.image = imagePreview || null;
+      updatedFields.userpic = imagePreview || null;
     }
 
     if (Object.keys(updatedFields).length === 0) {
@@ -99,14 +134,22 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
       });
 
       toast.success("Profile updated successfully ✨");
-      setInitialData({ ...initialData, ...updatedFields });
+
+      // Convert pronouns[] back to string
+      const updatedFieldsToSet: Partial<UserProfile> = {
+        ...updatedFields,
+        pronouns: updatedFields.pronouns?.join("/"),
+      };
+
+      setInitialData({ ...initialData, ...updatedFieldsToSet });
+
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 401) {
-          toast.error("Unauthorized. Please login again.", { position: "top-right" });
-          navigate("/");
+        toast.error("Unauthorized. Please login again.");
+        navigate("/");
       } else {
-          toast.error("Failed to update profile.", { position: "top-right" });
-          console.error("Update error", err);
+        toast.error("Failed to update profile.");
+        console.error("Update error", err);
       }
     }
   };
@@ -133,6 +176,7 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
             <img
               src={imagePreview || "/default-avatar.png"}
               alt="Profile"
+              
               className="w-full h-full object-cover"
             />
           </div>
@@ -145,6 +189,7 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
           </button>
           <input
             type="file"
+            multiple={false}
             accept="image/*"
             ref={fileInputRef}
             onChange={handleImageChange}
@@ -164,7 +209,7 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
         <FormInput
           labelText="Bio"
           placeholder="something about yourself"
-          error={errors.pronouns?.message}
+          error={errors.bio?.message}
           {...register("bio")}
         />
 

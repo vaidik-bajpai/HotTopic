@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { PostCard } from "../PostCard";
 import axios from "axios";
-import { useNavigate } from "react-router";
+import { useNavigate, useOutletContext } from "react-router";
 import { toast } from "react-toastify";
+import { PageContext } from "../../types/Page";
 
 interface Post {
   id: string;
@@ -22,6 +23,8 @@ export default function FeedRenderer() {
     const [lastID, setLastID] = useState<string>("");
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
+
+    const { setSearch } = useOutletContext<PageContext>();
 
     const observerRef = useRef<IntersectionObserver | null>(null);
     const loaderRef = useRef<HTMLDivElement | null>(null);
@@ -95,6 +98,7 @@ export default function FeedRenderer() {
                 
                 <button
                     className="px-5 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 shadow transition"
+                    onClick={() => setSearch(true)}
                 >
                     Open Search
                 </button>

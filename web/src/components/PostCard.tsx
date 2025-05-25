@@ -74,7 +74,7 @@ export function PostCard({
         })
     }
     return (
-        <div className="font-mono w-full h-full bg-white px-3 pb-2 rounded-xl">
+        <div className="w-full h-full bg-white px-3 pb-2 rounded-xl">
             <div className="flex py-2 px-2 gap-3 items-center">
                 <img src={userImage} className="rounded-full w-8 h-8 flex-shrink-0"></img>
                 <p className="font-bold text-sm truncate">{username}</p>
@@ -86,7 +86,7 @@ export function PostCard({
 
             <div className="flex justify-between px-2 py-2">
                 <div className="flex gap-8">
-                    <div>
+                    <div className="flex gap-2">
                         <button onClick={handleLike}>
                             <Heart className={`${isLiked ? "scale-100" : "scale-0 w-0 h-0"} transition-transform duration-500 text-red-500`} fill="red"/>
                             <Heart className={`${isLiked ? "scale-0 w-0 h-0" : "scale-100"} transition-transform duration-300`} />

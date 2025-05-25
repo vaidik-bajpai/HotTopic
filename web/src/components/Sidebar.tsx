@@ -1,9 +1,9 @@
-import React, { useState } from "react"
+import React, { Dispatch, SetStateAction, useState } from "react"
 import { House, BookMarked, BookHeart, LogOut, User, PlusSquare, Flame, Search} from 'lucide-react';
 import { useLocation, useNavigate } from "react-router";
 import { useUser } from "../context/UserContext";
 import axios from "axios";
-import CreatePost from "./CreatePost";
+import CreatePost from "./forms/CreatePost";
 import UserSearch from "./UserSearch";
 import { toast } from "react-toastify";
 
@@ -12,10 +12,11 @@ interface SidebarInterface {
     setSearch: (val: boolean) => void,
     expanded: boolean,
     setExpanded: (val: boolean) => void
+    createPost: boolean,
+    setCreatePost: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function Sidebar({search, setSearch, expanded, setExpanded}: SidebarInterface) {
-    const [createPost, setCreatePost] = useState<boolean>(false)
+export default function Sidebar({search, setSearch, expanded, setExpanded, createPost, setCreatePost}: SidebarInterface) {
     const location = useLocation()
     const navigate = useNavigate()
     const user = useUser()

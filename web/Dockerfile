@@ -1,10 +1,10 @@
-FROM node:23.7-bullseye AS build
+FROM node:22-bullseye AS build
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm ci
 
 COPY . .
 

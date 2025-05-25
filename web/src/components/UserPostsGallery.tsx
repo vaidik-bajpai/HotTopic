@@ -1,8 +1,9 @@
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useOutlet, useOutletContext, useParams } from "react-router";
 import { useUserPosts } from "../context/UserPostContext"; // adjust path
 import { Copy, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import NotAFollower from "./NotAFollower";
+import { PageContext } from "../types/Page";
 
 export default function UserPostsGallery() {
     const { userID } = useParams()
@@ -11,6 +12,8 @@ export default function UserPostsGallery() {
     const loaderRef = useRef<HTMLDivElement | null>(null);
     const observerRef = useRef<IntersectionObserver | null>(null);
     const navigate = useNavigate();
+
+    const { setCreatePost } = useOutletContext<PageContext>()
 
     useEffect(() => {
         if (observerRef.current) observerRef.current.disconnect();
@@ -41,7 +44,7 @@ export default function UserPostsGallery() {
     if (userPosts.length === 0) {
         return (
             <div className="flex-grow flex flex-col items-center justify-center text-center bg-indigo-200 rounded-xl shadow-sm p-2">
-                <NoPosts />
+                <NoPosts setCreatePost={setCreatePost}/>
             </div>
         );
     }
@@ -75,7 +78,7 @@ export default function UserPostsGallery() {
     );
 }
 
-function NoPosts() {
+function NoPosts({setCreatePost}: {setCreatePost: (val: boolean) => void}) {
     const navigate = useNavigate();
 
     return (
@@ -87,7 +90,7 @@ function NoPosts() {
                 Start sharing your thoughts and moments with others!
             </p>
             <button
-                onClick={() => navigate("/create-post")}
+                onClick={() => setCreatePost(true)}
                 className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
             >
                 Create Post

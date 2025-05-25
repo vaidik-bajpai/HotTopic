@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { PostCard } from "./PostCard";
 import { useUserPosts } from "../context/UserPostContext";
 

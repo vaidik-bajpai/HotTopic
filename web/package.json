@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "check-env": "node scripts/check-env.js",
+    "build": "npm run check-env && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
@@ -15,6 +16,7 @@
     "@hookform/resolvers": "^4.1.1",
     "@tailwindcss/vite": "^4.0.6",
     "axios": "^1.7.9",
+    "dotenv": "^16.5.0",
     "lodash": "^4.17.21",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.476.0",
@@ -41,6 +43,7 @@
     "@storybook/test": "^8.5.6",
     "@types/estree": "^1.0.7",
     "@types/lodash.debounce": "^4.0.9",
+    "@types/node": "^22.15.19",
     "@types/react": "^18.3.20",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
@@ -60,5 +63,8 @@
       "plugin:react/recommended",
       "plugin:storybook/recommended"
     ]
+  },
+  "engines": {
+    "node": "22.x"
   }
 }

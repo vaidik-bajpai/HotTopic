@@ -67,16 +67,18 @@ export default function CreatePost({
             const uploadedImagesURLs: string[] = [];
 
             for (let i = 0; i < medias.length; i++) {
-                const formData = new FormData();
-                formData.append("file", medias[i]);
-                formData.append("upload_preset", "Cloudinary-demo");
-                formData.append("cloud_name", "drg9zdr28");
+                try {
+                    const formData = new FormData();
+                    formData.append("file", medias[i]);
+                    formData.append("upload_preset", "Cloudinary-demo");
+                    formData.append("cloud_name", "drg9zdr28");
 
-                const res = await axios.post(
-                    "https://api.cloudinary.com/v1_1/drg9zdr28/image/upload",
-                    formData
-                );
-                uploadedImagesURLs.push(res.data.url);
+                    const res = await axios.post(import.meta.env.VITE_CLOUDINARY_UPLOAD_URI!, formData);
+                    uploadedImagesURLs.push(res.data.url);
+                } catch (uploadErr) {
+                    toast.error(`Failed to upload file: ${medias[i].name}`);
+                    throw uploadErr; // Prevent hitting backend if any upload fails
+                }
             }
 
             await axios.post(
@@ -88,7 +90,7 @@ export default function CreatePost({
                 { withCredentials: true }
             );
 
-            toast.success("Posted", { position: "top-right" });
+            toast.success("Posted");
 
             reset();
             setMedias([]);

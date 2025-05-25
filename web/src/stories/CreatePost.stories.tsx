@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import CreatePost from "../components/CreatePost";
+import CreatePost from "../components/forms/CreatePost";
 import { UserProvider } from "../context/UserContext"; // If needed
 import { MemoryRouter } from "react-router-dom";
 

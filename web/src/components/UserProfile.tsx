@@ -1,4 +1,4 @@
-import { Outlet, useNavigate, useParams } from "react-router";
+import { Outlet, useNavigate, useOutletContext, useParams } from "react-router";
 import EditProfileButton from "./buttons/EditProfileButton";
 import UserBio from "./UserBio";
 import UserProfileMetadata from "./UserProfileMetadata";
@@ -14,6 +14,7 @@ import EditProfilePage from "./EditProfilePage";
 import { toast } from "react-toastify";
 import { debounce } from "lodash";
 import NotAFollower from "./NotAFollower";
+import { PageContext } from "../types/Page";
 
 interface UserProfileInterface {
     user_id: string
@@ -25,6 +26,7 @@ interface UserProfileInterface {
     followers_count: number
     following_count: number
     is_following: boolean
+    is_self: boolean
 }
 
 function UserProfile() {
@@ -39,15 +41,15 @@ function UserProfile() {
         followers_count: 0,
         following_count: 0,
         is_following: false,
+        is_self: false,
     })
     const [isEditProfile, setIsEditProfile] = useState<boolean>(false);
-
+    const { setCreatePost } = useOutletContext<PageContext>();
     const debounceFollow = useCallback(
         debounce(async (shouldFollow: boolean, userID: string) => {
             try {
                 const url = `http://localhost:3000/user/${userID}/${shouldFollow ? "follow" : "unfollow"}`;
                 await axios.post(url, {}, { withCredentials: true });
-                    
             } catch (err) {
             if (axios.isAxiosError(err)) {
                 if (err.response?.status === 401) {
@@ -55,9 +57,6 @@ function UserProfile() {
                 navigate("/");
                 } else {
                 console.error(err);
-                // Since this function is debounced and outside state, 
-                // you might need a way to revert UI state from here if you want.
-                // But simplest is to reload profile or show error toast.
                 toast.error("Failed to update follow status. Please try again.");
                 }
             } else {
@@ -119,13 +118,13 @@ function UserProfile() {
                                 </div>
                             </div>
                             <UserBio bio={profile.bio} />
-                            {userID === user.id ? <EditProfileButton onClick={() => setIsEditProfile(true)}/> :  profile.is_following ? <ProfileUnFollowButton onClick={handleClick}/> : <ProfileFollowButton onClick={handleClick}/>}
+                            {profile.is_self ? <EditProfileButton onClick={() => setIsEditProfile(true)}/> :  profile.is_following ? <ProfileUnFollowButton onClick={handleClick}/> : <ProfileFollowButton onClick={handleClick}/>}
                         </div>
                         <div className="mt-2">
                             <UserProfileSlider />
                         </div>
                     </div>
-                    {user.id === userID || profile.is_following ? <Outlet /> : 
+                    {user.id === userID || profile.is_following ? <Outlet context={{ isSelf: profile.is_self, isFollowing: profile.is_following, setCreatePost: setCreatePost }} /> : 
                         <div className="flex-grow w-full flex justify-center items-center bg-indigo-200 rounded-xl shadow-sm p-2">
                             <NotAFollower text={"Only followers can view this user's content. Follow them to gain access."}/>
                         </div>  
@@ -135,7 +134,7 @@ function UserProfile() {
             {isEditProfile && <EditProfilePage user={{
                 ...profile,
                 pronouns: profile.pronouns != null && profile.pronouns.length > 0  ? profile.pronouns.join("/") : "",
-                image: profile.userpic
+                userpic: profile.userpic
             }} setIsEditProfile={setIsEditProfile}/>}
         </div>
     )

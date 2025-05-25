@@ -21,7 +21,6 @@ export default function UserSearch({
     search: boolean;
     setSearch: (val: boolean) => void;
 }) {
-    const navigate = useNavigate()
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [users, setUsers] = useState<ListInterface[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
