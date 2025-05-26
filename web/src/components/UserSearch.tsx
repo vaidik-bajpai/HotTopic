@@ -67,7 +67,7 @@ export default function UserSearch({
         <AnimatePresence mode="wait">
             {search && <motion.div
                 key="user-search"
-                className="absolute top-0 right-0 w-screen md:w-[28rem] h-full z-50 bg-gradient-to-br from-indigo-100 to-indigo-200 text-black shadow-xl sm:p-4 border-1 border-indigo-400 md:rounded-r-lg"
+                className="z-100 absolute top-0 right-0 w-screen md:w-[28rem] h-full bg-gradient-to-br from-indigo-100 to-indigo-200 text-black shadow-xl sm:p-4 border-1 border-indigo-400 md:rounded-r-lg"
                 initial={{ x: "-100%" }}     
                 animate={search ? { x: "100%" } : { x: "-100%" }}        
                 exit={{ x: "-100%"}}        
@@ -101,7 +101,7 @@ export default function UserSearch({
                         ))}
                     </ul> : <ul className="px-6 py-6 md:px-4 md:py-4 space-y-4">
                         {users.map((user) => (
-                            <UserListItem id={user.id} userpic={user.user_pic} username={user.username} name={user.name} is_following={user.is_following} setSearch={setSearch}/>
+                            <UserListItem key={user.id} id={user.id} userpic={user.user_pic} username={user.username} name={user.name} is_following={user.is_following} setSearch={setSearch}/>
                         ))}
                     </ul>}
                 </div>  

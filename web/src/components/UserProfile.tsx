@@ -5,7 +5,7 @@ import UserProfileMetadata from "./UserProfileMetadata";
 import UserProfileName from "./UserProfileName";
 import UserProfilePic from "./UserProfilePic";
 import UserProfileSlider from "./UserProfileSlider";
-import { useCallback, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { useUser } from "../context/UserContext";
 import ProfileFollowButton from "./buttons/ProfileFollowButton";
@@ -48,7 +48,7 @@ function UserProfile() {
         is_self: false,
     })
     const [isEditProfile, setIsEditProfile] = useState<boolean>(false);
-    const { setCreatePost } = useOutletContext<PageContext>();
+    const { setCreatePost, setHeaderText } = useOutletContext<PageContext & {setHeaderText: Dispatch<SetStateAction<string>>}>();
     async function handleClick() {
         if (isLoading) return; 
         const newFollowState = !profile.is_following;
@@ -109,6 +109,7 @@ function UserProfile() {
                 withCredentials: true
             });
             setProfile(response.data.profile);
+            setHeaderText(response.data.profile.username)
         } catch (error: any) {
             if (axios.isAxiosError(error) && error.response?.status === 401) {
                 showToast("You are not logged in.", "error");

@@ -82,7 +82,7 @@ export function PostCard({
         })
     }
     return (
-        <div className="w-full h-full bg-white px-3 pb-2 rounded-xl">
+        <div className="font-mono w-full h-full bg-white px-3 pb-2 rounded-xl">
             <div className="flex py-2 px-2 gap-3 items-center">
                 <img src={userImage} className="rounded-full w-8 h-8 flex-shrink-0"></img>
                 <p className="font-bold text-sm truncate">{username}</p>

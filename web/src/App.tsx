@@ -62,10 +62,13 @@ function App() {
 
           <Route path='*' element={<NotFoundPage />}/>
         </Routes>
-        <ToastContainer 
-          className="hidden md:block"
+        <ToastContainer
           position='top-center'
-          autoClose={1500}/>
+          autoClose={300}
+          toastClassName="max-w-[90vw] sm:max-w-sm md:max-w-md lg:max-w-lg 
+            bg-white rounded-md shadow-md
+            overflow-hidden
+            px-4 py-2"/>
       </div>
     </>
   )

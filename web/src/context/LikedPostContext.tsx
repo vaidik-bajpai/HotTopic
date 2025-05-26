@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, Dispatch, SetStateAction } from "react";
 import axios from "axios";
 import { Post } from "../types/post";
 import { showToast } from "../utility/toast";
-import { useNavigate } from "react-router";
+import { useNavigate, useOutletContext } from "react-router";
 
 interface LikedPostContextType {
   likedPosts: Post[];
@@ -24,12 +24,14 @@ export const LikedPostProvider = ({ children }: { children: React.ReactNode }) =
   const [lastID, setLastID] = useState("");
   const navigate = useNavigate();
 
+  const { setHeaderText }: { setHeaderText: Dispatch<SetStateAction<string>> } = useOutletContext();
+
   const fetchMorePosts = async () => {
     try {
       const res = await axios.get(`http://localhost:3000/post/liked?page_size=10&last_id=${lastID}`, {
         withCredentials: true,
       });
-      const newPosts: Post[] = res.data.posts;
+      const newPosts: Post[] = res.data.posts ?? [];
       if (newPosts.length) {
         setLikedPosts((prev) => [...prev, ...newPosts]);
         setLastID(newPosts[newPosts.length - 1].id);
@@ -49,6 +51,7 @@ export const LikedPostProvider = ({ children }: { children: React.ReactNode }) =
     if (likedPosts.length === 0) {
       fetchMorePosts();
     }
+    setHeaderText("Liked Posts")
   }, []);
 
   return (

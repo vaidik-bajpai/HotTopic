@@ -51,7 +51,7 @@ function ResetPasswordForm() {
 
         console.log("reset password successful", response.data);
         showToast("Password reset successful!");
-        navigate("/login");
+        navigate("/");
     } catch (err) {
         if (axios.isAxiosError(err) && err.response?.status === 401) {
             showToast("Unauthorized. Please login again.", "error");

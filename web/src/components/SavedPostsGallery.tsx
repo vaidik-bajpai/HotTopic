@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutlet, useOutletContext } from "react-router-dom";
 import { useSavedPosts } from "../context/SavedPostContext";
 
 function SavedPostsGallery() {

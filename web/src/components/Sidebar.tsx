@@ -15,17 +15,32 @@ interface SidebarInterface {
     setExpanded: (val: boolean) => void
     createPost: boolean,
     setCreatePost: Dispatch<SetStateAction<boolean>>;
+    headerText: string,
+    setHeaderText: Dispatch<SetStateAction<string>>;
 }
 
-export default function Sidebar({search, setSearch, expanded, setExpanded, createPost, setCreatePost}: SidebarInterface) {
+export default function Sidebar({
+    search,
+    setSearch,
+    expanded,
+    setExpanded,
+    createPost,
+    setCreatePost,
+    headerText
+}: SidebarInterface) {
     const location = useLocation()
     const navigate = useNavigate()
     const user = useUser()
 
+    
+
     function handleClickWrapper(fn: () => void) {
         if(search === true) {
             setSearch(false)
-            setExpanded(true)
+        }
+
+        if(expanded) {
+            setExpanded(false)
         }
         fn()
     }
@@ -67,7 +82,7 @@ export default function Sidebar({search, setSearch, expanded, setExpanded, creat
             {/* Top bar with hamburger icon */}
             <div className="flex flex-col w-full md:hidden py-2 px-4">
                 <div className="flex justify-between items-center w-full">
-                    <h1 className="font-bold text-lg">Feed</h1>
+                    <h1 className="font-semibold text-lg text-indigo-800">{headerText}</h1>
                     <div className="cursor-pointer " onClick={() => setExpanded(true)}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu">
                             <line x1="4" x2="20" y1="12" y2="12" />

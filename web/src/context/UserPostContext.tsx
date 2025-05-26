@@ -32,9 +32,10 @@ export const UserPostProvider = ({
     const [lastID, setLastID] = useState("");
     const [loading, setLoading] = useState(false);
     const [forbidden, setForbidden] = useState(false); // Track 403 state
-
+    const navigate = useNavigate();
+    
     const fetchMorePosts = async () => {
-        const navigate = useNavigate();
+        
         if (loading || !userID || forbidden) return;  // Don't fetch if forbidden
         setLoading(true);
         try {

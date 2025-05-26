@@ -160,7 +160,7 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
   }
 
   return (
-    <div className="w-full max-w-md sm:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 font-mono space-y-6">
+    <div className="z-50 w-full max-w-md sm:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 font-mono space-y-6">
         <form
             onSubmit={handleSubmit(onSubmit)}
             className="bg-white p-4 md:p-6 rounded-2xl shadow-xl border border-indigo-200 space-y-3 transition-all duration-300 ease-in-out"
