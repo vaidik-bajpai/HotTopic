@@ -53,7 +53,7 @@ func (p *Password) MatchHash(rawPassword string) (bool, error) {
 
 type User struct {
 	ID        string    `json:"id"`
-	Name      string    `json:"name" validate:"required,min=6,max=30"`
+	Name      string    `json:"name" validate:"required,min=3,max=30"`
 	Username  string    `json:"username" validate:"required.min=6,max=30"`
 	Password  *Password `json:"-"`
 	Email     string    `json:"email" validate:"required,email,checkEmail"`

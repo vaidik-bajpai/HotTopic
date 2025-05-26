@@ -77,7 +77,7 @@ func (s *Store) GetLikedPost(ctx context.Context, gl *models.GetLikedReq) ([]*mo
 	)
 
 	if gl.LastID != "" {
-		query = query.Cursor(db.PostLike.PostID.Cursor(gl.LastID))
+		query = query.Cursor(db.PostLike.ID.Cursor(gl.LastID))
 	}
 
 	likedPosts, err := query.Exec(ctx)
