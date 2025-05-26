@@ -3,6 +3,8 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router";
 import debounce from "lodash.debounce"
 import { toast } from "react-toastify";
+import defaultProfilePic from '../assets/Default-Profile.png';
+import { showToast } from "../utility/toast";
 
 interface FollowerStripInterface {
     userID: string;
@@ -28,7 +30,7 @@ export default function FollowerStrip({
         } catch (err) {
             if (axios.isAxiosError(err)) {
                 if (err.response?.status === 401) {
-                    toast.error("Unauthorized. Please login again.", { position: "top-right" });
+                    showToast("Unauthorized. Please login again.", "error");
                     navigate("/");
                 } else {
                     console.error(err);
@@ -51,13 +53,14 @@ export default function FollowerStrip({
     }
     
     return (
-        <div className="w-full flex justify-between items-center bg-white p-2 sm:px-3 sm:py-3 md:px-4 md:py-2 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer hover:shadow-lg hover:shadow-indigo-800 group">
+        <div className="w-full flex justify-between items-center bg-white p-2 sm:px-3 sm:py-3 md:px-4 md:py-2 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer hover:shadow-lg hover:shadow-indigo-800 group"
+            onClick={() => navigate(`/user-profile/${userID}`)}
+        >
             <div
                 className="flex items-center gap-3 md:gap-6 sm:gap-2 cursor-pointer"
-                onClick={() => navigate(`/user-profile/${userID}`)}
             >
                 <img
-                    src={userPic}
+                    src={userPic || defaultProfilePic}
                     alt={username}
                     className="md:h-12 md:w-12 sm:h-10 sm:w-10 h-8 sm:w-8 rounded-full object-cover border border-indigo-200 group-hover:border-indigo-800 group-hover:shadow-indigo-800 transition duration-300"
                 />
@@ -65,7 +68,13 @@ export default function FollowerStrip({
                     className="text-gray-800 font-medium text-base text-sm sm:text-md md:text-lg group-hover:text-indigo-800 transition duration-300">{username}</span>
             </div>
             <div className="ml-2">
-                {isFollowing ? <UnFollowButton onClick={handleFollow}/> : <FollowButton onClick={handleFollow}/>}
+                {isFollowing ? <UnFollowButton onClick={(e) => {
+                    e.stopPropagation()
+                    handleFollow()
+                }}/> : <FollowButton onClick={(e) => {
+                    e.stopPropagation()
+                    handleFollow()
+                }}/>}
             </div>
         </div>
     );

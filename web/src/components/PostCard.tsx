@@ -3,6 +3,8 @@ import MediaRenderer from "./renderers/MediaRenderer"
 import { Bookmark, Heart, Send } from "lucide-react"
 import axios from "axios"
 import debounce from "lodash.debounce"
+import { toast } from "react-toastify"
+import { showToast } from "../utility/toast"
 
 interface PostCardInterface {
     id: string
@@ -22,12 +24,13 @@ export function PostCard({
     username,
     postImages,
     caption,
-    likeCount,
+    likeCount: initialLikeCount,
     commentCount,
     isLiked: initialLikedState,
     isSaved: initialSavedState
 }: PostCardInterface) {
     const [isLiked, setIsLiked] = useState(initialLikedState)
+    const [likeCount, setLikeCount] = useState(initialLikeCount)
     const [isSaved, setIsSaved] = useState(initialSavedState)
     const [isCaption, setIsCaption] = useState<boolean>(false)
 
@@ -38,8 +41,12 @@ export function PostCard({
                 await axios.post(url, {}, {withCredentials: true})
 
             } catch(err) {
-                console.log(err)
-                setIsLiked(prev => !prev)
+                showToast("could not process your like", "error")
+                setIsLiked(prev => {
+                    const rollbackState = !prev;
+                    setLikeCount(count => rollbackState ? count + 1 : count - 1);
+                    return rollbackState;
+                });
             }
         }, 500),
         [id]
@@ -48,6 +55,7 @@ export function PostCard({
     function handleLike() {
         setIsLiked(prev => {
             const newLikedState = !prev
+            setLikeCount(count => newLikedState ? count + 1 : count - 1);
             debounceLike(newLikedState)
             return newLikedState
         })
@@ -60,7 +68,7 @@ export function PostCard({
                 await axios.post(url, {}, {withCredentials: true})
             } catch(err) {
                 console.log(err)
-                setIsLiked(prev => !prev)
+                setIsSaved(prev => !prev)
             }
         }, 500),
         [id]

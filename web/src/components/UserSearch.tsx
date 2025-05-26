@@ -5,6 +5,8 @@ import axios from "axios";
 import { useNavigate } from "react-router";
 import { FollowButton, UnFollowButton } from "./FollowerStrip";
 import { motion, AnimatePresence } from "framer-motion";
+import defaultProfilePic from '../assets/Default-Profile.png';
+import { showToast } from "../utility/toast";
 
 interface ListInterface {
     id: string;
@@ -24,6 +26,7 @@ export default function UserSearch({
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [users, setUsers] = useState<ListInterface[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
+    const navigate = useNavigate();
 
     const fetchUsers = async (query: string) => {
         try {   
@@ -39,6 +42,10 @@ export default function UserSearch({
             }
             setLoading(false)
         } catch(err) {
+            if(axios.isAxiosError(err) && err.response?.status === 401) {
+                showToast("Unauthorized. Please login again.", "error")
+                navigate("/")
+            }
             console.log(err)
             setLoading(false)
         }  
@@ -142,7 +149,7 @@ function UserListItem({id, userpic, username, name, is_following, setSearch}: Us
     return (
         <li className="flex justify-between items-center bg-white hover:bg-indigo-50 border border-indigo-200 shadow-sm rounded-md px-3 py-3 transition-colors cursor-pointer" onClick={() => {setSearch(false); navigate(`/user-profile/${id}`)}}>
             <div className="flex gap-4">
-                <img src={userpic} alt={`${username}'s profile pic`} className="w-11 aspect-square object-cover rounded-full border border-indigo-800"/>
+                <img src={userpic || defaultProfilePic} alt={`${username}'s profile pic`} className="w-11 overflow-hidden aspect-square object-cover rounded-full border border-indigo-800"/>
                 <div className="flex flex-col justify-center">
                     <div className="font-semibold text-sm md:text-md">{username}</div>
                     <div className="text-sm text-slate-100">{name}</div>

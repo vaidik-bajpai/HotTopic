@@ -1,9 +1,11 @@
 import { useNavigate, useOutlet, useOutletContext, useParams } from "react-router";
 import { useUserPosts } from "../context/UserPostContext"; // adjust path
-import { Copy, Plus } from "lucide-react";
+import { Camera, Copy, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import NotAFollower from "./NotAFollower";
 import { PageContext } from "../types/Page";
+import { ProfileContextType } from "../types/Profile";
+import NoContent from "./NoContent";
 
 export default function UserPostsGallery() {
     const { userID } = useParams()
@@ -13,7 +15,7 @@ export default function UserPostsGallery() {
     const observerRef = useRef<IntersectionObserver | null>(null);
     const navigate = useNavigate();
 
-    const { setCreatePost } = useOutletContext<PageContext>()
+    const { setCreatePost, isSelf } = useOutletContext<PageContext & ProfileContextType>()
 
     useEffect(() => {
         if (observerRef.current) observerRef.current.disconnect();
@@ -44,7 +46,13 @@ export default function UserPostsGallery() {
     if (userPosts.length === 0) {
         return (
             <div className="flex-grow flex flex-col items-center justify-center text-center bg-indigo-200 rounded-xl shadow-sm p-2">
-                <NoPosts setCreatePost={setCreatePost}/>
+                {isSelf 
+                    ? <NoPosts 
+                        setCreatePost={setCreatePost}/> 
+                    : <NoContent 
+                        image={<Camera className="w-16 h-16 mb-4 text-indigo-400"/>}
+                        title={"No Posts yet"}
+                        text="Looks the user has not posted anything yet!"/>}
             </div>
         );
     }
@@ -65,8 +73,8 @@ export default function UserPostsGallery() {
                                 className="w-full aspect-square object-cover rounded"
                             />
                             {post.media.length > 1 && (
-                                <div className="absolute z-10 right-0 top-0 opacity-50 p-2 -scale-x-100 overflow-hidden">
-                                    <Copy className="text-black" />
+                                <div className="absolute z-10 rounded right-0 top-0 opacity-50 p-2 -scale-x-100 overflow-hidden">
+                                    <Copy className="text-black " />
                                 </div>
                             )}
                         </div>
@@ -79,8 +87,6 @@ export default function UserPostsGallery() {
 }
 
 function NoPosts({setCreatePost}: {setCreatePost: (val: boolean) => void}) {
-    const navigate = useNavigate();
-
     return (
         <div className="bg-white rounded-lg shadow-md p-8 flex flex-col items-center justify-center text-center max-w-md mx-auto">
             <Plus className="w-16 h-16 mb-4 text-indigo-400"/>

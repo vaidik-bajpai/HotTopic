@@ -6,6 +6,7 @@ import axios from "axios";
 import CreatePost from "./forms/CreatePost";
 import UserSearch from "./UserSearch";
 import { toast } from "react-toastify";
+import { showToast } from "../utility/toast";
 
 interface SidebarInterface {
     search: boolean,
@@ -38,14 +39,10 @@ export default function Sidebar({search, setSearch, expanded, setExpanded, creat
             );
             user.logout();
 
-            toast.success("Logged out successfully", {
-                position: "top-center",
-            });
+            showToast("Logged out successfully");
         } catch (err) {
             console.error(err);
-            toast.error("Logout failed. Please try again.", {
-                position: "top-center",
-            });
+            showToast("Logout failed. Please try again.", "error");
         }
     }
 

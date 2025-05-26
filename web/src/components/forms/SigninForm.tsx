@@ -9,7 +9,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import axios, { AxiosError } from "axios";
 import PasswordInput from "../PasswordInput";
 import { useUser } from "../../context/UserContext";
-import { toast } from "react-toastify";
+import { showToast } from "../../utility/toast";
 
 const schema = yup.object({
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -36,7 +36,7 @@ export default function SigninForm() {
             });
 
             user.setUser({ isLoggedIn: true, id: response.data.id });
-            toast.success("Welcome back! 🎉");
+            showToast("Welcome back! 🎉");
             navigate("/dashboard");
         } catch (error) {
             const err = error as AxiosError;
@@ -44,23 +44,23 @@ export default function SigninForm() {
             if (err.response) {
                 switch (err.response.status) {
                     case 400:
-                        toast.error("Invalid request. Please try again.");
+                        showToast("Invalid request. Please try again.", "error");
                         break;
                     case 422:
-                        toast.error("Validation error. Please check your input.");
+                        showToast("Validation error. Please check your input.", "error");
                         break;
                     case 401:
-                        toast.error("Invalid email or password.");  
+                        showToast("Invalid email or password.", "error");  
                         break;
                     case 500:
-                        toast.error("Something went wrong. Please try later.");
+                        showToast("Something went wrong. Please try later.", "error");
                         break;
                     default:
-                        toast.error(`Unexpected error: ${err.response.status}`);
+                        showToast(`Unexpected error: ${err.response.status}`, "error");
                         break;
                 }
             } else {
-                toast.error("Network error. Please check your connection.");
+                showToast("Network error. Please check your connection.", "error");
             }
 
             console.error("Sign in failed", err);

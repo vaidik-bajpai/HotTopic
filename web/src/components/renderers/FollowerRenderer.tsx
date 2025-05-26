@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useOutlet, useOutletContext, useParams } from "react-router";
 import FollowerStrip from "../FollowerStrip";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -6,6 +6,8 @@ import FollowerList from "../../types/FollowerList";
 import { User } from "lucide-react";
 import { toast } from "react-toastify";
 import NotAFollower from "../NotAFollower";
+import NoContent from "../NoContent";
+import { ProfileContextType } from "../../types/Profile";
 
 function FollowerRenderer() {
     const navigate = useNavigate();
@@ -13,6 +15,8 @@ function FollowerRenderer() {
     const [followerList, setFollowerList] = useState<FollowerList[]>([]);
     const [lastID, setLastID] = useState<string>("");
     const [isForbidden, setIsForbidden] = useState(false);
+
+    const { isSelf, isFollowing } = useOutletContext<ProfileContextType>() 
 
     async function fetchFollower() {
         try {
@@ -47,10 +51,10 @@ function FollowerRenderer() {
             }
         }
     }
-
+    
     useEffect(() => {
         fetchFollower();
-    }, []);
+    }, [userID, isFollowing, isSelf]);
 
     if(isForbidden) {
         return (
@@ -65,7 +69,15 @@ function FollowerRenderer() {
             {
                 followerList.length == 0 ? (
                     <div className="flex-grow w-full flex justify-center items-center">
-                        <NoFollowers />
+                        {isSelf ? <NoContent 
+                            image={<User className="w-16 h-16 mb-4 text-indigo-400"/>}
+                            title={"No followers yet"}
+                            text="Looks like you don't have any followers right now. Share your profile to gain followers!"
+                        /> : <NoContent 
+                            image={<User className="w-16 h-16 mb-4 text-indigo-400"/>}
+                            title={"No followers yet"}
+                            text="Looks like the user does not have any followers right now"
+                        />}
                     </div>
                 ) : (
                     <div className="max-w-4xl lg:max-w-5xl mx-auto space-y-3 w-full px-2 md:px-4">
@@ -85,17 +97,3 @@ function FollowerRenderer() {
 }
 
 export default FollowerRenderer;
-
-
-function NoFollowers() {
-    return (
-        <div className="bg-white rounded-lg shadow-md p-8 flex flex-col items-center justify-center text-center max-w-md mx-auto">
-            <User className="w-16 h-16 mb-4 text-indigo-400"/>
-
-            <h3 className="text-lg font-semibold text-indigo-700 mb-2">No followers yet</h3>
-            <p className="text-indigo-600 text-sm">
-                Looks like you don’t have any followers right now. Share your profile to gain followers!
-            </p>
-        </div>
-    );
-}

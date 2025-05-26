@@ -17,8 +17,9 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
-import { toast } from "react-toastify";
 import { useNavigate } from "react-router";
+import { motion } from 'framer-motion';
+import { showToast } from "../../utility/toast";
 
 const schema = yup.object().shape({
     caption: yup.string().required("Caption is required"),
@@ -57,7 +58,7 @@ export default function CreatePost({
     
     const onSubmit = async (data: { caption: string }) => {
         if (medias.length === 0) {
-            toast.error("Media is required!", { position: "top-right" });
+            showToast("Media is required!", "error");
             return;
         }
 
@@ -76,8 +77,8 @@ export default function CreatePost({
                     const res = await axios.post(import.meta.env.VITE_CLOUDINARY_UPLOAD_URI!, formData);
                     uploadedImagesURLs.push(res.data.url);
                 } catch (uploadErr) {
-                    toast.error(`Failed to upload file: ${medias[i].name}`);
-                    throw uploadErr; // Prevent hitting backend if any upload fails
+                    showToast(`Failed to upload file: ${medias[i].name}`, "error");
+                    throw uploadErr;
                 }
             }
 
@@ -90,7 +91,7 @@ export default function CreatePost({
                 { withCredentials: true }
             );
 
-            toast.success("Posted");
+            showToast("Post created");
 
             reset();
             setMedias([]);
@@ -98,7 +99,7 @@ export default function CreatePost({
         } catch (err) {
             if (axios.isAxiosError(err)) {
                 if (err.response?.status === 401) {
-                    toast.error("Unauthorized. Please login again.", { position: "top-right" });
+                    showToast("Unauthorized. Please login again.", "error");
                     navigate("/");
                 } else {
                     console.error("Error Occurred!", err.response?.data || err.message);
@@ -125,7 +126,7 @@ export default function CreatePost({
     }, [medias]);
 
     return (
-        <div className="fixed flex flex-col z-200 inset-0 p-2 backdrop-blur-sm">
+        <div className="fixed flex flex-col z-200 inset-0 p-2 backdrop-blur-sm bg-indigo-100/50">
             <div className="w-full cursor-pointer" onClick={() => setCreatePost(false)}>
                 <X className="ml-auto" />
             </div>  
@@ -140,11 +141,15 @@ export default function CreatePost({
                             >
                                 <Images className="w-1/4 h-1/4" strokeWidth={1} />
                                 <div className="text-md md:text-xl">
-                                    Drag photos and videos here
+                                    Click to share photos
                                 </div>
-                                <span className="text-xs bg-indigo-800 text-white px-4 py-1.5 rounded-lg md:text-sm font-semibold mt-2">
-                                    Select from Computer
-                                </span>
+                                <motion.span className="text-xs bg-indigo-600 text-white px-4 py-1.5 rounded-lg md:text-sm font-semibold mt-2"
+                                    whileHover={{
+                                        y: -2,
+                                        boxShadow: "0px 6px 16px rgba(79, 70, 229, 0.3)",
+                                }}>
+                                    Upload
+                                </motion.span>
                             </label>
                             <input
                                 type="file"

@@ -5,8 +5,8 @@ import SubmitButton from "../buttons/SubmitButton";
 import * as yup from 'yup'
 import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
-import { toast } from "react-toastify";
 import { useNavigate } from "react-router";
+import { showToast } from "../../utility/toast";
 
 const schema = yup.object({
     email: yup.string().email("invalid email").required("email is required")
@@ -37,13 +37,13 @@ export function ForgotPasswordForm() {
                 }
             );
             console.log("Forgot password call successful", response.data);
-            toast.success("Password reset email sent!", { position: "top-right" });
+            showToast("Password reset email sent!");
         } catch (err) {
             if (axios.isAxiosError(err) && err.response?.status === 401) {
-                toast.error("Unauthorized. Please login again.", { position: "top-right" });
+                showToast("Unauthorized. Please login again.", "error");
                 navigate("/");
             } else {
-                toast.error("Failed to send forgot password email.", { position: "top-right" });
+                showToast("Failed to send forgot password email.", "error");
                 console.error("Forgot password call unsuccessful", err);
             }
         }

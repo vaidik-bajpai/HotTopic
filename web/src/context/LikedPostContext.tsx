@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { Post } from "../types/post";
+import { showToast } from "../utility/toast";
+import { useNavigate } from "react-router";
 
 interface LikedPostContextType {
   likedPosts: Post[];
@@ -20,6 +22,7 @@ export const useLikedPosts = () => {
 export const LikedPostProvider = ({ children }: { children: React.ReactNode }) => {
   const [likedPosts, setLikedPosts] = useState<Post[]>([]);
   const [lastID, setLastID] = useState("");
+  const navigate = useNavigate();
 
   const fetchMorePosts = async () => {
     try {
@@ -32,7 +35,12 @@ export const LikedPostProvider = ({ children }: { children: React.ReactNode }) =
         setLastID(newPosts[newPosts.length - 1].id);
       }
     } catch (err) {
-      console.error("Failed to fetch liked posts", err);
+      if (axios.isAxiosError(err) && err.response?.status === 401) {
+        showToast("Unauthorized. Please login again.", "error")
+        navigate("/");
+      } else {
+        console.error("Failed to fetch liked posts", err);
+      }
     }
   };
 

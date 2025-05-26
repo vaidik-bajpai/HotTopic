@@ -6,9 +6,10 @@ import FormHeader from "../FormHeader";
 import FormSubHeader from "../FormSubHeader";
 import FormInput from "../FormInput";
 import SubmitButton from "../buttons/SubmitButton";
-import { toast } from "react-toastify";
 import axios from "axios";
 import { useNavigate } from "react-router";
+import { showToast } from "../../utility/toast";
+import { error } from "console";
 
 const schema = yup.object({
   username: yup
@@ -123,7 +124,7 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
     }
 
     if (Object.keys(updatedFields).length === 0) {
-      toast.info("No changes made.");
+      showToast("No changes made.", "info");
       return;
     }
 
@@ -133,7 +134,7 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
         withCredentials: true,
       });
 
-      toast.success("Profile updated successfully ✨");
+      showToast("Profile updated successfully ✨");
 
       // Convert pronouns[] back to string
       const updatedFieldsToSet: Partial<UserProfile> = {
@@ -145,10 +146,10 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
 
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 401) {
-        toast.error("Unauthorized. Please login again.");
+        showToast("Unauthorized. Please login again.", "error");
         navigate("/");
       } else {
-        toast.error("Failed to update profile.");
+        showToast("Failed to update profile.", "error");
         console.error("Update error", err);
       }
     }

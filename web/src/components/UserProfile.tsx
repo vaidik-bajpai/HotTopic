@@ -15,6 +15,9 @@ import { toast } from "react-toastify";
 import { debounce } from "lodash";
 import NotAFollower from "./NotAFollower";
 import { PageContext } from "../types/Page";
+import defaultProfilePic from '../assets/Default-Profile.png';
+import UserPostGallerySkeleton from "./UserPostGallerySkeleton";
+import { showToast } from "../utility/toast";
 
 interface UserProfileInterface {
     user_id: string
@@ -30,6 +33,7 @@ interface UserProfileInterface {
 }
 
 function UserProfile() {
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate()
     const [profile, setProfile] = useState<UserProfileInterface>({
         user_id: "",
@@ -45,35 +49,55 @@ function UserProfile() {
     })
     const [isEditProfile, setIsEditProfile] = useState<boolean>(false);
     const { setCreatePost } = useOutletContext<PageContext>();
-    const debounceFollow = useCallback(
-        debounce(async (shouldFollow: boolean, userID: string) => {
-            try {
-                const url = `http://localhost:3000/user/${userID}/${shouldFollow ? "follow" : "unfollow"}`;
-                await axios.post(url, {}, { withCredentials: true });
-            } catch (err) {
-            if (axios.isAxiosError(err)) {
-                if (err.response?.status === 401) {
-                toast.error("Unauthorized. Please login again.", { position: "top-right" });
-                navigate("/");
-                } else {
-                console.error(err);
-                toast.error("Failed to update follow status. Please try again.");
-                }
-            } else {
-                console.error(err);
-                toast.error("Unknown error occurred.");
-            }
-            }
-        }, 500),
-        [navigate]
-    );
+    async function handleClick() {
+        if (isLoading) return; 
+        const newFollowState = !profile.is_following;
+ 
+        setProfile(prev => ({
+        ...prev,
+        is_following: newFollowState,
+        followers_count: newFollowState
+            ? prev.followers_count + 1
+            : prev.followers_count - 1,
+        }));
 
-    function handleClick() {
-        setProfile((prev) => {
-            const newFollowState = !prev.is_following;
-            debounceFollow(newFollowState, prev.user_id);
-            return { ...prev, is_following: newFollowState };
-        });
+        setIsLoading(true);
+
+        try {
+        const url = `http://localhost:3000/user/${profile.user_id}/${newFollowState ? "follow" : "unfollow"}`;
+        await axios.post(url, {}, { withCredentials: true });
+
+        // Refresh profile data from backend to sync state
+        await getProfile();
+
+        showToast(
+            newFollowState
+            ? `You are now following ${profile.username}`
+            : `You have unfollowed ${profile.username}`
+        );
+        } catch (err) {
+        // Rollback optimistic UI on error
+        setProfile(prev => ({
+            ...prev,
+            is_following: !newFollowState,
+            followers_count: newFollowState
+            ? prev.followers_count - 1
+            : prev.followers_count + 1,
+        }));
+
+        if (axios.isAxiosError(err)) {
+            if (err.response?.status === 401) {
+                showToast("Unauthorized. Please login again.", "error");
+                navigate("/");
+            } else {
+                showToast("Failed to update follow status. Please try again.", "error");
+            }
+        } else {
+            showToast("Unknown error occurred.", "error");
+        }
+        } finally {
+            setIsLoading(false);
+        }
     }
     
     const { userID } = useParams()
@@ -87,10 +111,10 @@ function UserProfile() {
             setProfile(response.data.profile);
         } catch (error: any) {
             if (axios.isAxiosError(error) && error.response?.status === 401) {
-                toast.error("You are not logged in.");
+                showToast("You are not logged in.", "error");
                 navigate("/");
             } else {
-                toast.error("An error occurred while fetching the profile.");
+                showToast("An error occurred while fetching the profile.", "error");
                 console.error(error);
             }
         }
@@ -107,7 +131,7 @@ function UserProfile() {
                     <div className="w-full px-4 border-b-2 shadow-none border-b border-gray-200">
                         <div className="flex flex-col max-w-6xl mx-auto justify-center rounded-lg gap-1 p-2 md:p-4">
                             <div className="flex gap-3 sm:gap-4 md:gap-8">
-                                <UserProfilePic profilePic={profile.userpic}/>
+                                <UserProfilePic profilePic={profile.userpic || defaultProfilePic}/>
                                 <div className="flex flex-col justify-center gap-1 sm:gap-2 2xl:gap-8 2xl:ml-10 2xl:mb-5">
                                     <UserProfileName name={profile.username} pronouns={profile.pronouns}/>
                                     <div className="flex justify-around gap-4 2xl:gap-6">
@@ -124,8 +148,13 @@ function UserProfile() {
                             <UserProfileSlider />
                         </div>
                     </div>
-                    {user.id === userID || profile.is_following ? <Outlet context={{ isSelf: profile.is_self, isFollowing: profile.is_following, setCreatePost: setCreatePost }} /> : 
-                        <div className="flex-grow w-full flex justify-center items-center bg-indigo-200 rounded-xl shadow-sm p-2">
+                    { profile.is_self || profile.is_following 
+                        ? !isLoading ? <Outlet
+                            key={`${profile.user_id}-${profile.is_following}`} 
+                            context={{ isSelf: profile.is_self, isFollowing: profile.is_following, setCreatePost: setCreatePost }} /> 
+                          : <UserPostGallerySkeleton /  >
+
+                        : <div className="flex-grow w-full flex justify-center items-center bg-indigo-200 rounded-xl shadow-sm p-2">
                             <NotAFollower text={"Only followers can view this user's content. Follow them to gain access."}/>
                         </div>  
                     }

@@ -6,7 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import PasswordInput from "../PasswordInput";
-import { toast } from "react-toastify";
+import { showToast } from "../../utility/toast";
 
 const schema = yup.object({
   new_password: yup
@@ -50,14 +50,14 @@ function ResetPasswordForm() {
         );
 
         console.log("reset password successful", response.data);
-        toast.success("Password reset successful!", { position: "top-right" });
+        showToast("Password reset successful!");
         navigate("/login");
     } catch (err) {
         if (axios.isAxiosError(err) && err.response?.status === 401) {
-            toast.error("Unauthorized. Please login again.", { position: "top-right" });
+            showToast("Unauthorized. Please login again.", "error");
             navigate("/");
         } else {
-            toast.error("Failed to reset password.", { position: "top-right" });
+            showToast("Failed to reset password.", "error");
             console.error("Failed to reset password", err);
         }
     }

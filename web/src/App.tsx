@@ -63,7 +63,9 @@ function App() {
           <Route path='*' element={<NotFoundPage />}/>
         </Routes>
         <ToastContainer 
-          position='top-center'/>
+          className="hidden md:block"
+          position='top-center'
+          autoClose={1500}/>
       </div>
     </>
   )

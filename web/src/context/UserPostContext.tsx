@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { Post } from "../types/post";
 import axios from "axios";
+import { showToast } from "../utility/toast";
+import { useNavigate } from "react-router";
 
 interface UserPostContextType {
     userPosts: Post[];
@@ -8,7 +10,7 @@ interface UserPostContextType {
     fetchMorePosts: () => Promise<void>;
     setUserPosts: React.Dispatch<React.SetStateAction<Post[]>>;
     loading: boolean;
-    forbidden: boolean;   // add forbidden here
+    forbidden: boolean;
 }
 
 const UserPostsContext = createContext<UserPostContextType | null>(null);
@@ -32,6 +34,7 @@ export const UserPostProvider = ({
     const [forbidden, setForbidden] = useState(false); // Track 403 state
 
     const fetchMorePosts = async () => {
+        const navigate = useNavigate();
         if (loading || !userID || forbidden) return;  // Don't fetch if forbidden
         setLoading(true);
         try {
@@ -50,9 +53,11 @@ export const UserPostProvider = ({
             }
         } catch (err) {
             if (axios.isAxiosError(err)) {
-                if (err.response?.status === 403) {
+                if (axios.isAxiosError(err) && err.response?.status === 401) {
+                    showToast("Unauthorized. Please login again.", "error")
+                    navigate("/");
+                } else if (err.response?.status === 403) {
                     setForbidden(true);
-                    // optionally notify user here with toast or other UI
                     console.warn("Access forbidden: you do not have permission to view these posts.");
                 } else {
                     console.error("Failed to fetch user posts", err);
