@@ -79,7 +79,7 @@ export default function UserSearch({
                         <div className="flex items-center justify-between mb-10">
                             <h1 className="font-semibold text-lg sm:text-2xl px-2 text-indigo-800">Search</h1>
                             <X
-                                className="block md:hidden"
+                                className="block"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     setSearch(false);

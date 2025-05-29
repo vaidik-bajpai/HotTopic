@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import FormHeader from "../FormHeader";
 import FormInput from "../FormInput";
 import FormSubHeader from "../FormSubHeader";
@@ -10,6 +10,9 @@ import axios, { AxiosError } from "axios";
 import PasswordInput from "../PasswordInput";
 import { useUser } from "../../context/UserContext";
 import { showToast } from "../../utility/toast";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../app/store";
+import { addAuthState } from "../../features/auth/authSlice";
 
 const schema = yup.object({
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -19,6 +22,7 @@ const schema = yup.object({
 type FormData = yup.InferType<typeof schema>;
 
 export default function SigninForm() {
+    const dispatch = useDispatch();
     const navigate = useNavigate();
     const user = useUser();
 
@@ -35,9 +39,14 @@ export default function SigninForm() {
                 withCredentials: true,
             });
 
-            user.setUser({ isLoggedIn: true, id: response.data.id });
+            dispatch(addAuthState({
+                id: response.data.id,
+                username: response.data.username,
+                email: response.data.email,
+            }))
+
             showToast("Welcome back! 🎉");
-            navigate("/dashboard");
+            navigate("/feed");
         } catch (error) {
             const err = error as AxiosError;
 
@@ -62,8 +71,6 @@ export default function SigninForm() {
             } else {
                 showToast("Network error. Please check your connection.", "error");
             }
-
-            console.error("Sign in failed", err);
         }
     }
 

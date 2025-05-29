@@ -93,17 +93,14 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
   const onSubmit = async (data: FormData) => {
     if (!initialData) return;
 
-    // Pronouns as string[] for backend update
     const pronounsArray = data.pronouns?.trim().split("/") ?? [];
 
-    // Fields to check
     const current = {
       username: data.username,
       bio: data.bio,
-      pronouns: pronounsArray, // string[]
+      pronouns: pronounsArray,
     };
 
-    // Fields to send in API
     const updatedFields: Partial<Omit<UserProfile, "pronouns">> & {
       pronouns?: string[];
     } = {};
@@ -119,16 +116,26 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
       }
     }
 
-    if (imageFile) {
-      updatedFields.userpic = imagePreview || null;
-    }
-
-    if (Object.keys(updatedFields).length === 0) {
-      showToast("No changes made.", "info");
-      return;
-    }
-
     try {
+      if (imageFile) {
+        const env = import.meta.env
+        const formData = new FormData();
+        formData.append("file", imageFile);
+        formData.append("upload_preset", env.VITE_CLOUD_PRESET);
+        formData.append("cloud_name", env.VITE_CLOUD_NAME);
+        const cloudinaryRes = await axios.post(
+          import.meta.env.VITE_CLOUDINARY_UPLOAD_URI,
+          formData
+        );
+        const imageUrl = cloudinaryRes.data.secure_url;
+        updatedFields.userpic = imageUrl;
+      }
+
+      if (Object.keys(updatedFields).length === 0) {
+        showToast("No changes made.", "info");
+        return;
+      }
+
       await axios.put("http://localhost:3000/user/profile", updatedFields, {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
@@ -136,14 +143,12 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
 
       showToast("Profile updated successfully ✨");
 
-      // Convert pronouns[] back to string
       const updatedFieldsToSet: Partial<UserProfile> = {
         ...updatedFields,
         pronouns: updatedFields.pronouns?.join("/"),
       };
 
       setInitialData({ ...initialData, ...updatedFieldsToSet });
-
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 401) {
         showToast("Unauthorized. Please login again.", "error");

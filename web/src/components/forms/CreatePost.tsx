@@ -69,12 +69,13 @@ export default function CreatePost({
 
             for (let i = 0; i < medias.length; i++) {
                 try {
+                    const env = import.meta.env
                     const formData = new FormData();
                     formData.append("file", medias[i]);
-                    formData.append("upload_preset", "Cloudinary-demo");
-                    formData.append("cloud_name", "drg9zdr28");
+                    formData.append("upload_preset", env.VITE_CLOUD_PRESET);
+                    formData.append("cloud_name", env.VITE_CLOUD_NAME);
 
-                    const res = await axios.post(import.meta.env.VITE_CLOUDINARY_UPLOAD_URI!, formData);
+                    const res = await axios.post(import.meta.env.VITE_CLOUDINARY_UPLOAD_URI, formData);
                     uploadedImagesURLs.push(res.data.url);
                 } catch (uploadErr) {
                     showToast(`Failed to upload file: ${medias[i].name}`, "error");
@@ -167,7 +168,7 @@ export default function CreatePost({
                 {medias.length > 0 && (
                     <form className="w-fit" onSubmit={handleSubmit(onSubmit)}>
                         <div className="flex justify-between w-full px-2 font-semibold mb-1">
-                            <ArrowLeft />
+                            <ArrowLeft onClick={() => setMedias([])}/>
                             <h1 className="">Preview</h1>
                             {isNext ? (
                                 <button
@@ -196,7 +197,7 @@ export default function CreatePost({
                                     {index === i && (
                                         <img
                                             src={image}
-                                            className="w-full h-full object-cover"
+                                            className="w-full aspect-square object-cover"
                                         />
                                     )}
                                     {!isNext && (

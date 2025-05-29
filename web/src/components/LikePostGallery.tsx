@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useLikedPosts } from "../context/LikedPostContext";
 import { Copy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { getOptimizedCloudinaryUrl } from "../utility/cloudinary";
 
 function LikedPostGallery() {
   const { likedPosts, fetchMorePosts } = useLikedPosts();
@@ -37,7 +38,7 @@ function LikedPostGallery() {
           Looks like you haven't liked anything. Discover amazing posts and like your favorites!
         </p>
         <button
-          onClick={() => navigate("/dashboard")}
+          onClick={() => navigate("/feed")}
           className="px-5 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 shadow transition"
         >
           Go to Home
@@ -49,7 +50,7 @@ function LikedPostGallery() {
     <div className="grid grid-cols-3 gap-1 w-fit mx-auto my-4">
       {likedPosts.map((post, index) => (
         <div key={post.id} className="relative cursor-pointer max-w-xs" onClick={() => navigate("/liked-posts", { state: { startIndex: index } })}>
-          <img src={post.media[0]} alt="post thumbnail" className="w-full aspect-square object-cover rounded" />
+          <img loading="lazy" src={getOptimizedCloudinaryUrl(post.media[0])} alt="post thumbnail" className="w-full aspect-square object-cover rounded" />
           {post.media.length > 1 && <div className="absolute z-10 right-0 top-0 opacity-50 p-2 -scale-x-100 overflow-hidden"><Copy className="text-black"/></div>}
         </div>
       ))}

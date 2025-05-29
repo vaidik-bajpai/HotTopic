@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import FollowerList from "../../types/FollowerList";    
 import { User } from "lucide-react";
-import { toast } from "react-toastify";
 import NotAFollower from "../NotAFollower";
 import NoContent from "../NoContent";
 import { ProfileContextType } from "../../types/Profile";
+import { showToast } from "../../utility/toast";
 
 function FollowerRenderer() {
     const navigate = useNavigate();
@@ -34,12 +34,7 @@ function FollowerRenderer() {
         } catch (err) {
             if (axios.isAxiosError(err)) {
                 if (err.response?.status === 401) {
-                    toast.error("Session expired. Redirecting to login...", {
-                    position: 'top-center',
-                    autoClose: 2000,
-                    });
-
-                
+                    showToast("Session expired. Redirecting to login...", "error");
                     navigate('/');
                 } else if (err.response?.status === 403) {
                     setIsForbidden(true);  // Update state on 403
@@ -76,7 +71,7 @@ function FollowerRenderer() {
                         /> : <NoContent 
                             image={<User className="w-16 h-16 mb-4 text-indigo-400"/>}
                             title={"No followers yet"}
-                            text="Looks like the user does not have any followers right now"
+                            text="Looks like you are the only follower."
                         />}
                     </div>
                 ) : (

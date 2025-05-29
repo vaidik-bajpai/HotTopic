@@ -1,5 +1,6 @@
 import { useNavigate, useOutlet, useOutletContext } from "react-router-dom";
 import { useSavedPosts } from "../context/SavedPostContext";
+import { getOptimizedCloudinaryUrl } from "../utility/cloudinary";
 
 function SavedPostsGallery() {
   const { savedPosts } = useSavedPosts();
@@ -13,7 +14,7 @@ function SavedPostsGallery() {
           Looks like you haven't saved anything. Discover amazing posts and save your favorites!
         </p>
         <button
-          onClick={() => navigate("/dashboard")}
+          onClick={() => navigate("/feed")}
           className="px-5 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 shadow transition"
         >
           Go to Home
@@ -35,7 +36,8 @@ function SavedPostsGallery() {
           }
         >
           <img
-            src={post.media[0]}
+            loading="lazy" 
+            src={getOptimizedCloudinaryUrl(post.media[0])}
             alt="post thumbnail"
             className="w-full aspect-square object-cover"
           />

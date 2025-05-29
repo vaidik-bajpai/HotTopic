@@ -4,6 +4,7 @@ import axios from "axios";
 import { useNavigate, useOutletContext } from "react-router";
 import { toast } from "react-toastify";
 import { PageContext } from "../../types/Page";
+import { showToast } from "../../utility/toast";
 
 interface Post {
   id: string;
@@ -52,11 +53,7 @@ export default function FeedRenderer() {
         } catch (err) {
             if (axios.isAxiosError(err)) {
                 if (err.response?.status === 401) {
-                    toast.error("Session expired. Redirecting to login...", {
-                    position: 'top-center',
-                    autoClose: 2000,
-                    });
-                
+                    showToast("Session expired. Redirecting to login...", "error");
                     navigate('/');
                 } else {
                     console.error("Error fetching feed:", err.response?.data || err.message);

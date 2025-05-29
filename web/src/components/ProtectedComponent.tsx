@@ -1,21 +1,15 @@
-import { Outlet, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { useUser } from "../context/UserContext";
+import { useSelector } from "react-redux";
+import { Navigate, Outlet } from "react-router-dom";
+import { RootState } from "../app/store";
 
-function ProtectedComponent() {
-  const user = useUser();
-  const navigate = useNavigate();
+const ProtectedComponent = () => {
+    const user = useSelector((state: RootState) => state.auth);
 
-  useEffect(() => {
-    if (!user.isLoggedIn) {
-      navigate("/");
+    if (user.status === 'failed') {
+        return <Navigate to="/" replace />;
     }
-  }, [user.isLoggedIn, navigate]);
 
-  // Prevent rendering before redirect check
-  if (!user.isLoggedIn) return null;
-
-  return <Outlet />;
-}
+    return <Outlet />;  
+};
 
 export default ProtectedComponent;

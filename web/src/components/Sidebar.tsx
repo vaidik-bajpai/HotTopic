@@ -7,6 +7,9 @@ import CreatePost from "./forms/CreatePost";
 import UserSearch from "./UserSearch";
 import { toast } from "react-toastify";
 import { showToast } from "../utility/toast";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../app/store";
+import { resetAppState } from "../app/action";
 
 interface SidebarInterface {
     search: boolean,
@@ -28,9 +31,10 @@ export default function Sidebar({
     setCreatePost,
     headerText
 }: SidebarInterface) {
+    const dispatch = useDispatch<AppDispatch>()
     const location = useLocation()
     const navigate = useNavigate()
-    const user = useUser()
+    const { id } = useSelector((state: RootState) => state.auth )
 
     
 
@@ -52,8 +56,8 @@ export default function Sidebar({
                 null,
                 { withCredentials: true }
             );
-            user.logout();
-
+            dispatch(resetAppState());
+            navigate("/")
             showToast("Logged out successfully");
         } catch (err) {
             console.error(err);
@@ -117,15 +121,15 @@ export default function Sidebar({
 
                 {/* Sidebar content */}
                 <ul className="h-full flex flex-col gap-6 mt-4 px-2 md:px-0">
-                    <LogoAppName icon={<Flame fill="#3730a3" size={40}/>} name="HotTopic" active={location.pathname == ""} expanded={expanded} search={search}/>
+                    <LogoAppName icon={<Flame fill="#3730a3" size={40}/>} name="HotTopic" active={location.pathname === "/feed"} expanded={expanded} search={search}/>
 
-                    <SidebarItem icon={<House />} name="Home" active={location.pathname.includes("/dashboard")} onClick={() => {handleClickWrapper(() => navigate("/dashboard"))}} expanded={expanded} search={search}/>
+                    <SidebarItem icon={<House />} name="Home" active={location.pathname.includes("/dashboard")} onClick={() => {handleClickWrapper(() => navigate("/feed"))}} expanded={expanded} search={search}/>
 
                     <SidebarItem icon={<PlusSquare />} name="Create" active={location.pathname.includes("/create-post")} onClick={() => {handleClickWrapper(() => setCreatePost(true))}} expanded={expanded} search={search}/>
 
                     <SidebarItem icon={<Search />} name="Search" active={location.pathname.includes("/search")} onClick={() => {setExpanded(false); setSearch(true)}} expanded={expanded} search={search}/>
 
-                    <SidebarItem icon={<User />} name="Profile" active={location.pathname.includes(`user-profile/${user.id}`)} onClick={() => {handleClickWrapper(() => navigate(`user-profile/${user.id}`))}} expanded={expanded} search={search}/>
+                    <SidebarItem icon={<User />} name="Profile" active={location.pathname.includes(`user-profile/${id}`)} onClick={() => {handleClickWrapper(() => navigate(`user-profile/${id}`))}} expanded={expanded} search={search}/>
 
                     <SidebarItem icon={<BookMarked />} name="Saved Posts" active={location.pathname.includes("/saved-gallery")} onClick={() => {handleClickWrapper(() => navigate("saved-gallery"))}} expanded={expanded} search={search}/>
 

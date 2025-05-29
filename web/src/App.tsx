@@ -22,8 +22,17 @@ import { ToastContainer } from 'react-toastify'
 import NotFoundPage from './components/NotFoundPage'
 import UserPostsViewer from './components/UserPostsViewer'
 import UserPostWrapper from './components/UserPostsWrapper'
+import { useEffect } from 'react'
+import authThunk from './features/auth/authThunk'
+import { useDispatch } from 'react-redux'
+import { AppDispatch } from './app/store'
 
 function App() {
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    dispatch(authThunk());
+  }, [dispatch]);
   return (
     <>
       <div className='flex'>
@@ -34,7 +43,7 @@ function App() {
           </Route>
           <Route element={<ProtectedComponent />}>
             <Route element={<Page />}>  
-              <Route path='/dashboard' element={<FeedRenderer/>}/>
+              <Route path='/feed' element={<FeedRenderer/>}/>
               <Route path='/user-profile/:userID' element={<UserProfile />}>
                 <Route index element={<UserPostWrapper ><UserPostsGallery /></UserPostWrapper>}/>
                 <Route path='followers' element={<FollowerRenderer />}/>  
