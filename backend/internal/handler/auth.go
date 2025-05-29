@@ -284,3 +284,11 @@ func (h *HTTPHandler) handleResetPassword(w http.ResponseWriter, r *http.Request
 	h.logger.Info("the password has been changed successfully")
 	h.json.WriteJSONResponse(w, http.StatusOK, "your password has been changed")
 }
+
+func (h *HTTPHandler) handleGetMe(w http.ResponseWriter, r *http.Request) {
+	user := getUserFromCtx(r)
+
+	h.json.WriteJSONResponse(w, http.StatusOK, map[string]any{
+		"user": user,
+	})
+}

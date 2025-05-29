@@ -132,7 +132,7 @@ func (s *Store) GetPosts(ctx context.Context, gp *models.GetPostReq) ([]*models.
 	log.Println("requesterID", gp.RequesterID) */
 
 	if gp.LastID != "" {
-		query = query.Cursor(db.Post.ID.Cursor(gp.LastID))
+		query = query.Cursor(db.Post.ID.Cursor(gp.LastID)).Skip(1)
 	}
 
 	postsRes, err := query.Exec(ctx)

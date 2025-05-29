@@ -108,6 +108,7 @@ func (h *HTTPHandler) SetupRoutes() *chi.Mux {
 		r.Post("/logout", h.handleUserLogout)
 		r.Post("/forgot-password", h.handleForgotPassword)
 
+		r.With(h.authenticate).Get("/me", h.handleGetMe)
 		r.With(h.authenticate, h.tokenChecker).Post("/activate/{token}", h.handleUserActivation)
 		r.With(h.tokenChecker).Post("/reset-password/{token}", h.handleResetPassword)
 	})
