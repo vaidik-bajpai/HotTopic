@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/go-playground/validator/v10"
 	"github.com/redis/go-redis/v9"
+	"github.com/vaidik-bajpai/gopher-social/internal/helper"
 	"github.com/vaidik-bajpai/gopher-social/internal/helper/json"
 	"github.com/vaidik-bajpai/gopher-social/internal/mailer"
 	"github.com/vaidik-bajpai/gopher-social/internal/store"
@@ -52,8 +53,9 @@ func NewHandler(logger *zap.Logger, store store.Storer, validate *validator.Vali
 func (h *HTTPHandler) SetupRoutes() *chi.Mux {
 	r := chi.NewRouter()
 
+	frontend := helper.GetEnvOrPanic("FRONTEND_ORIGIN")
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowedOrigins:   []string{frontend},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,

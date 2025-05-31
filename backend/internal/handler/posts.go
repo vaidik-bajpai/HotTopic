@@ -81,30 +81,30 @@ func (h *HTTPHandler) handleCreatePost(w http.ResponseWriter, r *http.Request) {
 	h.json.WriteJSONResponse(w, http.StatusOK, payload)
 }
 
-func (h *HTTPHandler) handleUpdatePost(w http.ResponseWriter, r *http.Request) {
-	var payload store.UpdateUserPost
-	if err := h.json.ReadJSON(w, r, payload); err != nil {
-		h.json.BadRequestResponse(w, r, err)
-		return
-	}
-
-	if err := h.validate.Struct(payload); err != nil {
-		h.json.FailedValidationResponse(w, r, err)
-		return
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	err := h.store.UpdatePost(ctx, &payload)
-	if err != nil {
-		h.json.ServerErrorResponse(w, r, err)
-		return
-	}
-
-	h.logger.Info("successfully updated the post", zap.Any("payload", payload))
-	h.json.WriteJSONResponse(w, http.StatusOK, payload)
-}
+//func (h *HTTPHandler) handleUpdatePost(w http.ResponseWriter, r *http.Request) {
+//	var payload store.UpdateUserPost
+//	if err := h.json.ReadJSON(w, r, payload); err != nil {
+//		h.json.BadRequestResponse(w, r, err)
+//		return
+//	}
+//
+//	if err := h.validate.Struct(payload); err != nil {
+//		h.json.FailedValidationResponse(w, r, err)
+//		return
+//	}
+//
+//	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+//	defer cancel()
+//
+//	err := h.store.UpdatePost(ctx, &payload)
+//	if err != nil {
+//		h.json.ServerErrorResponse(w, r, err)
+//		return
+//	}
+//
+//	h.logger.Info("successfully updated the post", zap.Any("payload", payload))
+//	h.json.WriteJSONResponse(w, http.StatusOK, payload)
+//}
 
 func (h *HTTPHandler) handleDeletePost(w http.ResponseWriter, r *http.Request) {
 	postID := chi.URLParam(r, "post_id")

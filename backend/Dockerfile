@@ -1,66 +1,62 @@
-# Pin specific version for stability
-# Use separate stage for building image
-# Use debian for easier build utilities
-FROM golang:1.23-bullseye AS build-base
+FROM golang:1.23-bullseye as base
 
-WORKDIR /app 
+WORKDIR /workspace
 
-# Copy only files required to install dependencies (better layer caching)
+# Add go modules lockfiles
 COPY go.mod go.sum ./
+RUN go mod download
 
-# Use cache mount to speed up install of existing dependencies
-RUN --mount=type=cache,target=/go/pkg/mod \
-  --mount=type=cache,target=/root/.cache/go-build \
-  go mod download
-
+# Prefetch the binaries, so that they will be cached and not downloaded on each change
 RUN go run github.com/steebchen/prisma-client-go prefetch
 
-FROM build-base AS dev
+# Development stage
+FROM base as dev
 
 # Install air for hot reload & delve for debugging
 RUN go install github.com/air-verse/air@latest && \
-  go install github.com/go-delve/delve/cmd/dlv@latest
+    go install github.com/go-delve/delve/cmd/dlv@latest
 
-COPY . .
+COPY . ./
 
+# Generate the Prisma Client Go client
 RUN go run github.com/steebchen/prisma-client-go generate --schema ./internal/db/schema.prisma
 
+# Use air for hot reload in development
 CMD ["air", "-c", ".air.toml"]
 
-FROM build-base AS build-production
+# Build stage for production
+FROM base as build
 
-# Add non root user
-RUN useradd -u 1001 nonroot
+COPY . ./
 
-COPY . .
-
+# Generate the Prisma Client Go client
 RUN go run github.com/steebchen/prisma-client-go generate --schema ./internal/db/schema.prisma
 
-# Compile application during build rather than at runtime
-# Add flags to statically link binary
-RUN go build \
-  -ldflags="-linkmode external -extldflags -static" \
-  -tags netgo \
-  -o api-golang ./cmd
+# Build the binary with all dependencies
+RUN CGO_ENABLED=0 go build -ldflags="-w -s" -o /app ./cmd
 
-# Use separate stage for deployable image
-FROM scratch
+# Production stage
+FROM debian:bullseye-slim as production
 
-# Set gin mode
-ENV GIN_MODE=release
+# Install ca-certificates for HTTPS requests
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /
+# Create non-root user
+RUN useradd -r -u 1001 appuser
 
-# Copy the passwd file
-COPY --from=build-production /etc/passwd /etc/passwd
+# Copy the binary from build stage
+COPY --from=build /app /app
 
-# Copy the app binary from the build stage
-COPY --from=build-production /app/api-golang api-golang
+# Copy Go module cache with Prisma binaries
+COPY --from=build /go/pkg/mod /go/pkg/mod
 
-# Use nonroot user
-USER nonroot
+# Set Go environment variables
+ENV GOPATH=/go
 
-# Indicate expected port
-EXPOSE 8080
+# Switch to non-root user
+USER appuser
 
-CMD ["/api-golang"]
+# Expose port
+EXPOSE 3000
+
+CMD ["/app"]

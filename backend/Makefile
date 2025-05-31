@@ -20,3 +20,6 @@ postgres-shell:
 
 store:
 	docker start HotTopic HotTopic-Cache
+
+stop-store:
+	docker stop HotTopic HotTopic-Cache

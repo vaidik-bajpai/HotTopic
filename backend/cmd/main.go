@@ -1,9 +1,9 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"net/http"
-	"os"
 	"regexp"
 	"strings"
 
@@ -12,16 +12,19 @@ import (
 	"github.com/vaidik-bajpai/gopher-social/internal/cache"
 	database "github.com/vaidik-bajpai/gopher-social/internal/db"
 	"github.com/vaidik-bajpai/gopher-social/internal/handler"
+	"github.com/vaidik-bajpai/gopher-social/internal/helper"
 	"github.com/vaidik-bajpai/gopher-social/internal/helper/json"
 	"github.com/vaidik-bajpai/gopher-social/internal/mailer"
 	"github.com/vaidik-bajpai/gopher-social/internal/store"
 	"go.uber.org/zap"
 )
 
+//go:generate go run github.com/steebchen/prisma-client-go generate --schema ../internal/db/schema.prisma
+
 func main() {
-	redisConnURL := getEnvOrPanic("REDIS_URL")
-	sgAPIKey := getEnvOrPanic("SENDGRID_API_KEY")
-	sgfromEmail := getEnvOrPanic("SENDGRID_FROM_EMAIL")
+	redisConnURL := helper.GetEnvOrPanic("REDIS_URL")
+	sgAPIKey := helper.GetEnvOrPanic("SENDGRID_API_KEY")
+	sgfromEmail := helper.GetEnvOrPanic("SENDGRID_FROM_EMAIL")
 
 	/* cfg := zap.NewProductionConfig()
 	cfg.EncoderConfig.TimeKey = "ts"
@@ -57,14 +60,6 @@ func main() {
 
 	fmt.Printf("Starting server on port: %s\n", "3000")
 	http.ListenAndServe(":3000", r)
-}
-
-func getEnvOrPanic(key string) string {
-	value, ok := os.LookupEnv(key)
-	if !ok {
-		panic(fmt.Errorf("error environment variable [%s] does not exists", key))
-	}
-	return value
 }
 
 func CheckEmail(fl validator.FieldLevel) bool {

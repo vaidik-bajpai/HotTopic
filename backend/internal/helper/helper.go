@@ -4,6 +4,8 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base32"
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/vaidik-bajpai/gopher-social/internal/models"
@@ -32,4 +34,12 @@ func GenerateHash(tokenPlaintext string) []byte {
 	hash := sha256.Sum256([]byte(tokenPlaintext))
 	tokenHash := hash[:]
 	return tokenHash
+}
+
+func GetEnvOrPanic(key string) string {
+	value, ok := os.LookupEnv(key)
+	if !ok {
+		panic(fmt.Errorf("error environment variable [%s] does not exists", key))
+	}
+	return value
 }

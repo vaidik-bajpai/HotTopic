@@ -103,7 +103,7 @@ func (h *HTTPHandler) handleUserSignin(w http.ResponseWriter, r *http.Request) {
 
 	expirationTime := 3 * time.Hour
 
-	userJSON, err := json.Marshal(user) // Convert struct to JSON
+	userJSON, err := json.Marshal(user)
 	if err != nil {
 		h.json.ServerErrorResponse(w, r, err)
 		return
@@ -129,7 +129,7 @@ func (h *HTTPHandler) handleUserSignin(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, cookie)
 
 	h.logger.Info("login successfull")
-	h.json.WriteJSONResponse(w, http.StatusOK, map[string]string{"id": user.ID})
+	h.json.WriteJSONResponse(w, http.StatusOK, user)
 }
 
 func (h *HTTPHandler) handleUserLogout(w http.ResponseWriter, r *http.Request) {
