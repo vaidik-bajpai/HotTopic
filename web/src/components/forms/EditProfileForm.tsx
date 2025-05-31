@@ -9,7 +9,7 @@ import SubmitButton from "../buttons/SubmitButton";
 import axios from "axios";
 import { useNavigate } from "react-router";
 import { showToast } from "../../utility/toast";
-import defaultAvatar from "../../assets/default-avatar.png";
+import defaultAvatar from "../../assets/Default-Profile.png";
 
 const schema = yup.object({
   username: yup
