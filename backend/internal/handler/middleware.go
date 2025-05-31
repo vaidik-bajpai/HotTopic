@@ -4,11 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"net"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/go-chi/chi"
+	limiter "github.com/ulule/limiter/v3"
+	limiterMiddleware "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
+	redisStore "github.com/ulule/limiter/v3/drivers/store/redis"
 	"github.com/vaidik-bajpai/gopher-social/internal/helper"
 	"github.com/vaidik-bajpai/gopher-social/internal/models"
 	"github.com/vaidik-bajpai/gopher-social/internal/store"
@@ -43,6 +48,17 @@ func (h *HTTPHandler) authenticate(next http.Handler) http.Handler {
 		h.logger.Info("inside user authenticate", zap.String("username", user.Username))
 
 		next.ServeHTTP(w, r.WithContext(uCtx))
+	})
+}
+
+func (h *HTTPHandler) activated(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := getUserFromCtx(r)
+		if !user.Activated {
+			h.json.ForbiddenResponse(w, r, errors.New("user account not activated"))
+			return
+		}
+		next.ServeHTTP(w, r.WithContext(r.Context()))
 	})
 }
 
@@ -142,4 +158,42 @@ func (h *HTTPHandler) onlyMe(next http.Handler) http.Handler {
 
 		h.json.ForbiddenResponse(w, r, errors.New("you cannot access this endpoint"))
 	})
+}
+
+func (h *HTTPHandler) rateLimit(rateStr, keyPrefix string, preferUser bool) func(http.Handler) http.Handler {
+	store, err := redisStore.NewStoreWithOptions(h.redisClient, limiter.StoreOptions{
+		Prefix:   keyPrefix,
+		MaxRetry: 3,
+	})
+	if err != nil {
+		h.logger.Fatal("failed to create rate limiter store", zap.Error(err))
+	}
+
+	rate, err := limiter.NewRateFromFormatted(rateStr)
+	if err != nil {
+		h.logger.Fatal("invalid rate format", zap.String("rate", rateStr), zap.Error(err))
+	}
+
+	limiterInstance := limiter.New(store, rate)
+
+	keyGetter := func(r *http.Request) string {
+		if preferUser {
+			user := getUserFromCtx(r)
+			if user != nil && user.ID != "" {
+				return fmt.Sprintf("user:%s", user.ID)
+			}
+		}
+		ip := r.Header.Get("X-Real-IP")
+		if ip == "" {
+			ip, _, _ = net.SplitHostPort(r.RemoteAddr)
+		}
+		return fmt.Sprintf("ip:%s", ip)
+	}
+
+	middleware := limiterMiddleware.NewMiddleware(
+		limiterInstance,
+		limiterMiddleware.WithKeyGetter(keyGetter),
+	)
+
+	return middleware.Handler
 }

@@ -31,6 +31,7 @@ type Storer interface {
 	GetUserFromToken(context.Context, *models.Token) error
 	ResetPassword(context.Context, *models.ResetPassword) error
 	GetTokenModel(ctx context.Context, tokenHash []byte) (*models.Token, error)
+	CreateToken(ctx context.Context, token *models.Token, scope string) error
 	ActivateUser(ctx context.Context, userID string) error
 
 	IsFollower(ctx context.Context, followerID string, followingID string) error

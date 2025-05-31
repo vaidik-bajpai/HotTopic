@@ -3,7 +3,6 @@ package mailer
 import (
 	"bytes"
 	"embed"
-	_ "embed"
 	"fmt"
 	"html/template"
 	"log"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"github.com/vaidik-bajpai/gopher-social/internal/helper"
 	"github.com/vaidik-bajpai/gopher-social/internal/store"
 )
 
@@ -90,24 +90,6 @@ func (m *SendGridMailer) SendForgotPasswordEmail(u *store.User, token string) er
 	return nil
 }
 
-func (m *SendGridMailer) TestEmail(subject, toEmail, content string) error {
-	if toEmail == "" {
-		return fmt.Errorf("user has no email")
-	}
-
-	from := mail.NewEmail(FromName, m.FromEmail)
-	to := mail.NewEmail("test recipient", toEmail)
-
-	email := mail.NewSingleEmail(from, subject, to, "", content)
-	response, err := m.Client.Send(email)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("Test email sent. Status Code: %d", response.StatusCode)
-	return nil
-}
-
 func buildEmailFromTemplate(templateName string, u *store.User, token string) (string, error) {
 	log.Printf("Loading template %s from embedded filesystem", templateName)
 
@@ -122,13 +104,15 @@ func buildEmailFromTemplate(templateName string, u *store.User, token string) (s
 	}
 
 	payload := struct {
-		User        *store.User
-		Token       string
-		CurrentYear int
+		User           *store.User
+		Token          string
+		CurrentYear    int
+		FrontendOrigin string
 	}{
-		User:        u,
-		Token:       token,
-		CurrentYear: time.Now().Year(),
+		User:           u,
+		Token:          token,
+		CurrentYear:    time.Now().Year(),
+		FrontendOrigin: helper.GetEnvOrPanic("FRONTEND_ORIGIN"),
 	}
 
 	var out bytes.Buffer

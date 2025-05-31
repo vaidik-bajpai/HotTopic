@@ -65,3 +65,24 @@ func (s *Store) GetTokenModel(ctx context.Context, tokenHash []byte) (*models.To
 		Expiry: expiry,
 	}, nil
 }
+
+func (s *Store) CreateToken(ctx context.Context, token *models.Token, scope string) error {
+	deleteTx := s.db.Token.FindMany(
+		db.Token.UID.Equals(token.UserID),
+		db.Token.Scope.Equals(scope),
+	).Update(
+		db.Token.TTL.Set(time.Now()),
+	).Tx()
+
+	createTx := s.db.Token.CreateOne(
+		db.Token.Token.Set(string(token.Hash)),
+		db.Token.TTL.Set(token.Expiry),
+		db.Token.Scope.Set(scope),
+		db.Token.User.Link(
+			db.User.ID.Equals(token.UserID),
+		),
+	).Tx()
+
+	err := s.db.Prisma.Transaction(deleteTx, createTx).Exec(ctx)
+	return err
+}

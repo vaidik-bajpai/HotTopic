@@ -122,7 +122,7 @@ func (h *HTTPHandler) handleUserSignin(w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Now().Add(expirationTime),
 		MaxAge:   int(expirationTime.Seconds()),
 		HttpOnly: true,
-		Secure:   false, // Set to true in production
+		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
 	}
 
@@ -154,7 +154,7 @@ func (h *HTTPHandler) handleUserLogout(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		MaxAge:   -1,
 		HttpOnly: true,
-		Secure:   false, // ⬅️ false in dev
+		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
 	})
 
@@ -170,13 +170,7 @@ func (h *HTTPHandler) handleUserActivation(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	user := getUserFromCtx(r)
 	token := getTokenFromCtx(r)
-
-	if token.UserID != user.ID {
-		h.json.FailedValidationResponse(w, r, err)
-		return
-	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -222,18 +216,13 @@ func (h *HTTPHandler) handleForgotPassword(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	token.UserID = user.ID
-
-	err = h.store.CreateForgotPasswordToken(ctx, token)
-	if err != nil {
-		h.logger.Error("could not create the forgot password token", zap.String("email", payload.Email), zap.Error(err))
-		h.json.WriteJSONResponse(w, http.StatusInternalServerError, "could not create the token")
+	if err := h.store.CreateToken(ctx, token, store.ScopeForgotPassword); err != nil {
+		h.json.ServerErrorResponse(w, r, err)
 		return
 	}
 
 	err = h.mailer.SendForgotPasswordEmail(user, token.Plaintext)
 	if err != nil {
-		h.logger.Info("could not send the forgot password mail", zap.String("email", user.Email), zap.Error(err))
 		h.json.WriteJSONResponse(w, http.StatusInternalServerError, "could not send the forgot password mail.")
 		return
 	}
@@ -291,4 +280,50 @@ func (h *HTTPHandler) handleGetMe(w http.ResponseWriter, r *http.Request) {
 	h.json.WriteJSONResponse(w, http.StatusOK, map[string]any{
 		"user": user,
 	})
+}
+
+func (h *HTTPHandler) handleResendActivation(w http.ResponseWriter, r *http.Request) {
+	var payload struct {
+		Email string `json:"email" validate:"required,email,checkEmail"`
+	}
+
+	if err := h.json.ReadJSON(w, r, &payload); err != nil {
+		h.json.BadRequestResponse(w, r, err)
+		return
+	}
+
+	if err := h.validate.Struct(payload); err != nil {
+		h.json.FailedValidationResponse(w, r, err)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	user, err := h.store.UserViaEmail(ctx, payload.Email)
+	if err != nil {
+		h.json.InvalidCredentialsResponse(w, r, err)
+		return
+	}
+
+	token, err := helper.GenerateToken(user.ID, 3*24*time.Hour)
+	if err != nil {
+		h.json.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	if err = h.store.CreateToken(ctx, token, store.ScopeActivation); err != nil {
+		h.json.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	err = h.mailer.SendActivationEmail(user, token.Plaintext)
+	if err != nil {
+		h.json.WriteJSONResponse(w, http.StatusInternalServerError, "Could not send activation email, Please try again later.")
+		return
+	}
+
+	h.json.WriteJSONResponse(w, http.StatusCreated, map[string]string{
+		"message": "activation email sent successfully",
+	})
+
 }

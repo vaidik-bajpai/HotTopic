@@ -10,10 +10,14 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/shopspring/decimal v1.4.0
 	github.com/steebchen/prisma-client-go v0.46.0
+	github.com/ulule/limiter/v3 v3.11.2
 	go.uber.org/zap v1.27.0
 )
 
-require github.com/sendgrid/rest v2.6.9+incompatible // indirect
+require (
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/sendgrid/rest v2.6.9+incompatible // indirect
+)
 
 require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect

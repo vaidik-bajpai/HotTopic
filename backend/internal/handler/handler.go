@@ -14,22 +14,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type Handler interface {
-	handleGetProfile(w http.ResponseWriter, r *http.Request)
-	handleCreateProfile(w http.ResponseWriter, r *http.Request)
-	handleUpdateProfile(w http.ResponseWriter, r *http.Request)
-	handleGetFollowers(w http.ResponseWriter, r *http.Request)
-	handleGetFollowing(w http.ResponseWriter, r *http.Request)
-	handleGetLikedPosts(w http.ResponseWriter, r *http.Request)
-	handleGetCommentedPosts(w http.ResponseWriter, r *http.Request)
-
-	handleGetUserPosts(w http.ResponseWriter, r *http.Request)
-	handleGetUserFeed(w http.ResponseWriter, r *http.Request)
-	handleCreatePost(w http.ResponseWriter, r *http.Request)
-	handleUpdatePost(w http.ResponseWriter, r *http.Request)
-	handleDeletePost(w http.ResponseWriter, r *http.Request)
-}
-
 type HTTPHandler struct {
 	logger      *zap.Logger
 	store       store.Storer
@@ -37,17 +21,26 @@ type HTTPHandler struct {
 	redisClient *redis.Client
 	json        *json.JSON
 	mailer      mailer.Mailer
+	limiters    map[string]func(http.Handler) http.Handler
 }
 
 func NewHandler(logger *zap.Logger, store store.Storer, validate *validator.Validate, redisClient *redis.Client, json *json.JSON, mailer mailer.Mailer) *HTTPHandler {
-	return &HTTPHandler{
+	h := &HTTPHandler{
 		logger:      logger,
 		store:       store,
 		validate:    validate,
 		redisClient: redisClient,
 		json:        json,
 		mailer:      mailer,
+		limiters:    make(map[string]func(http.Handler) http.Handler),
 	}
+
+	// Pre-create commonly used rate limiters
+	h.limiters["auth:20-M"] = h.rateLimit("10-M", "auth", true)
+	h.limiters["post:60-M"] = h.rateLimit("20-M", "post", true)
+	h.limiters["user:60-M"] = h.rateLimit("20-M", "user", true)
+	h.limiters["forgot-resend:3-H"] = h.rateLimit("3-H", "forgot-resend", true)
+	return h
 }
 
 func (h *HTTPHandler) SetupRoutes() *chi.Mux {
@@ -62,9 +55,14 @@ func (h *HTTPHandler) SetupRoutes() *chi.Mux {
 		MaxAge:           300,
 	}))
 
+	// Post routes: Authenticate -> Rate Limit -> Activated
 	r.Route("/post", func(r chi.Router) {
 		r.Use(h.authenticate)
+		r.Use(h.limiters["post:60-M"])
+		r.Use(h.activated)
+
 		r.Post("/create", h.handleCreatePost)
+
 		r.Route("/{postID}", func(r chi.Router) {
 			r.Post("/like", h.handleLikeAPost)
 			r.Post("/unlike", h.handleUnlikeAPost)
@@ -72,46 +70,59 @@ func (h *HTTPHandler) SetupRoutes() *chi.Mux {
 			r.Post("/unsave", h.handleUnsavePost)
 			r.With(h.onlyMe).Delete("/delete", h.handleDeletePost)
 		})
+
 		r.Route("/comment", func(r chi.Router) {
 			r.Post("/", h.handleWriteComment)
+
 			r.Route("/{commentID}", func(r chi.Router) {
 				r.Post("/", h.handleLikeComment)
 			})
+
 			r.With(h.paginate).Get("/{postID}", h.handleGetComments)
 		})
-		r.With(h.canAccess).
-			With(h.paginate).
-			Get("/{userID}", h.handleGetUserPosts)
-		r.With(h.paginate).
-			Get("/saved", h.handleGetSavedPosts)
-		r.With(h.paginate).
-			Get("/liked", h.handleGetLikedPosts)
+
+		r.With(h.canAccess, h.paginate).Get("/{userID}", h.handleGetUserPosts)
+		r.With(h.paginate).Get("/saved", h.handleGetSavedPosts)
+		r.With(h.paginate).Get("/liked", h.handleGetLikedPosts)
 	})
 
+	// User routes: Authenticate -> Rate Limit -> Activated
 	r.Route("/user", func(r chi.Router) {
 		r.Use(h.authenticate)
+		r.Use(h.limiters["user:60-M"])
+		r.Use(h.activated)
+
 		r.With(h.paginate).Get("/feed", h.handleGetUserFeed)
 		r.With(h.paginate).Get("/list", h.handleGetUser)
+
 		r.Route("/{userID}", func(r chi.Router) {
 			r.Post("/follow", h.handleFollowUser)
 			r.Post("/unfollow", h.handleUnFollowUser)
-			r.With(h.canAccess).With(h.paginate).Get("/followers", h.handleGetFollowers)
-			r.With(h.canAccess).With(h.paginate).Get("/followings", h.handleGetFollowing)
+			r.With(h.canAccess, h.paginate).Get("/followers", h.handleGetFollowers)
+			r.With(h.canAccess, h.paginate).Get("/followings", h.handleGetFollowing)
 		})
+
 		r.Route("/profile", func(r chi.Router) {
 			r.Get("/{userID}", h.handleGetProfile)
 			r.Put("/", h.handleUpdateProfile)
 		})
 	})
 
+	// Auth routes: Rate Limited
 	r.Route("/auth", func(r chi.Router) {
-		r.Post("/signup", h.handleUserSignup)
-		r.Post("/signin", h.handleUserSignin)
-		r.Post("/logout", h.handleUserLogout)
-		r.Post("/forgot-password", h.handleForgotPassword)
+		// No rate limiter globally here
 
-		r.With(h.authenticate).Get("/me", h.handleGetMe)
-		r.With(h.authenticate, h.tokenChecker).Post("/activate/{token}", h.handleUserActivation)
+		// Rate limiter for unauthenticated routes (fallback to IP):
+		r.With(h.limiters["auth:20-M"]).Post("/signup", h.handleUserSignup)
+		r.With(h.limiters["auth:20-M"]).Post("/signin", h.handleUserSignin)
+		r.With(h.limiters["auth:20-M"]).Post("/logout", h.handleUserLogout)
+
+		r.With(h.limiters["forgot-resend:3-H"]).Post("/forgot-password", h.handleForgotPassword)
+		r.With(h.limiters["forgot-resend:3-H"]).Post("/resend-activation", h.handleResendActivation)
+
+		// Authenticated routes get authenticate then rate limiter
+		r.With(h.authenticate, h.limiters["auth:20-M"], h.activated).Get("/me", h.handleGetMe)
+		r.With(h.tokenChecker).Post("/activate/{token}", h.handleUserActivation)
 		r.With(h.tokenChecker).Post("/reset-password/{token}", h.handleResetPassword)
 	})
 

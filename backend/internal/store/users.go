@@ -57,6 +57,7 @@ type User struct {
 	Username  string    `json:"username" validate:"required.min=6,max=30"`
 	Password  *Password `json:"-"`
 	Email     string    `json:"email" validate:"required,email,checkEmail"`
+	Activated bool      `json:"activated"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -128,6 +129,7 @@ func (s *Store) UserViaEmail(ctx context.Context, email string) (*User, error) {
 		Email:     user.Email,
 		Name:      name,
 		Password:  password,
+		Activated: user.Activated,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 	}, nil
