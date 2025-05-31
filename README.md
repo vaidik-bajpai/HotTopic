@@ -27,8 +27,8 @@ Built with a Golang backend (using Chi router and SendGrid for emailing), React 
 
 ## Demo
 
-![HotTopic Demo](assets/App-Screenshot.png)  
-*Demo screenshot of HotTopic*
+![HotTopic Demo](./assets/App-Screenshot.png)  
+*Demo screenshot of HotTopic application.*
 
 ---
 
