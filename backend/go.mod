@@ -1,4 +1,4 @@
-module github.com/vaidik-bajpai/gopher-social
+module github.com/vaidik-bajpai/HotTopic/backend
 
 go 1.23.4
 

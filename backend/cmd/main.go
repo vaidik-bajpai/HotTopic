@@ -9,13 +9,13 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/vaidik-bajpai/gopher-social/internal/cache"
-	database "github.com/vaidik-bajpai/gopher-social/internal/db"
-	"github.com/vaidik-bajpai/gopher-social/internal/handler"
-	"github.com/vaidik-bajpai/gopher-social/internal/helper"
-	"github.com/vaidik-bajpai/gopher-social/internal/helper/json"
-	"github.com/vaidik-bajpai/gopher-social/internal/mailer"
-	"github.com/vaidik-bajpai/gopher-social/internal/store"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/cache"
+	database "github.com/vaidik-bajpai/HotTopic/backend/internal/db"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/handler"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/helper"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/helper/json"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/mailer"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/store"
 	"go.uber.org/zap"
 )
 

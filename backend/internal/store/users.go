@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/vaidik-bajpai/gopher-social/internal/db/db"
-	"github.com/vaidik-bajpai/gopher-social/internal/helper"
-	"github.com/vaidik-bajpai/gopher-social/internal/models"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/db/db"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/helper"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/models"
 	"golang.org/x/crypto/bcrypt"
 )
 

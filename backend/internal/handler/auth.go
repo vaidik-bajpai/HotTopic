@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
-	"github.com/vaidik-bajpai/gopher-social/internal/helper"
-	"github.com/vaidik-bajpai/gopher-social/internal/models"
-	"github.com/vaidik-bajpai/gopher-social/internal/store"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/helper"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/models"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/store"
 	"go.uber.org/zap"
 )
 
@@ -116,7 +116,7 @@ func (h *HTTPHandler) handleUserSignin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookie := &http.Cookie{
-		Name:     "hottopic-auth",
+		Name:     "HotTopic/backend-auth",
 		Value:    sessionID,
 		Path:     "/",
 		Expires:  time.Now().Add(expirationTime),
@@ -133,7 +133,7 @@ func (h *HTTPHandler) handleUserSignin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HTTPHandler) handleUserLogout(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("hottopic-auth")
+	cookie, err := r.Cookie("HotTopic/backend-auth")
 	if err != nil {
 		h.json.UnauthorizedResponse(w, r, err)
 		return
@@ -149,7 +149,7 @@ func (h *HTTPHandler) handleUserLogout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     "hottopic-auth",
+		Name:     "HotTopic/backend-auth",
 		Value:    "",
 		Path:     "/",
 		MaxAge:   -1,

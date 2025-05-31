@@ -7,10 +7,10 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/go-playground/validator/v10"
 	"github.com/redis/go-redis/v9"
-	"github.com/vaidik-bajpai/gopher-social/internal/helper"
-	"github.com/vaidik-bajpai/gopher-social/internal/helper/json"
-	"github.com/vaidik-bajpai/gopher-social/internal/mailer"
-	"github.com/vaidik-bajpai/gopher-social/internal/store"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/helper"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/helper/json"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/mailer"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/store"
 	"go.uber.org/zap"
 )
 

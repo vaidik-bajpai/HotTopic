@@ -1,6 +1,6 @@
 package database
 
-import "github.com/vaidik-bajpai/gopher-social/internal/db/db"
+import "github.com/vaidik-bajpai/HotTopic/backend/internal/db/db"
 
 func NewPrismaClient() (*db.PrismaClient, error) {
 	client := db.NewClient()

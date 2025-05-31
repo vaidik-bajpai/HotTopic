@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
-	"github.com/vaidik-bajpai/gopher-social/internal/models"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/models"
 	"go.uber.org/zap"
 )
 

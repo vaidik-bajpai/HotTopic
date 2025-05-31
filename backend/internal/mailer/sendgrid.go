@@ -10,14 +10,14 @@ import (
 
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
-	"github.com/vaidik-bajpai/gopher-social/internal/helper"
-	"github.com/vaidik-bajpai/gopher-social/internal/store"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/helper"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/store"
 )
 
 //go:embed templates/*.templ
 var templateFS embed.FS
 
-var FromName = "Hottopic"
+var FromName = "HotTopic/backend"
 
 type SendGridMailer struct {
 	FromEmail string

@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/vaidik-bajpai/gopher-social/internal/models"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/models"
 )
 
 func GenerateToken(userID string, ttl time.Duration) (*models.Token, error) {

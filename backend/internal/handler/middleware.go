@@ -14,15 +14,15 @@ import (
 	limiter "github.com/ulule/limiter/v3"
 	limiterMiddleware "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
 	redisStore "github.com/ulule/limiter/v3/drivers/store/redis"
-	"github.com/vaidik-bajpai/gopher-social/internal/helper"
-	"github.com/vaidik-bajpai/gopher-social/internal/models"
-	"github.com/vaidik-bajpai/gopher-social/internal/store"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/helper"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/models"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/store"
 	"go.uber.org/zap"
 )
 
 func (h *HTTPHandler) authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("hottopic-auth")
+		cookie, err := r.Cookie("HotTopic/backend-auth")
 		if err != nil {
 			h.json.UnauthorizedResponse(w, r, err)
 			return

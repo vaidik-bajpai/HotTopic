@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/vaidik-bajpai/gopher-social/internal/models"
-	"github.com/vaidik-bajpai/gopher-social/internal/store"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/models"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/store"
 )
 
 type userKey string
