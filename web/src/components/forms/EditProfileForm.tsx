@@ -9,6 +9,7 @@ import SubmitButton from "../buttons/SubmitButton";
 import axios from "axios";
 import { useNavigate } from "react-router";
 import { showToast } from "../../utility/toast";
+import defaultAvatar from "../../assets/default-avatar.png";
 
 const schema = yup.object({
   username: yup
@@ -183,7 +184,7 @@ export default function EditProfileForm({ user, setIsEditProfile }: EditProfileF
             onClick={triggerFileInput}
           >
             <img
-              src={imagePreview || "/default-avatar.png"}
+              src={imagePreview || defaultAvatar}
               alt="Profile"
               
               className="w-full h-full object-cover"
