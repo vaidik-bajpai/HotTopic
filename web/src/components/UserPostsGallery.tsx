@@ -80,6 +80,15 @@ export default function UserPostsGallery() {
         return () => observerRef.current?.disconnect();
     }, [loadMore]);
 
+    useEffect(() => {
+        return () => {
+            setCursor("");
+            setAllPosts([]);
+            setHasMore(true);
+            trigger({ userId: userID, cursor: "" })
+        };
+    }, []);
+
     if(isLoading && allPosts.length === 0) {
         return <SkeletonPostsGallery />
     }

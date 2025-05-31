@@ -1,11 +1,9 @@
 import React, { Dispatch, SetStateAction, useState } from "react"
 import { House, BookMarked, BookHeart, LogOut, User, PlusSquare, Flame, Search} from 'lucide-react';
 import { useLocation, useNavigate } from "react-router";
-import { useUser } from "../context/UserContext";
 import axios from "axios";
 import CreatePost from "./forms/CreatePost";
 import UserSearch from "./UserSearch";
-import { toast } from "react-toastify";
 import { showToast } from "../utility/toast";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../app/store";

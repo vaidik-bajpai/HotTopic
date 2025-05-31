@@ -33,8 +33,9 @@ function UserProfile() {
         dispatch(updateFollowState(true))
         setIsLoading(true);
 
+        const backendBaseURI = import.meta.env.VITE_BACKEND_BASE_URI
         try {
-            const url = `http://localhost:3000/user/${profile.user_id}/${newFollowState ? "follow" : "unfollow"}`;
+            const url = `${backendBaseURI}/user/${profile.user_id}/${newFollowState ? "follow" : "unfollow"}`;
             await axios.post(url, {}, { withCredentials: true });
 
             // Refresh profile data from backend to sync state
@@ -65,8 +66,9 @@ function UserProfile() {
     const { userID } = useParams()
 
     async function getProfile() {
+        const backendBaseURI = import.meta.env.VITE_BACKEND_BASE_URI
         try {
-            const response = await axios.get(`http://localhost:3000/user/profile/${userID}`, {
+            const response = await axios.get(`${backendBaseURI}/user/profile/${userID}`, {
                 withCredentials: true
             });
             dispatch(addProfileState(response.data.profile))

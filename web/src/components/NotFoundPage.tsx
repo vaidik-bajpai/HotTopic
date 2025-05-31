@@ -9,7 +9,7 @@ function NotFoundPage() {
         <h1 className="text-7xl font-extrabold text-indigo-500 mb-6">404</h1>
         <h2 className="text-2xl md:text-3xl font-semibold mb-4">Oops! Page not found</h2>
         <p className="text-md md:text-lg text-gray-700 mb-8">
-          The page you’re looking for doesn’t exist or has been moved.
+          The page you're looking for doesn't exist or has been moved.
         </p>
         <button
           onClick={() => navigate(-1)}

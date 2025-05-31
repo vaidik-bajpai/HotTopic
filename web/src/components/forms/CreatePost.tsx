@@ -83,8 +83,9 @@ export default function CreatePost({
                 }
             }
 
+            const backendBaseURI = import.meta.env.VITE_BACKEND_BASE_URI
             await axios.post(
-                "http://localhost:3000/post/create",
+                `${backendBaseURI}/post/create`,
                 {
                     caption: data.caption,
                     medias: uploadedImagesURLs,

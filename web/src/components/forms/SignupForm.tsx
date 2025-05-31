@@ -29,8 +29,9 @@ export default function SignupForm() {
     } = useForm<FormData>({ resolver: yupResolver(schema) });
 
     async function onSubmit(data: FormData) {
+        const backendBaseURI = import.meta.env.VITE_BACKEND_BASE_URI
         try {
-            const response = await axios.post("http://localhost:3000/auth/signup", data, {
+            const response = await axios.post(`${backendBaseURI}/auth/signup`, data, {
                 headers: { "Content-Type": "application/json" },
                 withCredentials: true,
             });

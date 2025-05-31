@@ -37,8 +37,9 @@ function ResetPasswordForm() {
 
   async function onSubmit(data: FormData) {
     try {
+      const backendBaseURI = import.meta.env.VITE_BACKEND_BASE_URI
         const response = await axios.post(
-            `http://localhost:3000/auth/reset-password/${token}`,
+            `${backendBaseURI}/auth/reset-password/${token}`,
             {
                 new_password: data.new_password,
                 confirm_password: data.confirm_password,

@@ -21,11 +21,12 @@ import SavedPostsViewer from './components/SavedPostsViewer'
 import { ToastContainer } from 'react-toastify'
 import NotFoundPage from './components/NotFoundPage'
 import UserPostsViewer from './components/UserPostsViewer'
-import UserPostWrapper from './components/UserPostsWrapper'
 import { useEffect } from 'react'
 import authThunk from './features/auth/authThunk'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from './app/store'
+import AccountActivation from './components/AccountActivation'
+import { ResendActivationForm } from './components/forms/ResendActivationForm'
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -45,7 +46,7 @@ function App() {
             <Route element={<Page />}>  
               <Route path='/feed' element={<FeedRenderer/>}/>
               <Route path='/user-profile/:userID' element={<UserProfile />}>
-                <Route index element={<UserPostWrapper ><UserPostsGallery /></UserPostWrapper>}/>
+                <Route index element={<UserPostsGallery />}/>
                 <Route path='followers' element={<FollowerRenderer />}/>  
                 <Route path='followings' element={<FollowingRenderer />}/>
               </Route>
@@ -58,7 +59,7 @@ function App() {
                 <Route path='saved-posts' element={<SavedPostsViewer />} />
               </Route>
               <Route path='/:userID'>
-                <Route path='posts' element={<UserPostWrapper><UserPostsViewer /></UserPostWrapper>}/>
+                <Route path='posts' element={<UserPostsViewer />}/>
               </Route>
             </Route>
           </Route>
@@ -66,6 +67,9 @@ function App() {
           <Route element={<WrapperResetPassword />}>
             <Route path='/forgot-password' element={<ForgotPasswordForm />}/>
             <Route path='/reset-password/:token' element={<ResetPasswordForm />} />
+
+            <Route path='/resend-activation' element={<ResendActivationForm />} />
+            <Route path='/activate/:token' element={<AccountActivation />} />
           </Route>
 
           <Route path='*' element={<NotFoundPage />}/>

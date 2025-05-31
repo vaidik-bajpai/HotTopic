@@ -9,8 +9,6 @@ import SubmitButton from "../buttons/SubmitButton";
 import axios from "axios";
 import { useNavigate } from "react-router";
 import { showToast } from "../../utility/toast";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../app/store";
 
 const schema = yup.object({
   username: yup
@@ -139,7 +137,8 @@ export default function EditProfileForm({ user, setIsEditProfile }: EditProfileF
         return;
       }
 
-      await axios.put("http://localhost:3000/user/profile", updatedFields, {
+      const backendBaseURI = import.meta.env.VITE_BACKEND_BASE_URI
+      await axios.put(`${backendBaseURI}/user/profile`, updatedFields, {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });

@@ -36,8 +36,9 @@ export function PostCard({
 
     const debounceLike = useCallback(
         debounce(async (shouldLike: boolean) => {
+            const backendBaseURI = import.meta.env.VITE_BACKEND_BASE_URI
             try {
-                const url = `http://localhost:3000/post/${id}/${shouldLike ? "like" : "unlike"}`
+                const url = `${backendBaseURI}/post/${id}/${shouldLike ? "like" : "unlike"}`
                 await axios.post(url, {}, {withCredentials: true})
 
             } catch(err) {
@@ -63,8 +64,9 @@ export function PostCard({
 
     const debounceSave = useCallback(
         debounce(async (shouldSave: boolean) => {
+            const backendBaseURI = import.meta.env.VITE_BACKEND_BASE_URI
             try {
-                const url = `http://localhost:3000/post/${id}/${shouldSave ? "save" : "unsave"}`
+                const url = `${backendBaseURI}/post/${id}/${shouldSave ? "save" : "unsave"}`
                 await axios.post(url, {}, {withCredentials: true})
             } catch(err) {
                 console.log(err)

@@ -26,17 +26,16 @@ export function ForgotPasswordForm() {
     })
     
     async function onSubmit(data: FormData) {
-        console.log(data);
+        const backendBaseURI = import.meta.env.VITE_BACKEND_BASE_URI
         try {
             const response = await axios.post(
-                "http://localhost:3000/auth/forgot-password",
+                `${backendBaseURI}/auth/forgot-password`,
                 { email: data.email },
                 {
                     headers: { "Content-Type": "application/json" },
                     withCredentials: true,
                 }
             );
-            console.log("Forgot password call successful", response.data);
             showToast("Password reset email sent!");
         } catch (err) {
             if (axios.isAxiosError(err) && err.response?.status === 401) {
@@ -44,7 +43,6 @@ export function ForgotPasswordForm() {
                 navigate("/");
             } else {
                 showToast("Failed to send forgot password email.", "error");
-                console.error("Forgot password call unsuccessful", err);
             }
         }
     }

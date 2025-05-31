@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import axios, { AxiosError } from "axios";
 import PasswordInput from "../PasswordInput";
-import { useUser } from "../../context/UserContext";
 import { showToast } from "../../utility/toast";
 import { useDispatch } from "react-redux";
 import { addAuthState } from "../../features/auth/authSlice";
@@ -32,8 +31,9 @@ export default function SigninForm() {
     } = useForm<FormData>({ resolver: yupResolver(schema) });
 
     async function onSubmit(data: FormData) {
+        const backendBaseURI = import.meta.env.VITE_BACKEND_BASE_URI
         try {
-            const response = await axios.post("http://localhost:3000/auth/signin", data, {
+            const response = await axios.post(`${backendBaseURI}/auth/signin`, data, {
                 headers: { "Content-Type": "application/json" },
                 withCredentials: true,
             });
@@ -43,9 +43,10 @@ export default function SigninForm() {
                 username: response.data.username,
                 email: response.data.email,
                 status: "succeeded",
+                activated: response.data.activated,
             }))
 
-            showToast("Welcome back! 🎉");
+            if(response.data.activated) showToast("Welcome back! 🎉");
             reset();
             navigate("/feed");
         } catch (error) {

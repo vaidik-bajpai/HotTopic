@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router-dom";
 import { RootState } from "../app/store";
+import { showToast } from "../utility/toast";
 
 const ProtectedComponent = () => {
     const user = useSelector((state: RootState) => state.auth);
@@ -9,7 +10,13 @@ const ProtectedComponent = () => {
         return null;
     }
 
-    if(user.status === "failed") {
+    if (!user.activated) {
+        showToast("Account not activated. Check your inbox.", "error", 3000)
+        return <Navigate to="/resend-activation" replace />;
+    }
+        
+
+    if(user.status === "failed" || !user.activated) {
         return <Navigate to="/" replace />;
     }
 

@@ -7,6 +7,7 @@ interface UserAuthState {
     username: string
     email: string
     status: "idle" | "pending" | "succeeded" | "failed",
+    activated: boolean
 }
 
 const initialState: UserAuthState = {
@@ -14,6 +15,7 @@ const initialState: UserAuthState = {
     username: "",
     email: "",
     status: "idle",
+    activated: false
 }
 
 const authSlice = createSlice({
@@ -25,6 +27,7 @@ const authSlice = createSlice({
             state.username = action.payload.username
             state.email = action.payload.email
             state.status = action.payload.status
+            state.activated = action.payload.activated
         },
         clearAuthState: () => initialState
     },

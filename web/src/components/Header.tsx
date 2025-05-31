@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router";
 import GetStartedButton from "./buttons/GetStartedButton";
-import { useState } from "react";
-import { useUser } from "../context/UserContext";
+import { useEffect, useState } from "react";
+import { RootState } from "../app/store";
+import { useSelector } from "react-redux";
 
 interface MainHeaderInterface {
     headerText: string;
@@ -9,8 +10,14 @@ interface MainHeaderInterface {
 
 export function MainHeader({ headerText }: MainHeaderInterface) {
     const navigate = useNavigate();
-    const {isLoggedIn, logout} = useUser();
     const [isOpen, setIsOpen] = useState<boolean>(false);
+
+    const { id } = useSelector((state: RootState) => state.auth);
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+    useEffect(() => {
+        setIsLoggedIn(!!id);
+    }, [id])
 
     return (
         <div className="bg-slate-50 px-4 py-3 shadow-lg relative">

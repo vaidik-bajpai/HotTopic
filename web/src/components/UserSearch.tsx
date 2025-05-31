@@ -34,7 +34,9 @@ export default function UserSearch({
                 return
             }
             setLoading(true)
-            const res = await axios.get(`http://localhost:3000/user/list?search_term=${searchTerm}&page_size=5`, {
+
+            const backendBaseURI = import.meta.env.VITE_BACKEND_BASE_URI
+            const res = await axios.get(`${backendBaseURI}/user/list?search_term=${searchTerm}&page_size=5`, {
                 withCredentials: true,
             })
             if(Array.isArray(res.data.results)) {

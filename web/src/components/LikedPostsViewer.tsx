@@ -4,7 +4,7 @@ import { useLikedPosts } from "../context/LikedPostContext";
 import { PostCard } from "./PostCard";
 
 function LikedPostViewer() {
-    const { likedPosts, fetchMorePosts } = useLikedPosts();
+    const { likedPosts } = useLikedPosts();
     const location = useLocation();
     const startIndex = location.state?.startIndex ?? 0;
 
@@ -13,7 +13,7 @@ function LikedPostViewer() {
     useEffect(() => {
         const el = postRefs.current[startIndex];
         if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
         }
     }, [startIndex, likedPosts.length]);
 

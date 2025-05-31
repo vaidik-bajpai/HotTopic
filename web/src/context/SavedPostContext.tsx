@@ -27,8 +27,9 @@ export const SavedPostProvider = ({ children }: { children: React.ReactNode }) =
     const { setHeaderText }: { setHeaderText: Dispatch<SetStateAction<string>> } = useOutletContext();
   
     const fetchMorePosts = async () => {
+      const backendBaseURI = import.meta.env.VITE_BACKEND_BASE_URI
       try {
-        const res = await axios.get(`http://localhost:3000/post/saved?page_size=10&last_id=${lastID}`, {
+        const res = await axios.get(`${backendBaseURI}/post/saved?page_size=10&last_id=${lastID}`, {
           withCredentials: true,
         });
         const newPosts: Post[] = res.data.posts ?? [];
