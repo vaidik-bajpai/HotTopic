@@ -5,7 +5,11 @@ import { RootState } from "../app/store";
 const ProtectedComponent = () => {
     const user = useSelector((state: RootState) => state.auth);
 
-    if (user.status === 'failed') {
+    if (user.status === 'pending' || user.status === 'idle') {
+        return null;
+    }
+
+    if(user.status === "failed") {
         return <Navigate to="/" replace />;
     }
 

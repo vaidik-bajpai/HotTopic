@@ -9,7 +9,8 @@ import SubmitButton from "../buttons/SubmitButton";
 import axios from "axios";
 import { useNavigate } from "react-router";
 import { showToast } from "../../utility/toast";
-import { error } from "console";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../app/store";
 
 const schema = yup.object({
   username: yup
@@ -42,14 +43,16 @@ const schema = yup.object({
 type FormData = yup.InferType<typeof schema>;
 
 interface UserProfile extends FormData {
+  user_id: string
   userpic: string | null;
 }
 
 export interface EditProfileFormProps {
-    user: UserProfile;
+  user: UserProfile;
+  setIsEditProfile: (val: boolean) => void;
 }
 
-export default function EditProfileForm({ user }: EditProfileFormProps) {
+export default function EditProfileForm({ user, setIsEditProfile }: EditProfileFormProps) {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -67,13 +70,13 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
   });
 
   useEffect(() => {
-  console.log("Incoming user to EditProfileForm", user); // ✅ debug
-  if (user) {
-    reset(user); // resets form fields
-    setInitialData(user);
-    setImagePreview(user.userpic);
-  }
-}, [user, reset]);
+    console.log("Incoming user to EditProfileForm", user); // ✅ debug
+    if (user) {
+      reset(user);
+      setInitialData(user);
+      setImagePreview(user.userpic);
+    }
+  }, [user, reset]);
 
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,6 +152,7 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
       };
 
       setInitialData({ ...initialData, ...updatedFieldsToSet });
+      setIsEditProfile(false);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 401) {
         showToast("Unauthorized. Please login again.", "error");

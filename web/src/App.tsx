@@ -61,12 +61,11 @@ function App() {
                 <Route path='posts' element={<UserPostWrapper><UserPostsViewer /></UserPostWrapper>}/>
               </Route>
             </Route>
-            <Route element={<WrapperResetPassword />}>
-              <Route path='/forgot-password' element={<ForgotPasswordForm />}/>
-              <Route path='/reset-password/:token' element={<ResetPasswordForm />} />
-            </Route>
+          </Route>
 
-            
+          <Route element={<WrapperResetPassword />}>
+            <Route path='/forgot-password' element={<ForgotPasswordForm />}/>
+            <Route path='/reset-password/:token' element={<ResetPasswordForm />} />
           </Route>
 
           <Route path='*' element={<NotFoundPage />}/>

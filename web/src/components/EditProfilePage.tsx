@@ -4,7 +4,7 @@ import { useLocation } from "react-router";
 import { useEffect, useState } from "react";
 
 type EditProfilePageProps = EditProfileFormProps & {
-  setIsEditProfile: (val: boolean) => void;
+    setIsEditProfile: (val: boolean) => void;
 };
 
 function EditProfilePage({ user, setIsEditProfile }: EditProfilePageProps) {
@@ -19,10 +19,10 @@ function EditProfilePage({ user, setIsEditProfile }: EditProfilePageProps) {
     }, [location.pathname]);
 
     return (
-        <div className="fixed inset-0 flex flex-col h-screen bg-indigo-200">
-            <div onClick={() => setIsEditProfile(false)}><X className="ml-auto m-2 w-8 h-8 hidden md:block cursor-pointer"/></div>
+        <div className="absolute inset-0 flex flex-col h-screen bg-indigo-200">
+            <div onClick={() => setIsEditProfile(false)}><X className="ml-auto m-2 w-8 h-8 cursor-pointer"/></div>
             <div className="flex-grow flex justify-center items-center">
-                <EditProfileForm user={user}/>
+                <EditProfileForm user={user} setIsEditProfile={setIsEditProfile}/>
             </div>
         </div>
     )

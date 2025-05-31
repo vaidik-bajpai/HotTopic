@@ -47,7 +47,6 @@ export const SavedPostProvider = ({ children }: { children: React.ReactNode }) =
     };
   
     useEffect(() => {
-      // Initial fetch
       if (savedPosts.length === 0) {
         fetchMorePosts();
       }

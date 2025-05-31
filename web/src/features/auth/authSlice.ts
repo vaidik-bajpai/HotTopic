@@ -1,7 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { resetAppState } from "../../app/action";
 import authThunk from "./authThunk";
-import { RootState } from "../../app/store";
 
 interface UserAuthState {
     id: string
@@ -25,6 +24,7 @@ const authSlice = createSlice({
             state.id = action.payload.id
             state.username = action.payload.username
             state.email = action.payload.email
+            state.status = action.payload.status
         },
         clearAuthState: () => initialState
     },

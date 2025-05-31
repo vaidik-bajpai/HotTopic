@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
 import PasswordInput from "../PasswordInput";
+import { showToast } from "../../utility/toast";
 
 const schema = yup.object({
     username: yup.string().required("Username is required"),
@@ -23,7 +24,8 @@ export default function SignupForm() {
     const {
         register,
         handleSubmit,
-        formState: { errors, isSubmitting }
+        formState: { errors, isSubmitting },
+        reset,
     } = useForm<FormData>({ resolver: yupResolver(schema) });
 
     async function onSubmit(data: FormData) {
@@ -32,7 +34,8 @@ export default function SignupForm() {
                 headers: { "Content-Type": "application/json" },
                 withCredentials: true,
             });
-            console.log("Signup successful", response.data);
+            showToast("User registered! 🎉")
+            reset();
             navigate("/");
         } catch (err: any) {
             console.error("Signup failed:", err.response?.data || err.message);

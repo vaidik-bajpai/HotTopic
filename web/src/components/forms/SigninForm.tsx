@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from "react-router";
+import { useNavigate } from "react-router-dom";
 import FormHeader from "../FormHeader";
 import FormInput from "../FormInput";
 import FormSubHeader from "../FormSubHeader";
@@ -10,8 +10,7 @@ import axios, { AxiosError } from "axios";
 import PasswordInput from "../PasswordInput";
 import { useUser } from "../../context/UserContext";
 import { showToast } from "../../utility/toast";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../app/store";
+import { useDispatch } from "react-redux";
 import { addAuthState } from "../../features/auth/authSlice";
 
 const schema = yup.object({
@@ -24,12 +23,12 @@ type FormData = yup.InferType<typeof schema>;
 export default function SigninForm() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const user = useUser();
 
     const {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
+        reset
     } = useForm<FormData>({ resolver: yupResolver(schema) });
 
     async function onSubmit(data: FormData) {
@@ -43,9 +42,11 @@ export default function SigninForm() {
                 id: response.data.id,
                 username: response.data.username,
                 email: response.data.email,
+                status: "succeeded",
             }))
 
             showToast("Welcome back! 🎉");
+            reset();
             navigate("/feed");
         } catch (error) {
             const err = error as AxiosError;

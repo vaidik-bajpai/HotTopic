@@ -11,8 +11,6 @@ const authThunk = createAsyncThunk(
             withCredentials: true,
         });
 
-        console.log(res)
-
         if (res.status === 200 && res.data?.user) {
             dispatch(addAuthState(res.data.user));
             return res.data.user;

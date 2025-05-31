@@ -47,7 +47,6 @@ export const LikedPostProvider = ({ children }: { children: React.ReactNode }) =
   };
 
   useEffect(() => {
-    // Initial fetch
     if (likedPosts.length === 0) {
       fetchMorePosts();
     }

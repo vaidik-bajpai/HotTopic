@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, Dispatch, SetStateAction } from "react";
 import { PostCard } from "../PostCard";
 import axios from "axios";
 import { useNavigate, useOutletContext } from "react-router";
@@ -24,6 +24,7 @@ export default function FeedRenderer() {
     const [lastID, setLastID] = useState<string>("");
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
+    const { setHeaderText } = useOutletContext<{setHeaderText: Dispatch<SetStateAction<string>>}>();
 
     const { setSearch } = useOutletContext<PageContext>();
 
@@ -68,6 +69,7 @@ export default function FeedRenderer() {
 
     useEffect(() => {
         fetchFeed();
+        setHeaderText("Feed");
     }, []);
 
     useEffect(() => {

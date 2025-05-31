@@ -7,7 +7,6 @@ import UserProfilePic from "./UserProfilePic";
 import UserProfileSlider from "./UserProfileSlider";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import axios from "axios";
-import { useUser } from "../context/UserContext";
 import ProfileFollowButton from "./buttons/ProfileFollowButton";
 import ProfileUnFollowButton from "./buttons/ProfileUnfollowButton";
 import EditProfilePage from "./EditProfilePage";
@@ -16,97 +15,61 @@ import { PageContext } from "../types/Page";
 import defaultProfilePic from '../assets/Default-Profile.png';
 import UserPostGallerySkeleton from "./UserPostGallerySkeleton";
 import { showToast } from "../utility/toast";
-
-interface UserProfileInterface {
-    user_id: string
-    username: string
-    userpic: string
-    bio: string
-    pronouns: string[]
-    post_count: number
-    followers_count: number
-    following_count: number
-    is_following: boolean
-    is_self: boolean
-}
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../app/store";
+import { addProfileState, updateFollowState } from "../features/profile/profileSlice";
 
 function UserProfile() {
+    const profile = useSelector((state: RootState) => state.profile)
+    const dispatch = useDispatch();
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate()
-    const [profile, setProfile] = useState<UserProfileInterface>({
-        user_id: "",
-        username: "",
-        userpic: "",
-        bio: "",
-        pronouns: [""],
-        post_count: 0,
-        followers_count: 0,
-        following_count: 0,
-        is_following: false,
-        is_self: false,
-    })
+
     const [isEditProfile, setIsEditProfile] = useState<boolean>(false);
     const { setCreatePost, setHeaderText } = useOutletContext<PageContext & {setHeaderText: Dispatch<SetStateAction<string>>}>();
     async function handleClick() {
         if (isLoading) return; 
         const newFollowState = !profile.is_following;
- 
-        setProfile(prev => ({
-        ...prev,
-        is_following: newFollowState,
-        followers_count: newFollowState
-            ? prev.followers_count + 1
-            : prev.followers_count - 1,
-        }));
-
+        dispatch(updateFollowState(true))
         setIsLoading(true);
 
         try {
-        const url = `http://localhost:3000/user/${profile.user_id}/${newFollowState ? "follow" : "unfollow"}`;
-        await axios.post(url, {}, { withCredentials: true });
+            const url = `http://localhost:3000/user/${profile.user_id}/${newFollowState ? "follow" : "unfollow"}`;
+            await axios.post(url, {}, { withCredentials: true });
 
-        // Refresh profile data from backend to sync state
-        await getProfile();
+            // Refresh profile data from backend to sync state
+            await getProfile();
 
-        showToast(
-            newFollowState
-            ? `You are now following ${profile.username}`
-            : `You have unfollowed ${profile.username}`
-        );
+            showToast(
+                newFollowState
+                ? `You are now following ${profile.username}`
+                : `You have unfollowed ${profile.username}`
+            );
         } catch (err) {
-        // Rollback optimistic UI on error
-        setProfile(prev => ({
-            ...prev,
-            is_following: !newFollowState,
-            followers_count: newFollowState
-            ? prev.followers_count - 1
-            : prev.followers_count + 1,
-        }));
-
-        if (axios.isAxiosError(err)) {
-            if (err.response?.status === 401) {
-                showToast("Unauthorized. Please login again.", "error");
-                navigate("/");
+            dispatch(updateFollowState(false))
+            if (axios.isAxiosError(err)) {
+                if (err.response?.status === 401) {
+                    showToast("Unauthorized. Please login again.", "error");
+                    navigate("/");
+                } else {
+                    showToast("Failed to update follow status. Please try again.", "error");
+                }
             } else {
-                showToast("Failed to update follow status. Please try again.", "error");
+                showToast("Unknown error occurred.", "error");
             }
-        } else {
-            showToast("Unknown error occurred.", "error");
-        }
         } finally {
             setIsLoading(false);
         }
     }
     
     const { userID } = useParams()
-    const user = useUser()
 
     async function getProfile() {
         try {
             const response = await axios.get(`http://localhost:3000/user/profile/${userID}`, {
                 withCredentials: true
             });
-            setProfile(response.data.profile);
+            dispatch(addProfileState(response.data.profile))
             setHeaderText(response.data.profile.username)
         } catch (error: any) {
             if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -117,15 +80,15 @@ function UserProfile() {
                 console.error(error);
             }
         }
-    }
+    }           
 
     useEffect(() => {
         getProfile()
-    }, [userID])
+    }, [userID, isEditProfile])
 
     return (
         <div className="relative min-h-screen w-full flex flex-col">
-            <div className="bg-white shadow-md rounded-xl flex flex-col flex-grow">
+            <div className={`bg-white shadow-md rounded-xl flex flex-col flex-grow ${isEditProfile ? "hidden" : ""}`}>
                 <div className="flex flex-col flex-grow">
                     <div className="w-full px-4 border-b-2 shadow-none border-b border-gray-200">
                         <div className="flex flex-col max-w-6xl mx-auto justify-center rounded-lg gap-1 p-2 md:p-4">

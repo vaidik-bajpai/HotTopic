@@ -18,7 +18,7 @@ function SavedPostsViewer() {
     }, [startIndex, savedPosts.length]);
 
     return (
-        <div className="flex flex-col mx-auto gap-5 max-w-xl my-4">
+        <div className="flex flex-col mx-auto gap-5 max-w-xl my-4 mx-2">
             {savedPosts.map((post, index) => (
                 <div key={post.id} ref={(el) => (postRefs.current[index] = el)}>
                 <PostCard

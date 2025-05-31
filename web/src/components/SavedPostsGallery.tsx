@@ -24,7 +24,7 @@ function SavedPostsGallery() {
   }
 
   return (
-    <div className="grid grid-cols-3 gap-1 w-fit mx-auto my-4">
+    <div className="grid grid-cols-3 gap-1 w-fit mx-auto my-4 mx-2">
       {savedPosts.map((post, index) => (
         <div
           key={post.id}
