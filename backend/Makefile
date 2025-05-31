@@ -13,7 +13,7 @@ prisma-migrate:
 	go run github.com/steebchen/prisma-client-go migrate dev
  
 prisma-mig-deploy:
-	go run github.com/steebchen/prisma-client-go migrate deploy
+	go run github.com/steebchen/prisma-client-go migrate deploy --schema $(SCHEMA_PATH)
 
 postgres-shell:
 	docker exec -it HotTopic psql -U postgres hottopic

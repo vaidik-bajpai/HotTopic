@@ -22,6 +22,7 @@ import (
 //go:generate go run github.com/steebchen/prisma-client-go generate --schema ../internal/db/schema.prisma
 
 func main() {
+	port := helper.GetEnvOrPanic("PORT")
 	redisConnURL := helper.GetEnvOrPanic("REDIS_URL")
 	sgAPIKey := helper.GetEnvOrPanic("SENDGRID_API_KEY")
 	sgfromEmail := helper.GetEnvOrPanic("SENDGRID_FROM_EMAIL")
@@ -58,8 +59,8 @@ func main() {
 	hdl := handler.NewHandler(logger, store, validate, redisClient, json, sendGridMailer)
 	r := hdl.SetupRoutes()
 
-	fmt.Printf("Starting server on port: %s\n", "3000")
-	http.ListenAndServe(":3000", r)
+	fmt.Printf("Starting server on port: %s\n", port)
+	http.ListenAndServe(port, r)
 }
 
 func CheckEmail(fl validator.FieldLevel) bool {
