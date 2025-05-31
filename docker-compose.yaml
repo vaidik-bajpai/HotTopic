@@ -1,0 +1,86 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: hottopic-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pa55word
+      POSTGRES_DB: hottopic
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d hottopic"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: hottopic-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: hottopic-backend
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      migrate:
+        condition: service_completed_successfully
+    env_file:
+      - ./backend/.env
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_HOST: hottopic-redis
+    ports:
+      - "3000:3000"
+
+  # Init container for migrations
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: build
+    container_name: hottopic-migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./backend/.env
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_HOST: hottopic-redis
+    command: >
+      sh -c "
+        echo 'Running database migrations...' &&
+        go run github.com/steebchen/prisma-client-go db push --schema ./internal/db/schema.prisma &&
+        echo 'Migrations completed successfully!'
+      "
+    restart: "no"
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: hottopic-web
+    restart: on-failure
+    depends_on:
+      - backend
+    env_file:
+      - ./web/.env
+    ports:
+      - "5173:80"
+
+volumes:
+  postgres-data:
