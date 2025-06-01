@@ -6,6 +6,7 @@ import (
 	"encoding/base32"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/vaidik-bajpai/HotTopic/backend/internal/models"
@@ -42,4 +43,18 @@ func GetEnvOrPanic(key string) string {
 		panic(fmt.Errorf("error environment variable [%s] does not exists", key))
 	}
 	return value
+}
+
+func GetBoolEnvOrPanic(key string) bool {
+	value, ok := os.LookupEnv(key)
+	if !ok {
+		panic(fmt.Errorf("error environment variable [%s] does not exists", key))
+	}
+
+	boolValue, err := strconv.ParseBool(value)
+	if err != nil {
+		panic(fmt.Errorf("invalid boolean value for [%s]: %v", key, err))
+	}
+
+	return boolValue
 }
