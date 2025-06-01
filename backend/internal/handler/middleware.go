@@ -22,7 +22,7 @@ import (
 
 func (h *HTTPHandler) authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("HotTopic/backend-auth")
+		cookie, err := r.Cookie("hottopic-auth")
 		if err != nil {
 			h.json.UnauthorizedResponse(w, r, err)
 			return

@@ -19,8 +19,6 @@ import (
 	"go.uber.org/zap"
 )
 
-//go:generate go run github.com/steebchen/prisma-client-go generate --schema ../internal/db/schema.prisma
-
 func main() {
 	port := helper.GetEnvOrPanic("PORT")
 	redisConnURL := helper.GetEnvOrPanic("REDIS_URL")

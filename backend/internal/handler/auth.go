@@ -116,7 +116,7 @@ func (h *HTTPHandler) handleUserSignin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookie := &http.Cookie{
-		Name:     "HotTopic/backend-auth",
+		Name:     "hottopic-auth",
 		Value:    sessionID,
 		Path:     "/",
 		Expires:  time.Now().Add(expirationTime),
