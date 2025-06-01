@@ -48,9 +48,10 @@ export default function Sidebar({
     }
 
     async function handleLogout() {
+        const backendBaseURI = import.meta.env.VITE_BACKEND_BASE_URI
         try {
             await axios.post(
-                `http://localhost:3000/auth/logout`,
+                `${backendBaseURI}/auth/logout`,
                 null,
                 { withCredentials: true }
             );
