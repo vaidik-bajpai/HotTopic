@@ -119,7 +119,6 @@ func (h *HTTPHandler) handleUserSignin(w http.ResponseWriter, r *http.Request) {
 		Name:     "hottopic-auth",
 		Value:    sessionID,
 		Path:     "/",
-		Domain:   helper.GetEnvOrPanic("COOKIE_DOMAIN"),
 		Expires:  time.Now().Add(expirationTime),
 		MaxAge:   int(expirationTime.Seconds()),
 		HttpOnly: true,
