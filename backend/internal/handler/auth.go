@@ -133,7 +133,7 @@ func (h *HTTPHandler) handleUserSignin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HTTPHandler) handleUserLogout(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("HotTopic/backend-auth")
+	cookie, err := r.Cookie("hottopic-auth")
 	if err != nil {
 		h.json.UnauthorizedResponse(w, r, err)
 		return
