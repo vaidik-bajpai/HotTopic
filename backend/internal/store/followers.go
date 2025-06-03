@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/vaidik-bajpai/HotTopic/backend/internal/db/db"
@@ -109,7 +110,7 @@ func (s *Store) GetFollowerList(ctx context.Context, fr *models.GetFollowReq) ([
 	)
 
 	if fr.LastID != "" {
-		query.Cursor(db.Follow.FollowerID.Cursor(fr.LastID))
+		query = query.Cursor(db.Follow.ID.Cursor(fr.LastID)).Skip(1)
 	}
 
 	followerRes, err := query.Exec(ctx)
@@ -143,7 +144,7 @@ func (s *Store) GetFollowerList(ctx context.Context, fr *models.GetFollowReq) ([
 
 func (s *Store) GetFollowingList(ctx context.Context, fr *models.GetFollowReq) ([]*models.GetFollowRes, error) {
 	var followingList []*models.GetFollowRes
-
+	fmt.Println("lastID: ", fr.LastID)
 	query := s.db.Follow.FindMany(
 		db.Follow.FollowerID.Equals(fr.UserID),
 		db.Follow.FollowingID.Not(fr.RequesterID),
@@ -158,7 +159,7 @@ func (s *Store) GetFollowingList(ctx context.Context, fr *models.GetFollowReq) (
 	)
 
 	if fr.LastID != "" {
-		query.Cursor(db.Follow.FollowingID.Cursor(fr.LastID))
+		query = query.Cursor(db.Follow.ID.Cursor(fr.LastID)).Skip(1)
 	}
 
 	followingRes, err := query.Exec(ctx)
@@ -180,6 +181,7 @@ func (s *Store) GetFollowingList(ctx context.Context, fr *models.GetFollowReq) (
 		isFollowedByRequester := len(user.Following()) > 0
 
 		followingList = append(followingList, &models.GetFollowRes{
+			ID:          follow.ID,
 			UserID:      user.ID,
 			Username:    user.Username,
 			UserPic:     pic,

@@ -3,7 +3,7 @@ package store
 import (
 	"context"
 	"errors"
-	"log"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,7 +14,9 @@ import (
 )
 
 var (
-	ErrUserNotFound = errors.New("user not found")
+	ErrUserNotFound  = errors.New("user not found")
+	ErrUsernameTaken = errors.New("username already taken")
+	ErrEmailTaken    = errors.New("email already taken")
 )
 
 const (
@@ -99,7 +101,15 @@ func (s *Store) UserRegistration(ctx context.Context, cu *User) (*models.Token, 
 	).Tx()
 
 	if err := s.db.Prisma.Transaction(userTxn, tokenTxn, userProfileTxn).Exec(ctx); err != nil {
-		log.Printf("[error:%v]\n", err)
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "P2002") {
+			if strings.Contains(errMsg, `"email"`) {
+				return nil, ErrEmailTaken
+			}
+			if strings.Contains(errMsg, `"username"`) {
+				return nil, ErrUsernameTaken
+			}
+		}
 		return nil, err
 	}
 
@@ -171,6 +181,9 @@ func (s *Store) GetProfile(ctx context.Context, gp *models.GetProfileReq) (*mode
 		),
 	).Exec(ctx)
 	if err != nil {
+		if ok := db.IsErrNotFound(err); ok {
+			return nil, ErrUserNotFound
+		}
 		return nil, err
 	}
 
@@ -220,7 +233,7 @@ func (s *Store) ListUsers(ctx context.Context, lu *models.ListUserReq) ([]*model
 			),
 		),
 	).With(
-		db.User.Followers.Fetch(
+		db.User.Following.Fetch(
 			db.Follow.FollowerID.Equals(lu.UserID),
 		),
 	).OrderBy(
@@ -243,7 +256,7 @@ func (s *Store) ListUsers(ctx context.Context, lu *models.ListUserReq) ([]*model
 			name = ""
 		}
 
-		isFollowing := len(user.Followers()) > 0
+		isFollowing := len(user.Following()) > 0
 
 		res = append(res, &models.ListUserRes{
 			ID:          user.ID,
@@ -297,6 +310,12 @@ func (s *Store) UpdateProfile(ctx context.Context, up *models.UpdateProfile) err
 	}
 
 	if err := s.db.Prisma.Transaction(txns...).Exec(ctx); err != nil {
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "P2002") {
+			if strings.Contains(errMsg, `"username"`) {
+				return ErrUsernameTaken
+			}
+		}
 		return err
 	}
 

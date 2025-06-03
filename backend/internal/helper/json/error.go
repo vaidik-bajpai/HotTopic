@@ -77,3 +77,9 @@ func (j *JSON) ForbiddenResponse(w http.ResponseWriter, r *http.Request, err err
 	j.logError(r, message, message)
 	j.errorResponse(w, r, http.StatusForbidden, message)
 }
+
+func (j *JSON) NotFoundResponse(w http.ResponseWriter, r *http.Request, err error) {
+	message := err.Error()
+	j.logError(r, message, message)
+	j.errorResponse(w, r, http.StatusNotFound, message)
+}

@@ -7,6 +7,7 @@ type GetFollowReq struct {
 }
 
 type GetFollowRes struct {
+	ID          string `json:"id"`
 	UserID      string `json:"user_id"`
 	Username    string `json:"username"`
 	UserPic     string `json:"userpic"`

@@ -74,5 +74,5 @@ func (h *HTTPHandler) handleGetSavedPosts(w http.ResponseWriter, r *http.Request
 	}
 
 	h.logger.Info("successfully fetched the posts")
-	h.json.WriteJSONResponse(w, http.StatusOK, map[string][]*models.Post{"posts": posts})
+	h.json.WriteJSONResponse(w, http.StatusOK, map[string][]*models.SavedPosts{"posts": posts})
 }

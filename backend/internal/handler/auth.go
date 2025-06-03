@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -33,6 +32,11 @@ func (h *HTTPHandler) handleUserSignup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.logger.Info("signup payload",
+		zap.String("username", temp.Username),
+		zap.String("email", temp.Email),
+	)
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -44,11 +48,10 @@ func (h *HTTPHandler) handleUserSignup(w http.ResponseWriter, r *http.Request) {
 
 	token, err := h.store.UserRegistration(ctx, payload)
 	if err != nil {
-		if strings.Contains(err.Error(), "P2002") {
-			h.json.ConflictResponse(w, r, errors.New("email or username already registered"))
+		if errors.Is(err, store.ErrEmailTaken) || errors.Is(err, store.ErrUsernameTaken) {
+			h.json.ConflictResponse(w, r, errors.New("email or username already in use"))
 			return
 		}
-
 		h.json.ServerErrorResponse(w, r, err)
 		return
 	}

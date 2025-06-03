@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
-	"github.com/vaidik-bajpai/HotTopic/backend/internal/db/db"
 	"github.com/vaidik-bajpai/HotTopic/backend/internal/models"
+	"github.com/vaidik-bajpai/HotTopic/backend/internal/store"
 	"go.uber.org/zap"
 )
 
@@ -31,6 +31,10 @@ func (h *HTTPHandler) handleGetProfile(w http.ResponseWriter, r *http.Request) {
 		RequesterID: user.ID,
 	})
 	if err != nil {
+		if errors.Is(err, store.ErrUserNotFound) {
+			h.json.NotFoundResponse(w, r, err)
+			return
+		}
 		h.json.ServerErrorResponse(w, r, err)
 		return
 	}
@@ -39,7 +43,7 @@ func (h *HTTPHandler) handleGetProfile(w http.ResponseWriter, r *http.Request) {
 		profile.IsSelf = true
 	}
 
-	h.json.WriteJSONResponse(w, http.StatusOK, map[string]interface{}{"profile": profile})
+	h.json.WriteJSONResponse(w, http.StatusOK, map[string]any{"profile": profile})
 }
 
 func (h *HTTPHandler) handleGetUser(w http.ResponseWriter, r *http.Request) {
@@ -71,7 +75,7 @@ func (h *HTTPHandler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.json.WriteJSONResponse(w, http.StatusOK, map[string]interface{}{"results": list})
+	h.json.WriteJSONResponse(w, http.StatusOK, map[string]any{"results": list})
 }
 
 func (h *HTTPHandler) handleUpdateProfile(w http.ResponseWriter, r *http.Request) {
@@ -94,8 +98,8 @@ func (h *HTTPHandler) handleUpdateProfile(w http.ResponseWriter, r *http.Request
 
 	err := h.store.UpdateProfile(ctx, req)
 	if err != nil {
-		if _, ok := db.IsErrUniqueConstraint(err); ok {
-			h.json.ConflictResponse(w, r, errors.New("username taken"))
+		if errors.Is(err, store.ErrUsernameTaken) {
+			h.json.ConflictResponse(w, r, errors.New("username alredy taken"))
 			return
 		}
 		h.json.ServerErrorResponse(w, r, err)
@@ -105,7 +109,3 @@ func (h *HTTPHandler) handleUpdateProfile(w http.ResponseWriter, r *http.Request
 	h.logger.Info("user updated successfully", zap.String("username", user.Username))
 	h.json.WriteNoContentResponse(w)
 }
-
-//func (h *HTTPHandler) handleGetCommentedPosts(w http.ResponseWriter, r *http.Request) {
-//	panic("unimplemented")
-//}

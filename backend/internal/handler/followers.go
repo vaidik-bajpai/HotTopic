@@ -72,6 +72,7 @@ func (h *HTTPHandler) handleGetFollowers(w http.ResponseWriter, r *http.Request)
 		UserID:      userID,
 		Paginate: models.Paginate{
 			PageSize: paginate.PageSize,
+			LastID:   paginate.LastID,
 		},
 	})
 	if err != nil {
@@ -101,6 +102,7 @@ func (h *HTTPHandler) handleGetFollowing(w http.ResponseWriter, r *http.Request)
 		UserID:      userID,
 		Paginate: models.Paginate{
 			PageSize: paginate.PageSize,
+			LastID:   paginate.LastID,
 		},
 	})
 	if err != nil {

@@ -61,7 +61,7 @@ func (s *Store) UnlikeAPost(ctx context.Context, userID string, postID string) e
 	return nil
 }
 
-func (s *Store) GetLikedPost(ctx context.Context, gl *models.GetLikedReq) ([]*models.Post, error) {
+func (s *Store) GetLikedPost(ctx context.Context, gl *models.GetLikedReq) ([]*models.LikedPosts, error) {
 	query := s.db.PostLike.FindMany(
 		db.PostLike.UserID.Equals(gl.UserID),
 	).With(
@@ -77,7 +77,7 @@ func (s *Store) GetLikedPost(ctx context.Context, gl *models.GetLikedReq) ([]*mo
 	)
 
 	if gl.LastID != "" {
-		query = query.Cursor(db.PostLike.ID.Cursor(gl.LastID))
+		query = query.Cursor(db.PostLike.ID.Cursor(gl.LastID)).Skip(1)
 	}
 
 	likedPosts, err := query.Exec(ctx)
@@ -85,7 +85,7 @@ func (s *Store) GetLikedPost(ctx context.Context, gl *models.GetLikedReq) ([]*mo
 		return nil, err
 	}
 
-	var posts []*models.Post
+	var posts []*models.LikedPosts
 	for _, post := range likedPosts {
 		pic, ok := post.Post().User().Pic()
 		if !ok {
@@ -100,17 +100,20 @@ func (s *Store) GetLikedPost(ctx context.Context, gl *models.GetLikedReq) ([]*mo
 
 		isLiked := len(post.Post().Like()) > 0
 
-		posts = append(posts, &models.Post{
-			ID:           post.PostID,
-			UserID:       post.Post().UserID,
-			Username:     post.Post().User().Username,
-			UserPic:      pic,
-			Media:        images,
-			Caption:      post.Post().Caption,
-			LikeCount:    int64(post.Post().Likes),
-			CommentCount: int64(post.Post().Comments),
-			IsLiked:      isLiked,
-			IsSaved:      true,
+		posts = append(posts, &models.LikedPosts{
+			LikeID: post.ID,
+			Post: models.Post{
+				ID:           post.PostID,
+				UserID:       post.Post().UserID,
+				Username:     post.Post().User().Username,
+				UserPic:      pic,
+				Media:        images,
+				Caption:      post.Post().Caption,
+				LikeCount:    int64(post.Post().Likes),
+				CommentCount: int64(post.Post().Comments),
+				IsLiked:      isLiked,
+				IsSaved:      true,
+			},
 		})
 	}
 
