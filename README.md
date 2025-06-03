@@ -25,12 +25,34 @@ Built with a Golang backend (using Chi router and SendGrid for emailing), React 
 
 ---
 
-## Demo
+## 📱 Demo
 
-![HotTopic Demo](./assets/App-Screenshot.png)  
-*Demo screenshot of HotTopic application.*
+### 🖥️ Desktop View
+
+#### 📰 Feed Page
+
+![HotTopic Feed - Desktop](./assets/App-Screenshot.png)  
+*Feed page of HotTopic as seen on a desktop browser.*
+
+#### 👤 Profile Page
+
+![HotTopic Profile - Desktop](./assets/App-Profile.png)  
+*User profile page of HotTopic on desktop.*
+
+### 📱 Mobile View
+
+#### 🎞️ Interaction (GIF)
+
+![HotTopic Mobile Interaction GIF](./assets/Responsive.gif)  
+*GIF showing interactive usage on a mobile.*
+
+#### 🖼️ Static Mobile View
+
+![HotTopic Mobile Static Screenshot](./assets/Responsive.png)  
+*Static mobile screenshot demonstrating responsive layout of HotTopic.*
 
 ---
+
 
 ## Getting Started
 
@@ -55,7 +77,9 @@ REDIS_URL=redis://${REDIS_HOST}:6379
 SENDGRID_API_KEY=your-sendgrid-api-key
 SENDGRID_FROM_EMAIL=your-email@example.com
 FRONTEND_ORIGIN=http://localhost:5173
-
+PRODUCTION=true
+PORT=:3000
+COOKIE_DOMAIN=localhost
 ```
 
 **Frontend `.env` (`./web/.env`):**
