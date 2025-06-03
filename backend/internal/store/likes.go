@@ -66,7 +66,7 @@ func (s *Store) GetLikedPost(ctx context.Context, gl *models.GetLikedReq) ([]*mo
 		db.PostLike.UserID.Equals(gl.UserID),
 	).With(
 		db.PostLike.Post.Fetch().With(
-			db.Post.Like.Fetch(db.PostLike.UserID.Equals(gl.UserID)),
+			db.Post.Save.Fetch(db.Save.UserID.Equals(gl.UserID)),
 			db.Post.Images.Fetch(),
 			db.Post.User.Fetch(),
 		),
@@ -98,7 +98,7 @@ func (s *Store) GetLikedPost(ctx context.Context, gl *models.GetLikedReq) ([]*mo
 			images = append(images, image.Media)
 		}
 
-		isLiked := len(post.Post().Like()) > 0
+		isSaved := len(post.Post().Save()) > 0
 
 		posts = append(posts, &models.LikedPosts{
 			LikeID: post.ID,
@@ -111,8 +111,8 @@ func (s *Store) GetLikedPost(ctx context.Context, gl *models.GetLikedReq) ([]*mo
 				Caption:      post.Post().Caption,
 				LikeCount:    int64(post.Post().Likes),
 				CommentCount: int64(post.Post().Comments),
-				IsLiked:      isLiked,
-				IsSaved:      true,
+				IsLiked:      true,
+				IsSaved:      isSaved,
 			},
 		})
 	}
