@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react"
 import MediaRenderer from "./renderers/MediaRenderer"
-import { Bookmark, Heart, Send } from "lucide-react"
+import { Bookmark, Heart, MessageCircle, Send } from "lucide-react"
 import axios from "axios"
 import debounce from "lodash.debounce"
 import { toast } from "react-toastify"
@@ -103,10 +103,10 @@ export function PostCard({
                         </button>
                         {likeCount != 0 && <div>{likeCount}</div>}
                     </div>
-                    <button>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-circle"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+                    <button className="text-gray-500" onClick={() => showToast("comments not available", "info")}>
+                        <MessageCircle />
                     </button>
-                    <button>
+                    <button className="text-gray-500" onClick={() => showToast("share not available", "info")}>
                         <Send />
                     </button>
                 </div>

@@ -27,6 +27,7 @@ import { useDispatch } from 'react-redux'
 import { AppDispatch } from './app/store'
 import AccountActivation from './components/AccountActivation'
 import { ResendActivationForm } from './components/forms/ResendActivationForm'
+import UserPostWrapper from './components/UserPostsWrapper'
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -46,7 +47,7 @@ function App() {
             <Route element={<Page />}>  
               <Route path='/feed' element={<FeedRenderer/>}/>
               <Route path='/user-profile/:userID' element={<UserProfile />}>
-                <Route index element={<UserPostsGallery />}/>
+                <Route index element={<UserPostWrapper ><UserPostsGallery /></UserPostWrapper>}/>
                 <Route path='followers' element={<FollowerRenderer />}/>  
                 <Route path='followings' element={<FollowingRenderer />}/>
               </Route>
@@ -59,7 +60,7 @@ function App() {
                 <Route path='saved-posts' element={<SavedPostsViewer />} />
               </Route>
               <Route path='/:userID'>
-                <Route path='posts' element={<UserPostsViewer />}/>
+                <Route path='posts' element={<UserPostWrapper><UserPostsViewer /></UserPostWrapper>}/>
               </Route>
             </Route>
           </Route>

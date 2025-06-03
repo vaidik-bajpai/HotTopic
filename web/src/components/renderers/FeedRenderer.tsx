@@ -2,9 +2,9 @@ import { useEffect, useRef, useState, useCallback, Dispatch, SetStateAction } fr
 import { PostCard } from "../PostCard";
 import axios from "axios";
 import { useNavigate, useOutletContext } from "react-router";
-import { toast } from "react-toastify";
 import { PageContext } from "../../types/Page";
 import { showToast } from "../../utility/toast";
+import Spinner from "../Spinner";
 
 interface Post {
   id: string;
@@ -34,9 +34,11 @@ export default function FeedRenderer() {
     const fetchFeed = useCallback(async () => {
         if (loading || !hasMore) return;
         setLoading(true);
+
+        const backendBaseURI = import.meta.env.VITE_BACKEND_BASE_URI
         try {
             const res = await axios.get(
-                `http://localhost:3000/user/feed?page_size=10&last_id=${lastID}`,
+                `${backendBaseURI}/user/feed?page_size=10&last_id=${lastID}`,
                 { withCredentials: true }
             );
 
@@ -88,7 +90,7 @@ export default function FeedRenderer() {
         return () => observerRef.current?.disconnect();
     }, [fetchFeed, loading, hasMore]);
 
-    if(feed.length === 0) {
+    if(feed.length === 0 && !loading) {
         return ( 
             <div className="h-full flex flex-col items-center justify-center">
                 <p className="text-2xl font-bold text-indigo-600 text-gray-600 mb-4 text-center">
@@ -107,22 +109,22 @@ export default function FeedRenderer() {
 
     return (
         <div className="flex-grow flex flex-col mx-auto gap-5 max-w-xl my-4">
-        {feed.map((post) => (
-            <PostCard
-            key={post.id}
-            id={post.id}
-            userImage={post.userpic}
-            username={post.username}
-            postImages={post.media}
-            caption={post.caption}
-            likeCount={post.like_count}
-            commentCount={post.comment_count}
-            isLiked={post.is_liked}
-            isSaved={post.is_saved}
-            />
-        ))}
-        {loading && <p className="text-center text-gray-500">Loading...</p>}
-        <div ref={loaderRef} className="h-10"></div>
+            {feed.map((post) => (
+                <PostCard
+                key={post.id}
+                id={post.id}
+                userImage={post.userpic}
+                username={post.username}
+                postImages={post.media}
+                caption={post.caption}
+                likeCount={post.like_count}
+                commentCount={post.comment_count}
+                isLiked={post.is_liked}
+                isSaved={post.is_saved}
+                />
+            ))}
+            <div ref={loaderRef} className="h-10"></div>
+            {loading && hasMore && <Spinner />}
         </div>
     );
 }

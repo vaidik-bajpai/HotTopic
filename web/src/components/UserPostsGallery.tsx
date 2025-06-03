@@ -1,108 +1,53 @@
-import { useNavigate, useOutletContext, useParams } from "react-router";
+import { useNavigate, useOutlet, useOutletContext, useParams } from "react-router";
+import { useUserPosts } from "../context/UserPostContext"; // adjust path
 import { Camera, Copy, Plus } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import NotAFollower from "./NotAFollower";
 import { PageContext } from "../types/Page";
 import { ProfileContextType } from "../types/Profile";
 import NoContent from "./NoContent";
 import SkeletonPostsGallery from "./SkeletonPostsGallery";
-import { showToast } from "../utility/toast";
-import { Post } from "../types/post";
-import { useLazyGetProfilePostsQuery } from "../app/api/api";
-import { getOptimizedCloudinaryUrl } from "../utility/cloudinary";
 
 export default function UserPostsGallery() {
-    const { userID } = useParams();
-    const navigate = useNavigate();
-    const [cursor, setCursor] = useState<string | null>("");
-    const [hasMore, setHasMore] = useState<boolean>(true)
-    const [allPosts, setAllPosts] = useState<Post[]>([]);
-
-    if (!userID) return null;
-
-    const [
-        trigger,
-    {
-        data,
-        error,
-        isLoading,
-        isFetching,
-    }] = useLazyGetProfilePostsQuery()
-
-    useEffect(() => {
-        setCursor("");
-        setAllPosts([]);
-        setHasMore(true);
-        trigger({ userId: userID, cursor: "" })
-    }, [userID])
-
-    useEffect(() => {
-        if (!data) return;
-
-        setAllPosts((prev) => {
-            return [...prev, ...data.posts]
-        });
-
-        if (data.cursor === null) {
-            setHasMore(false);
-        } else {
-            setCursor(data.cursor);
-        }
-    }, [data]);
-
-    useEffect(() => {
-        if (error && 'status' in error && error.status === 401) {
-            showToast("Unauthorised, Please login again.", "error");
-            navigate("/");
-        }
-    }, [error]);
-    
-
+    const { userID } = useParams()
+    const { userPosts, fetchMorePosts, forbidden, loading, hasMore } = useUserPosts();
     const loaderRef = useRef<HTMLDivElement | null>(null);
     const observerRef = useRef<IntersectionObserver | null>(null);
-    const { setCreatePost, isSelf } = useOutletContext<PageContext & ProfileContextType>();
+    const navigate = useNavigate();
 
-    const loadMore = useCallback(() => {
-        if (!isFetching && cursor && hasMore) {
-            trigger({ userId: userID, cursor });
-        }
-    }, [isFetching, cursor, hasMore, userID, trigger]);
+    const { setCreatePost, isSelf } = useOutletContext<PageContext & ProfileContextType>()
 
     useEffect(() => {
         if (observerRef.current) observerRef.current.disconnect();
 
-        observerRef.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting) loadMore();
+        observerRef.current = new IntersectionObserver(async (entries) => {
+            if (entries[0].isIntersecting && hasMore && !loading) { 
+                await fetchMorePosts()
+            }
         });
 
-        if (loaderRef.current) observerRef.current.observe(loaderRef.current);
+        if (loaderRef.current) {
+            observerRef.current.observe(loaderRef.current);
+        }
 
         return () => observerRef.current?.disconnect();
-    }, [loadMore]);
+    }, [fetchMorePosts, userPosts.length, hasMore]);
 
-    useEffect(() => {
-        return () => {
-            setCursor("");
-            setAllPosts([]);
-            setHasMore(true);
-            trigger({ userId: userID, cursor: "" })
-        };
-    }, []);
-
-    if(isLoading && allPosts.length === 0) {
-        return <SkeletonPostsGallery />
-    }
-
-    if(error && 'status' in error && error.status === 403) {
+    if(loading && userPosts.length === 0 && hasMore) {
         return (
-            <div className="flex-grow w-full flex justify-center items-center bg-indigo-200">
-                <NotAFollower 
-                    text={"Only followers can view this user's content. Follow them to gain access."}/>
-            </div>
+            <SkeletonPostsGallery />
         )
     }
 
-    if (allPosts.length === 0) {
+    if (forbidden) {
+        return (
+            <div className="flex-grow w-full flex justify-center items-center bg-indigo-200 rounded-xl shadow-sm p-2">
+                <NotAFollower text={"Only followers can view this user's content. Follow them to gain access."}/>
+            </div>
+        );
+    }
+
+    if (userPosts.length === 0) {
         return (
             <div className="flex-grow flex flex-col items-center justify-center text-center bg-indigo-200 rounded-xl shadow-sm p-2">
                 {isSelf 
@@ -120,15 +65,14 @@ export default function UserPostsGallery() {
         <div className="flex-grow w-full bg-indigo-200 py-4 px-2 overflow-y-auto">
             <div className="max-w-3xl mx-auto">
                 <div className="grid grid-cols-3 gap-1 w-fit mx-auto my-4">
-                    {allPosts.map((post, index) => (
+                    {userPosts.map((post, index) => (
                         <div
-                            key={post.id}
+                            key={post.id || `${post.media[0]}-${index}`}
                             className="relative cursor-pointer max-w-xs"
                             onClick={() => navigate(`/${userID}/posts`)}
                         >
                             <img
-                                loading="lazy"
-                                src={getOptimizedCloudinaryUrl(post.media[0])}
+                                src={post.media[0]}
                                 alt="Post thumbnail"
                                 className="w-full aspect-square object-cover rounded"
                             />
@@ -139,9 +83,13 @@ export default function UserPostsGallery() {
                             )}
                         </div>
                     ))}
-                    {isFetching && <p className="text-center text-gray-500">Loading...</p>}
                     <div ref={loaderRef} className="h-10 col-span-3"></div>
                 </div>
+                {loading && userPosts.length !== 0 && hasMore &&  (
+                    <div className="flex justify-center items-center mt-2 w-full">
+                        <div className="w-8 h-8 border-4 border-indigo-700 border-t-transparent rounded-full animate-spin" />
+                    </div>
+                )}
             </div>
         </div>
     );

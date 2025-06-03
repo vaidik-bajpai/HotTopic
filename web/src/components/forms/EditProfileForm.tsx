@@ -154,9 +154,15 @@ export default function EditProfileForm({ user, setIsEditProfile }: EditProfileF
       setInitialData({ ...initialData, ...updatedFieldsToSet });
       setIsEditProfile(false);
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.status === 401) {
-        showToast("Unauthorized. Please login again.", "error");
-        navigate("/");
+      if (axios.isAxiosError(err)) {
+        if(err.response?.status === 401) {
+          showToast("Unauthorized. Please login again.", "error");
+          navigate("/");
+        }
+        else if (err.response?.status === 409) {
+          showToast("username already in use", "error");
+          return
+        }
       } else {
         showToast("Failed to update profile.", "error");
         console.error("Update error", err);

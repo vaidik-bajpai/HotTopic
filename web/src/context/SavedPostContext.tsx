@@ -3,12 +3,13 @@ import { Post } from "../types/post"
 import axios from "axios";
 import { showToast } from "../utility/toast";
 import { useNavigate, useOutletContext } from "react-router";
+import { SavePost } from "../types/SavedPosts";
 
 interface SavedPostContextType {
     savedPosts: Post[];
     lastID: string;
     fetchMorePosts: () => Promise<void>;
-    setSavedPosts: React.Dispatch<React.SetStateAction<Post[]>>;
+    setSavedPosts: React.Dispatch<React.SetStateAction<SavePost[]>>;
 }
 
 const SavedPostContext = createContext<SavedPostContextType | null>(null);
@@ -20,7 +21,7 @@ export const useSavedPosts = () => {
 }
 
 export const SavedPostProvider = ({ children }: { children: React.ReactNode }) => {
-    const [savedPosts, setSavedPosts] = useState<Post[]>([]);
+    const [savedPosts, setSavedPosts] = useState<SavePost[]>([]);
     const [lastID, setLastID] = useState("");
     const navigate = useNavigate();
 
@@ -32,10 +33,10 @@ export const SavedPostProvider = ({ children }: { children: React.ReactNode }) =
         const res = await axios.get(`${backendBaseURI}/post/saved?page_size=10&last_id=${lastID}`, {
           withCredentials: true,
         });
-        const newPosts: Post[] = res.data.posts ?? [];
+        const newPosts: SavePost[] = res.data.posts ?? [];
         if (newPosts.length) {
           setSavedPosts((prev) => [...prev, ...newPosts]);
-          setLastID(newPosts[newPosts.length - 1].id);
+          setLastID(newPosts[newPosts.length - 1].saved_id);
         }
       } catch (err) {
         if (axios.isAxiosError(err) && err.response?.status === 401) {

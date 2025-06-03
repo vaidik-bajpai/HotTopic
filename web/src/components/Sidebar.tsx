@@ -122,7 +122,7 @@ export default function Sidebar({
                 <ul className="h-full flex flex-col gap-6 mt-4 px-2 md:px-0">
                     <LogoAppName icon={<Flame fill="#3730a3" size={40}/>} name="HotTopic" active={location.pathname === "/feed"} expanded={expanded} search={search}/>
 
-                    <SidebarItem icon={<House />} name="Home" active={location.pathname.includes("/dashboard")} onClick={() => {handleClickWrapper(() => navigate("/feed"))}} expanded={expanded} search={search}/>
+                    <SidebarItem icon={<House />} name="Home" active={location.pathname.includes("/feed")} onClick={() => {handleClickWrapper(() => navigate("/feed"))}} expanded={expanded} search={search}/>
 
                     <SidebarItem icon={<PlusSquare />} name="Create" active={location.pathname.includes("/create-post")} onClick={() => {handleClickWrapper(() => setCreatePost(true))}} expanded={expanded} search={search}/>
 

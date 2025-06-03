@@ -38,8 +38,16 @@ export default function SignupForm() {
             showToast("User registered! 🎉")
             reset();
             navigate("/");
-        } catch (err: any) {
-            console.error("Signup failed:", err.response?.data || err.message);
+        } catch (err) {
+            if (axios.isAxiosError(err)) {
+                if (err.response?.status === 409) {
+                    showToast("username or email already in use", "error");
+                    return
+                } else {
+                    showToast("something went wrong", "error");
+                    console.error("Update error", err);
+                }
+            }
         }
     }
 

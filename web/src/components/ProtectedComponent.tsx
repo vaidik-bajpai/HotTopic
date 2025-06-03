@@ -8,16 +8,16 @@ const ProtectedComponent = () => {
 
     if (user.status === 'pending' || user.status === 'idle') {
         return null;
+    }   
+
+    if(user.status === "failed" || user.id === "") {
+        showToast("Please login again!!", "error")
+        return <Navigate to="/" replace />;
     }
 
     if (!user.activated) {
         showToast("Account not activated. Check your inbox.", "error", 3000)
         return <Navigate to="/resend-activation" replace />;
-    }
-        
-
-    if(user.status === "failed" || !user.activated) {
-        return <Navigate to="/" replace />;
     }
 
     return <Outlet />;  

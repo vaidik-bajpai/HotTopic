@@ -1,14 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, Dispatch, SetStateAction } from "react";
 import axios from "axios";
-import { Post } from "../types/post";
 import { showToast } from "../utility/toast";
 import { useNavigate, useOutletContext } from "react-router";
+import { LikePost } from "../types/LikedPosts";
 
 interface LikedPostContextType {
-  likedPosts: Post[];
+  likedPosts: LikePost[];
   lastID: string;
   fetchMorePosts: () => Promise<void>;
-  setLikedPosts: React.Dispatch<React.SetStateAction<Post[]>>;
+  setLikedPosts: React.Dispatch<React.SetStateAction<LikePost[]>>;
 }
 
 const LikedPostContext = createContext<LikedPostContextType | null>(null);
@@ -20,7 +20,7 @@ export const useLikedPosts = () => {
 };
 
 export const LikedPostProvider = ({ children }: { children: React.ReactNode }) => {
-  const [likedPosts, setLikedPosts] = useState<Post[]>([]);
+  const [likedPosts, setLikedPosts] = useState<LikePost[]>([]);
   const [lastID, setLastID] = useState("");
   const navigate = useNavigate();
 
@@ -32,10 +32,10 @@ export const LikedPostProvider = ({ children }: { children: React.ReactNode }) =
       const res = await axios.get(`${backendBaseURI}/post/liked?page_size=10&last_id=${lastID}`, {
         withCredentials: true,
       });
-      const newPosts: Post[] = res.data.posts ?? [];
+      const newPosts: LikePost[] = res.data.posts ?? [];
       if (newPosts.length) {
         setLikedPosts((prev) => [...prev, ...newPosts]);
-        setLastID(newPosts[newPosts.length - 1].id);
+        setLastID(newPosts[newPosts.length - 1].liked_id);
       }
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 401) {

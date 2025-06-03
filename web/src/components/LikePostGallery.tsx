@@ -47,7 +47,7 @@ function LikedPostGallery() {
     );
   }
   return (
-    <div className="grid grid-cols-3 gap-1 w-fit mx-auto my-4">
+    <div className="grid grid-cols-3 gap-1 w-fit mx-auto my-4 px-1">
       {likedPosts.map((post, index) => (
         <div key={post.id} className="relative cursor-pointer max-w-xs" onClick={() => navigate("/liked-posts", { state: { startIndex: index } })}>
           <img loading="lazy" src={getOptimizedCloudinaryUrl(post.media[0])} alt="post thumbnail" className="w-full aspect-square object-cover rounded" />

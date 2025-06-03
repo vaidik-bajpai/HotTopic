@@ -1,10 +1,32 @@
-import { useNavigate, useOutlet, useOutletContext } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSavedPosts } from "../context/SavedPostContext";
 import { getOptimizedCloudinaryUrl } from "../utility/cloudinary";
+import { useEffect, useRef, useState } from "react";
 
 function SavedPostsGallery() {
-  const { savedPosts } = useSavedPosts();
+  const { savedPosts, fetchMorePosts } = useSavedPosts();
+  const [hasMore, setHasMore] = useState(true);
+  const loaderRef = useRef<HTMLDivElement | null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore) {
+        fetchMorePosts().then(() => {
+          if (savedPosts.length % 10 !== 0) setHasMore(false);
+        });
+      }
+    });
+
+    if (loaderRef.current) {
+      observerRef.current.observe(loaderRef.current);
+    }
+
+    return () => observerRef.current?.disconnect();
+  }, [fetchMorePosts, savedPosts.length, hasMore]);
 
   if (savedPosts.length === 0) {
     return (
@@ -24,7 +46,7 @@ function SavedPostsGallery() {
   }
 
   return (
-    <div className="grid grid-cols-3 gap-1 w-fit mx-auto my-4 mx-2">
+    <div className="grid grid-cols-3 gap-1 w-fit mx-auto my-4 px-1">
       {savedPosts.map((post, index) => (
         <div
           key={post.id}
@@ -36,13 +58,14 @@ function SavedPostsGallery() {
           }
         >
           <img
-            loading="lazy" 
+            loading="lazy"
             src={getOptimizedCloudinaryUrl(post.media[0])}
             alt="post thumbnail"
             className="w-full aspect-square object-cover"
           />
         </div>
       ))}
+      <div ref={loaderRef} className="h-10 col-span-3"></div>
     </div>
   );
 }

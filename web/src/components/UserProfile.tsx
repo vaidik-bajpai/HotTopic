@@ -30,7 +30,7 @@ function UserProfile() {
     async function handleClick() {
         if (isLoading) return; 
         const newFollowState = !profile.is_following;
-        dispatch(updateFollowState(true))
+        dispatch(updateFollowState(newFollowState))
         setIsLoading(true);
 
         const backendBaseURI = import.meta.env.VITE_BACKEND_BASE_URI

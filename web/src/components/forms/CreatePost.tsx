@@ -20,6 +20,9 @@ import axios from "axios";
 import { useNavigate } from "react-router";
 import { motion } from 'framer-motion';
 import { showToast } from "../../utility/toast";
+import { useSelector } from "react-redux";
+import { RootState } from "../../app/store";
+import Spinner from "../Spinner";
 
 const schema = yup.object().shape({
     caption: yup.string().required("Caption is required"),
@@ -36,6 +39,7 @@ export default function CreatePost({
     const [isNext, setIsNext] = useState<boolean>(false);
     const [index, setIndex] = useState<number>(0);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const user = useSelector((state: RootState) => state.auth)
 
     const {
         register,
@@ -98,6 +102,7 @@ export default function CreatePost({
             reset();
             setMedias([]);
             setIsNext(false);
+            navigate(`/user-profile/${user.id}`)
         } catch (err) {
             if (axios.isAxiosError(err)) {
                 if (err.response?.status === 401) {
@@ -177,7 +182,9 @@ export default function CreatePost({
                                     type="submit"
                                     disabled={isLoading}
                                 >
-                                    {isLoading ? "Posting..." : "Share"}
+                                    {isLoading ? 
+                                        <div className="w-3 h-3 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                                        : "Post"}
                                 </button>
                             ) : (
                                 <button
